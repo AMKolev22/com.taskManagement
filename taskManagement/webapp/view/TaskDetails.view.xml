@@ -1,0 +1,519 @@
+<mvc:View
+    controllerName="taskManagement.controller.TaskDetails"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:unified="sap.ui.unified"
+    displayBlock="true"
+    height="100%"
+    busyIndicatorDelay="0"
+>
+    <SplitApp
+        id="managerSplitApp"
+        initialMaster="masterPage"
+        initialDetail="detailPage"
+    >
+        <masterPages>
+            <Page id="masterPage">
+                <content>
+                    <FlexBox
+                        alignItems="Center"
+                        direction="Column"
+                        height="100%"
+                    >
+                        <core:Fragment
+                            fragmentName="taskManagement.view.fragments.Sidebar"
+                            type="XML"
+                        />
+                    </FlexBox>
+                </content>
+            </Page>
+        </masterPages>
+        <detailPages>
+            <Page id="detailPage">
+                <customHeader>
+                    <OverflowToolbar>
+                        <Button
+                            icon="sap-icon://nav-back"
+                            type="Transparent"
+                            press="onNavBack"
+                            class="sapUiHideOnDesktop sapUiHideOnTablet"
+                        />
+                        <ToolbarSpacer />
+                        <Title
+                            text="Request Details"
+                            level="H2"
+                        />
+                        <ToolbarSpacer />
+                        <Avatar
+                            initials="Js"
+                            press="onUserInfoPress"
+                            displaySize="XS"
+                            backgroundColor="Accent6"
+                            tooltip="User Info"
+                        />
+                    </OverflowToolbar>
+                </customHeader>
+                <content>
+                    <VBox class="sapUiMediumMargin">
+                        <!-- Request Detail Section -->
+                        <Panel headerText="Request Information" expanded="true">
+                            <content>
+                                <VBox class="sapUiSmallMargin">
+                                    <!-- Request ID -->
+                                    <HBox class="sapUiSmallMarginBottom" alignItems="Center">
+                                        <Label text="Request ID:" class="sapUiTinyMarginEnd" design="Bold"/>
+                                        <Text text="{detailModel>/requestId}" class="sapUiMediumMarginBegin"/>
+                                    </HBox>
+                                    
+                                    <!-- Type and Status -->
+                                    <HBox class="sapUiSmallMarginBottom">
+                                        <Label text="Type" class="sapUiTinyMarginEnd"/>
+                                        <ObjectStatus 
+                                            text="{detailModel>/type}"
+                                            state="{= ${detailModel>/type} === 'Travel' ? 'Success' : 'Information'}"
+                                            class="sapUiMediumMarginBegin"/>
+                                        <Label text="Status" class="sapUiMediumMarginBegin"/>
+                                        <ObjectStatus 
+                                            text="{detailModel>/status}"
+                                            state="{= ${detailModel>/status} === 'APPROVED' ? 'Success' : (${detailModel>/status} === 'REJECTED' ? 'Error' : 'Warning')}"
+                                            class="sapUiMediumMarginBegin"/>
+                                    </HBox>
+                                    
+                                    <!-- Submitted Date and From -->
+                                    <HBox class="sapUiSmallMarginBottom">
+                                        <Label text="Submitted Date" class="sapUiTinyMarginEnd"/>
+                                        <Text text="{path: 'detailModel>/submittedDate', formatter: '.formatter.formatDateTime'}" class="sapUiMediumMarginBegin"/>
+                                        <Label text="From" class="sapUiMediumMarginBegin"/>
+                                        <Text text="{detailModel>/from}" class="sapUiMediumMarginBegin"/>
+                                    </HBox>
+                                    
+                                    <!-- Manager and Substitute (for Vacation) -->
+                                    <HBox class="sapUiSmallMarginBottom" visible="{= ${detailModel>/type} === 'Vacation'}">
+                                        <Label text="Manager" class="sapUiTinyMarginEnd"/>
+                                        <Text text="{detailModel>/manager}" class="sapUiMediumMarginBegin"/>
+                                        <Label text="Substitute" class="sapUiMediumMarginBegin"/>
+                                        <Text text="{detailModel>/substitute}" class="sapUiMediumMarginBegin"/>
+                                    </HBox>
+                                    
+                                    <!-- Approving Manager (for Travel and Equipment) -->
+                                    <HBox class="sapUiSmallMarginBottom" visible="{= ${detailModel>/type} === 'Travel' || ${detailModel>/type} === 'Equipment'}">
+                                        <Label text="Approving Manager" class="sapUiTinyMarginEnd"/>
+                                        <Text text="{detailModel>/manager}" class="sapUiMediumMarginBegin"/>
+                                    </HBox>
+                                </VBox>
+                            </content>
+                        </Panel>
+                        
+                        <!-- Vacation Request Details -->
+                        <Panel 
+                            headerText="Vacation Details" 
+                            expanded="true"
+                            visible="{= ${detailModel>/type} === 'Vacation'}"
+                            class="sapUiMediumMarginTop">
+                            <content>
+                                <VBox class="sapUiSmallMargin">
+                                    <HBox class="sapUiSmallMarginBottom">
+                                        <Label text="Vacation Type" class="sapUiTinyMarginEnd"/>
+                                        <Text text="{path: 'detailModel>/vacationType', formatter: '.formatter.formatVacationType'}" class="sapUiMediumMarginBegin"/>
+                                    </HBox>
+                                    <HBox class="sapUiSmallMarginBottom">
+                                        <Label text="Start Date" class="sapUiTinyMarginEnd"/>
+                                        <Text text="{path: 'detailModel>/startDate', formatter: '.formatter.formatDate'}" class="sapUiMediumMarginBegin"/>
+                                        <Label text="End Date" class="sapUiMediumMarginBegin"/>
+                                        <Text text="{path: 'detailModel>/endDate', formatter: '.formatter.formatDate'}" class="sapUiMediumMarginBegin"/>
+                                        <Label text="Duration" class="sapUiMediumMarginBegin"/>
+                                        <Text text="{parts: [{path: 'detailModel>/startDate'}, {path: 'detailModel>/endDate'}], formatter: '.formatter.calculateDuration'}" class="sapUiMediumMarginBegin"/>
+                                    </HBox>
+                                    <HBox class="sapUiSmallMarginBottom">
+                                        <Label text="Reason" class="sapUiTinyMarginEnd"/>
+                                        <Text text="{detailModel>/reason}" class="sapUiMediumMarginBegin"/>
+                                    </HBox>
+                                </VBox>
+                            </content>
+                        </Panel>
+                        
+                        <!-- Vacation Attachments -->
+                        <Panel 
+                            headerText="Attachments" 
+                            expanded="true"
+                            visible="{= ${detailModel>/type} === 'Vacation'}"
+                            class="sapUiMediumMarginTop">
+                            <content>
+                                <Table items="{detailModel>/attachments}" noDataText="No attachments" class="sapUiSmallMargin">
+                                    <columns>
+                                        <Column>
+                                            <Text text="File Name"/>
+                                        </Column>
+                                        <Column>
+                                            <Text text="Description"/>
+                                        </Column>
+                                        <Column hAlign="Center">
+                                            <Text text="Size"/>
+                                        </Column>
+                                        <Column hAlign="Center">
+                                            <Text text="Status"/>
+                                        </Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Link text="{detailModel>fileName}" href="{detailModel>fileUrl}" target="_blank"/>
+                                                <Text text="{detailModel>description}"/>
+                                                <Text text="{detailModel>fileSize}"/>
+                                                <ObjectStatus 
+                                                    text="{path: 'detailModel>status', formatter: '.formatter.formatAttachmentStatus'}"
+                                                    state="{= ${detailModel>status} === 'APPROVED' ? 'Success' : (${detailModel>status} === 'REJECTED' ? 'Error' : 'Warning')}"
+                                                />
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </content>
+                        </Panel>
+                        
+                        <!-- Equipment Items (for Equipment requests) -->
+                        <Panel 
+                            headerText="Requested Equipment Items" 
+                            expanded="true"
+                            visible="{= ${detailModel>/type} === 'Equipment'}"
+                            class="sapUiMediumMarginTop">
+                            <content>
+                                <VBox class="sapUiSmallMargin">
+                                    <Table items="{detailModel>/items}" class="sapUiSmallMarginTop">
+                                        <columns>
+                                            <Column>
+                                                <Text text="Type"/>
+                                            </Column>
+                                            <Column>
+                                                <Text text="Name"/>
+                                            </Column>
+                                            <Column hAlign="End">
+                                                <Text text="Cost"/>
+                                            </Column>
+                                            <Column hAlign="Center">
+                                                <Text text="Amount"/>
+                                            </Column>
+                                            <Column>
+                                                <Text text="Reason"/>
+                                            </Column>
+                                        </columns>
+                                        <items>
+                                            <ColumnListItem>
+                                                <cells>
+                                                    <Text text="{detailModel>type}"/>
+                                                    <Text text="{detailModel>name}"/>
+                                                    <ObjectNumber number="{detailModel>cost}" unit="EUR"/>
+                                                    <Text text="{detailModel>amount}"/>
+                                                    <Text text="{detailModel>reason}"/>
+                                                </cells>
+                                            </ColumnListItem>
+                                        </items>
+                                    </Table>
+                                    <HBox class="sapUiMediumMarginTop" justifyContent="End">
+                                        <Label text="Total Cost" class="sapUiSmallMarginEnd"/>
+                                        <ObjectNumber 
+                                            number="{detailModel>/totalCost}" 
+                                            unit="EUR"
+                                            emphasized="true"
+                                            state="Success"/>
+                                    </HBox>
+                                </VBox>
+                            </content>
+                        </Panel>
+                        
+                        <!-- Files (for Travel requests) -->
+                        <Panel 
+                            headerText="Travel Request Details" 
+                            expanded="true"
+                            visible="{= ${detailModel>/type} === 'Travel'}"
+                            class="sapUiMediumMarginTop">
+                            <content>
+                                <VBox class="sapUiSmallMargin">
+                                    <!-- Travel Information -->
+                                    <HBox class="sapUiSmallMarginBottom">
+                                        <Label text="Destination" class="sapUiTinyMarginEnd"/>
+                                        <Text text="{detailModel>/destination}" class="sapUiMediumMarginBegin"/>
+                                    </HBox>
+                                    <HBox class="sapUiSmallMarginBottom">
+                                        <Label text="Start Date" class="sapUiTinyMarginEnd"/>
+                                        <Text text="{path: 'detailModel>/startDate', formatter: '.formatter.formatDate'}" class="sapUiMediumMarginBegin"/>
+                                        <Label text="End Date" class="sapUiMediumMarginBegin"/>
+                                        <Text text="{path: 'detailModel>/endDate', formatter: '.formatter.formatDate'}" class="sapUiMediumMarginBegin"/>
+                                    </HBox>
+                                    <HBox class="sapUiSmallMarginBottom">
+                                        <Label text="Reason" class="sapUiTinyMarginEnd"/>
+                                        <Text text="{detailModel>/travelReason}" class="sapUiMediumMarginBegin"/>
+                                    </HBox>
+                                </VBox>
+                            </content>
+                        </Panel>
+                        
+                        <!-- All Expense Attachments (combined) -->
+                        <Panel 
+                            headerText="Expense Attachments" 
+                            expanded="true"
+                            visible="{= ${detailModel>/type} === 'Travel'}"
+                            class="sapUiMediumMarginTop">
+                            <headerToolbar>
+                                <OverflowToolbar>
+                                    <Title text="Expense Attachments" level="H4"/>
+                                    <ToolbarSpacer/>
+                                    <Button
+                                        text="Reject All Food Costs"
+                                        icon="sap-icon://decline"
+                                        type="Transparent"
+                                        press="onRejectCategory"
+                                        visible="{detailModel>/canApprove}">
+                                        <customData>
+                                            <core:CustomData key="category" value="Food Costs"/>
+                                        </customData>
+                                    </Button>
+                                    <Button
+                                        text="Reject All Travel Costs"
+                                        icon="sap-icon://decline"
+                                        type="Transparent"
+                                        press="onRejectCategory"
+                                        visible="{detailModel>/canApprove}">
+                                        <customData>
+                                            <core:CustomData key="category" value="Travel Costs"/>
+                                        </customData>
+                                    </Button>
+                                    <Button
+                                        text="Reject All Stay Costs"
+                                        icon="sap-icon://decline"
+                                        type="Transparent"
+                                        press="onRejectCategory"
+                                        visible="{detailModel>/canApprove}">
+                                        <customData>
+                                            <core:CustomData key="category" value="Stay Costs"/>
+                                        </customData>
+                                    </Button>
+                                </OverflowToolbar>
+                            </headerToolbar>
+                            <content>
+                                <VBox class="sapUiSmallMargin">
+                                    <HBox justifyContent="End" class="sapUiSmallMarginBottom">
+                                        <SearchField
+                                            id="descriptionSearch"
+                                            width="15rem"
+                                            placeholder="Search by description..."
+                                            value="{filterModel>/descriptionQuery}"
+                                            search="onSearchAttachmentsByDescription"
+                                            liveChange="onSearchAttachmentsByDescription"
+                                            class="sapUiTinyMarginEnd"
+                                        />
+                                        <Select
+                                            id="categoryFilter"
+                                            width="12rem"
+                                            selectedKey="{filterModel>/categoryFilter}"
+                                            change="onFilterAttachmentsByCategory"
+                                            class="sapUiTinyMarginEnd">
+                                            <core:Item key="" text="All Categories"/>
+                                            <core:Item key="Food Costs" text="Food Costs"/>
+                                            <core:Item key="Travel Costs" text="Travel Costs"/>
+                                            <core:Item key="Stay Costs" text="Stay Costs"/>
+                                        </Select>
+                                        <Select
+                                            id="statusFilter"
+                                            width="12rem"
+                                            selectedKey="{filterModel>/statusFilter}"
+                                            change="onFilterAttachmentsByStatus">
+                                            <core:Item key="" text="All Statuses"/>
+                                            <core:Item key="PENDING" text="Pending"/>
+                                            <core:Item key="APPROVED" text="Approved"/>
+                                            <core:Item key="REJECTED" text="Rejected"/>
+                                        </Select>
+                                    </HBox>
+                                    <Table 
+                                        id="attachmentsTable"
+                                        items="{detailModel>/attachments}" 
+                                        noDataText="No expense attachments"
+                                        class="sapUiSmallMarginTop">
+                                        <columns>
+                                            <Column>
+                                                <Text text="Category"/>
+                                                <customData>
+                                                    <core:CustomData key="p13nData" value='\{"sortProperty": "category", "filterProperty": "category"}'/>
+                                                </customData>
+                                            </Column>
+                                            <Column>
+                                                <Text text="Description"/>
+                                                <customData>
+                                                    <core:CustomData key="p13nData" value='\{"sortProperty": "description", "filterProperty": "description"}'/>
+                                                </customData>
+                                            </Column>
+                                            <Column>
+                                                <Text text="File Name"/>
+                                                <customData>
+                                                    <core:CustomData key="p13nData" value='\{"sortProperty": "fileName", "filterProperty": "fileName"}'/>
+                                                </customData>
+                                            </Column>
+                                            <Column hAlign="Center" width="6rem">
+                                                <Text text="Size"/>
+                                                <customData>
+                                                    <core:CustomData key="p13nData" value='\{"sortProperty": "fileSize", "filterProperty": "fileSize"}'/>
+                                                </customData>
+                                            </Column>
+                                            <Column hAlign="Center" width="8rem">
+                                                <Text text="Status"/>
+                                                <customData>
+                                                    <core:CustomData key="p13nData" value='\{"sortProperty": "status", "filterProperty": "status"}'/>
+                                                </customData>
+                                            </Column>
+                                            <Column hAlign="Center" width="10rem" visible="{detailModel>/canApprove}">
+                                                <Text text="Actions"/>
+                                            </Column>
+                                        </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{detailModel>category}"/>
+                                                <Text text="{detailModel>description}"/>
+                                                <Link text="{detailModel>fileName}" href="{detailModel>fileUrl}" target="_blank"/>
+                                                <Text text="{detailModel>fileSize}"/>
+                                                <ObjectStatus 
+                                                    text="{path: 'detailModel>status', formatter: '.formatter.formatAttachmentStatus'}"
+                                                    state="{= ${detailModel>status} === 'APPROVED' ? 'Success' : (${detailModel>status} === 'REJECTED' ? 'Error' : 'Warning')}"
+                                                />
+                                                <HBox justifyContent="Center" visible="{detailModel>/canApprove}">
+                                                    <Button
+                                                        icon="sap-icon://accept"
+                                                        type="Accept"
+                                                        tooltip="Approve this attachment"
+                                                        press="onApproveAttachment"
+                                                        visible="{= ${detailModel>status} !== 'APPROVED'}"
+                                                        class="sapUiTinyMarginEnd"
+                                                    />
+                                                    <Button
+                                                        icon="sap-icon://decline"
+                                                        type="Reject"
+                                                        tooltip="Reject this attachment"
+                                                        press="onRejectAttachment"
+                                                        visible="{= ${detailModel>status} !== 'REJECTED'}"
+                                                    />
+                                                </HBox>
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                                </VBox>
+                            </content>
+                        </Panel>
+
+                        <!-- Resubmission Section for Rejected Attachments -->
+                        <Panel 
+                            headerText="Resubmit Rejected Attachments" 
+                            expanded="true"
+                            visible="{= ${detailModel>/isOwner} &amp;&amp; (${detailModel>/status} === 'REJECTED' || ${detailModel>/status} === 'PARTIALLY_REJECTED')}"
+                            class="sapUiMediumMarginTop">
+                            <content>
+                                <VBox class="sapUiSmallMargin">
+                                    <Text text="Please upload new files to replace the rejected attachments below:" class="sapUiSmallMarginBottom"/>
+                                    <Table items="{detailModel>/attachments}" noDataText="No rejected attachments" class="sapUiSmallMarginTop">
+                                        <columns>
+                                            <Column>
+                                                <Text text="Category"/>
+                                            </Column>
+                                            <Column>
+                                                <Text text="Description"/>
+                                            </Column>
+                                            <Column>
+                                                <Text text="Rejected File"/>
+                                            </Column>
+                                            <Column>
+                                                <Text text="Rejection Reason"/>
+                                            </Column>
+                                            <Column hAlign="Center">
+                                                <Text text="Replacement File"/>
+                                            </Column>
+                                        </columns>
+                                        <items>
+                                            <ColumnListItem visible="{= ${detailModel>status} === 'REJECTED'}">
+                                                <cells>
+                                                    <Text text="{detailModel>category}"/>
+                                                    <Text text="{detailModel>description}"/>
+                                                    <Link text="{detailModel>fileName}" href="{detailModel>fileUrl}" target="_blank"/>
+                                                    <Text text="{detailModel>rejectionReason}" class="sapUiTinyMargin"/>
+                                                    <unified:FileUploader
+                                                        sameFilenameAllowed="true"
+                                                        buttonText="Upload Replacement"
+                                                        fileType="pdf,doc,docx,jpg,jpeg,png"
+                                                        uploadUrl="/api/upload"
+                                                        uploadComplete="onFileReuploaded"
+                                                        change="onFileReuploadChange"
+                                                        class="sapUiSmallMarginTop">
+                                                        <unified:parameters>
+                                                            <unified:FileUploaderParameter name="category" value="{detailModel>category}"/>
+                                                            <unified:FileUploaderParameter name="requestId" value="{detailModel>/requestId}"/>
+                                                            <unified:FileUploaderParameter name="description" value="{detailModel>description}"/>
+                                                            <unified:FileUploaderParameter name="replacementFor" value="{detailModel>id}"/>
+                                                        </unified:parameters>
+                                                    </unified:FileUploader>
+                                                </cells>
+                                            </ColumnListItem>
+                                        </items>
+                                    </Table>
+                                </VBox>
+                            </content>
+                        </Panel>
+                        
+                        <!-- Action Buttons -->
+                        <HBox justifyContent="End" class="sapUiMediumMarginTop">
+                            <!-- Manager Actions (only if user is manager and status is pending) -->
+                            <Button
+                                text="Approve"
+                                type="Accept"
+                                icon="sap-icon://accept"
+                                press="onApproveAll"
+                                visible="{detailModel>/canApprove}"
+                                class="sapUiTinyMarginEnd"
+                            />
+                            <Button
+                                text="Reject"
+                                type="Reject"
+                                icon="sap-icon://decline"
+                                press="onRejectAll"
+                                visible="{detailModel>/canApprove}"
+                                class="sapUiTinyMarginEnd"
+                            />
+                            <Button
+                                text="Partial Approval"
+                                type="Emphasized"
+                                icon="sap-icon://approvals"
+                                press="onPartialApprove"
+                                visible="{= ${detailModel>/canApprove} &amp;&amp; ${detailModel>/type} === 'Travel'}"
+                                class="sapUiTinyMarginEnd"
+                            />
+                            
+                            <!-- User/Owner Actions -->
+                            <Button
+                                text="Edit Request"
+                                icon="sap-icon://edit"
+                                press="onEditRequest"
+                                visible="{= ${detailModel>/isOwner} &amp;&amp; (${detailModel>/status} === 'PENDING_APPROVAL' || ${detailModel>/status} === 'PARTIALLY_REJECTED')}"
+                                class="sapUiTinyMarginEnd"
+                            />
+                            <Button
+                                text="Resubmit Request"
+                                icon="sap-icon://refresh"
+                                type="Emphasized"
+                                press="onEditRequest"
+                                visible="{= ${detailModel>/isOwner} &amp;&amp; ${detailModel>/status} === 'REJECTED'}"
+                                class="sapUiTinyMarginEnd"
+                            />
+                            <Button
+                                text="Forward to Another Manager"
+                                icon="sap-icon://forward"
+                                press="onForwardRequest"
+                                visible="{= ${detailModel>/isOwner} || ${detailModel>/isManager}}"
+                                class="sapUiTinyMarginEnd"
+                            />
+                        </HBox>
+                    </VBox>
+                </content>
+            </Page>
+        </detailPages>
+    </SplitApp>
+</mvc:View>

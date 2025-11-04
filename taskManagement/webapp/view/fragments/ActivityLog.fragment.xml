@@ -1,0 +1,87 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <Panel
+        headerText="Activity Log"
+        expandable="true"
+        expanded="true"
+    >
+        <content>
+            <VBox>
+                <!-- Filter Bar -->
+                <Toolbar>
+                    <SearchField
+                        id="activitySearchField"
+                        width="60%"
+                        placeholder="Search activities..."
+                        value="{filterModel>/searchQuery}"
+                        search=".onActivitySearch"
+                        liveChange=".onActivitySearch"
+                    />
+                    <ToolbarSpacer />
+                    <Select
+                        id="activityTypeFilter"
+                        width="150px"
+                        selectedKey="{filterModel>/typeFilter}"
+                        change=".onActivityFilterChange"
+                    >
+                        <items>
+                            <core:Item
+                                key="all"
+                                text="All Actions"
+                            />
+                            <core:Item
+                                key="APPROVED"
+                                text="Approved"
+                            />
+                            <core:Item
+                                key="REJECTED"
+                                text="Rejected"
+                            />
+                            <core:Item
+                                key="PARTIALLY_REJECTED"
+                                text="Partially Rejected"
+                            />
+                            <core:Item
+                                key="SUBMITTED"
+                                text="Submitted"
+                            />
+                        </items>
+                    </Select>
+                </Toolbar>
+
+                <!-- Activity Feed -->
+                <List
+                    id="activityFeedList"
+                    items="{dashboardModel>/activities}"
+                    growing="true"
+                    growingThreshold="20"
+                    noDataText="No activities found"
+                >
+                    <FeedListItem
+                        sender="{dashboardModel>actorName}"
+                        icon="{path: 'dashboardModel>action', formatter: '.formatter.getRequestTypeIcon'}"
+                        iconActive="false"
+                        info="{dashboardModel>requestType}"
+                        timestamp="{path: 'dashboardModel>timestamp', formatter: '.formatter.formatDateTime'}"
+                        text="{dashboardModel>description}"
+                        press=".onActivityPress"
+                    >
+                        <customData>
+                            <core:CustomData
+                                key="requestId"
+                                value="{dashboardModel>requestId}"
+                            />
+                            <core:CustomData
+                                key="requestType"
+                                value="{dashboardModel>requestType}"
+                            />
+                        </customData>
+                    </FeedListItem>
+                </List>
+            </VBox>
+        </content>
+    </Panel>
+</core:FragmentDefinition>
+

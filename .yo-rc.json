@@ -1,0 +1,16 @@
+{
+  "generator-ui5-project": {
+    "namespaceUI5": "com.TaskManagement",
+    "projectName": "taskManagement",
+    "uimoduleName": "taskManagement",
+    "enableFPM": false,
+    "platform": "Application Router",
+    "ui5Libs": "Content delivery network (SAPUI5)",
+    "newDir": false,
+    "initRepo": false,
+    "projectId": "com.TaskManagement.taskManagement",
+    "uimodules": [
+      "taskManagement"
+    ]
+  }
+}

@@ -1,0 +1,381 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Manager {
+  id                  String                @id @default(cuid())
+  managerId           String                @unique
+  managerName         String
+  email               String?
+  department          String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  
+  // Relations
+  travelRequests      TravelRequest[]
+  equipmentRequests   EquipmentRequest[]
+
+  @@map("managers")
+}
+
+// Main Travel Request model
+model TravelRequest {
+  id                String            @id @default(cuid())
+  requestId         String            @unique
+  submittedDate     DateTime
+  status            RequestStatus     @default(PENDING_APPROVAL)
+  
+  // Submitter Information (Employee who created the request)
+  userId            String?
+  submittedBy       String?           // Name of the person who submitted
+  submittedByEmail  String?
+  
+  // Travel Information
+  destination       String
+  startDate         String
+  endDate           String
+  reason            String            @db.Text
+  duration          String?
+  
+  // Manager Information (Approving Manager)
+  managerId         String
+  manager           Manager           @relation(fields: [managerId], references: [managerId])
+  
+  // Expenses Relations
+  foodCosts         FoodCost[]
+  travelCosts       TravelCost[]
+  stayCosts         StayCost[]
+  
+  // Summary fields
+  totalFoodReceipts    Int            @default(0)
+  totalTravelReceipts  Int            @default(0)
+  totalStayReceipts    Int            @default(0)
+  totalAttachments     Int            @default(0)
+  
+  // Approval tracking
+  approvedBy        String?
+  approvedDate      DateTime?
+  rejectionReason   String?           @db.Text
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([managerId])
+  @@index([userId])
+  @@index([status])
+  @@index([submittedDate])
+  @@map("travel_requests")
+}
+
+// Food Cost Expenses
+model FoodCost {
+  id              String            @id @default(cuid())
+  fileName        String
+  description     String            @db.Text
+  fileSize        String
+  fileType        String
+  uploadDate      DateTime
+  fileUrl         String?           // Optional: if storing file URLs
+  status          AttachmentStatus  @default(PENDING)
+  rejectionReason String?           @db.Text
+  
+  travelRequestId String
+  travelRequest   TravelRequest   @relation(fields: [travelRequestId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([travelRequestId])
+  @@map("food_costs")
+}
+
+// Travel Cost Expenses
+model TravelCost {
+  id              String            @id @default(cuid())
+  fileName        String
+  description     String            @db.Text
+  fileSize        String
+  fileType        String
+  uploadDate      DateTime
+  fileUrl         String?           // Optional: if storing file URLs
+  status          AttachmentStatus  @default(PENDING)
+  rejectionReason String?           @db.Text
+  
+  travelRequestId String
+  travelRequest   TravelRequest   @relation(fields: [travelRequestId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([travelRequestId])
+  @@map("travel_costs")
+}
+
+// Stay Cost Expenses
+model StayCost {
+  id              String            @id @default(cuid())
+  fileName        String
+  description     String            @db.Text
+  fileSize        String
+  fileType        String
+  uploadDate      DateTime
+  fileUrl         String?           // Optional: if storing file URLs
+  status          AttachmentStatus  @default(PENDING)
+  rejectionReason String?           @db.Text
+  
+  travelRequestId String
+  travelRequest   TravelRequest   @relation(fields: [travelRequestId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([travelRequestId])
+  @@map("stay_costs")
+}
+
+// Equipment Request model
+model EquipmentRequest {
+  id                String            @id @default(cuid())
+  requestId         String            @unique
+  submittedDate     DateTime
+  status            RequestStatus     @default(PENDING_APPROVAL)
+  
+  // Manager Information
+  managerId         String
+  manager           Manager           @relation(fields: [managerId], references: [managerId])
+  
+  // Summary fields
+  totalCost         String            @default("0")
+  totalItems        Int               @default(0)
+  
+  // Approval tracking
+  approvedBy        String?
+  approvedDate      DateTime?
+  rejectionReason   String?           @db.Text
+  
+  // Items
+  equipmentItems    EquipmentItem[]
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([managerId])
+  @@index([status])
+  @@index([submittedDate])
+  @@map("equipment_requests")
+}
+
+// Equipment Item model
+model EquipmentItem {
+  id                  String            @id @default(cuid())
+  type                String
+  name                String
+  cost                String
+  amount              Int
+  reason              String            @db.Text
+  
+  equipmentRequestId  String
+  equipmentRequest    EquipmentRequest  @relation(fields: [equipmentRequestId], references: [id], onDelete: Cascade)
+  
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([equipmentRequestId])
+  @@map("equipment_items")
+}
+
+// Enum for request status
+enum RequestStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  PARTIALLY_REJECTED
+  CANCELLED
+  DRAFT
+}
+
+// User model for authentication and authorization
+model User {
+  id                    String                @id @default(cuid())
+  userId                String                @unique
+  username              String                @unique
+  password              String                // In production, this should be hashed
+  email                 String?               @unique
+  firstName             String
+  lastName              String
+  role                  UserRole              @default(USER)
+  department            String?
+  isActive              Boolean               @default(true)
+  
+  // Relations
+  submittedRequests     VacationRequest[]     @relation("RequestSubmitter")
+  managedRequests       VacationRequest[]     @relation("RequestManager")
+  substituteRequests    VacationRequest[]     @relation("RequestSubstitute")
+  availabilities        Availability[]
+  comments              Comment[]
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  @@map("users")
+}
+
+// User roles
+enum UserRole {
+  USER
+  MANAGER
+}
+
+// Vacation Request model
+model VacationRequest {
+  id                String            @id @default(cuid())
+  requestId         String            @unique
+  submittedDate     DateTime          @default(now())
+  status            RequestStatus     @default(PENDING_APPROVAL)
+  
+  // Vacation Information
+  startDate         DateTime
+  endDate           DateTime
+  vacationType      VacationType
+  reason            String            @db.Text
+  
+  // User Relations
+  userId            String
+  user              User              @relation("RequestSubmitter", fields: [userId], references: [userId])
+  
+  managerId         String
+  manager           User              @relation("RequestManager", fields: [managerId], references: [userId])
+  
+  substituteId      String
+  substitute        User              @relation("RequestSubstitute", fields: [substituteId], references: [userId])
+  
+  // Attachments and Comments
+  attachments       FileAttachment[]
+  comments          Comment[]
+  
+  // Approval tracking
+  approvedBy        String?
+  approvedDate      DateTime?
+  rejectionReason   String?           @db.Text
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([managerId])
+  @@index([status])
+  @@index([startDate])
+  @@map("vacation_requests")
+}
+
+// Vacation types
+enum VacationType {
+  ANNUAL_LEAVE
+  SICK_LEAVE
+  UNPAID_LEAVE
+  PARENTAL_LEAVE
+  OTHER
+}
+
+// File Attachment model for vacation requests
+model FileAttachment {
+  id                  String            @id @default(cuid())
+  fileName            String
+  description         String            @db.Text
+  fileSize            String
+  fileType            String
+  uploadDate          DateTime
+  fileUrl             String?
+  status              AttachmentStatus  @default(PENDING)
+  rejectionReason     String?           @db.Text
+  category            String?
+  
+  vacationRequestId   String
+  vacationRequest     VacationRequest   @relation(fields: [vacationRequestId], references: [id], onDelete: Cascade)
+  
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([vacationRequestId])
+  @@map("file_attachments")
+}
+
+// Attachment status for partial rejection
+enum AttachmentStatus {
+  APPROVED
+  REJECTED
+  PENDING
+}
+
+// Comment model for manager feedback
+model Comment {
+  id                  String            @id @default(cuid())
+  content             String            @db.Text
+  commentType         CommentType       @default(GENERAL)
+  
+  // Relations
+  userId              String
+  user                User              @relation(fields: [userId], references: [userId])
+  
+  vacationRequestId   String
+  vacationRequest     VacationRequest   @relation(fields: [vacationRequestId], references: [id], onDelete: Cascade)
+  
+  // For tracking which attachment this comment refers to
+  attachmentId        String?
+  
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([vacationRequestId])
+  @@index([userId])
+  @@map("comments")
+}
+
+// Comment types
+enum CommentType {
+  GENERAL
+  REJECTION
+  APPROVAL
+  PARTIAL_REJECTION
+}
+
+// Availability model for tracking user unavailability
+model Availability {
+  id                String            @id @default(cuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [userId])
+  
+  startDate         DateTime
+  endDate           DateTime
+  reason            String
+  availabilityType  AvailabilityType  @default(UNAVAILABLE)
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([startDate])
+  @@map("availabilities")
+}
+
+// Availability types
+enum AvailabilityType {
+  UNAVAILABLE
+  VACATION
+  SICK
+  BUSINESS_TRIP
+  OTHER
+}

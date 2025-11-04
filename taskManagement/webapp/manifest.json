@@ -1,0 +1,182 @@
+{
+    "_version": "1.60.0",
+    "sap.app": {
+        "id": "taskManagement",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap-ux/fiori-freestyle-writer:basic",
+            "version": "0.21.10"
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.136.2",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "taskManagement.i18n.i18n"
+                }
+            }
+        },
+        "resources": {
+            "css": [
+                {
+                    "uri": "css/style.css"
+                }
+            ]
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router",
+                "viewType": "XML",
+                "async": true,
+                "viewPath": "taskManagement.view",
+                "controlAggregation": "pages",
+                "controlId": "app",
+                "clearControlAggregation": false
+            },
+            "routes": [
+                {
+                    "name": "login",
+                    "pattern": "",
+                    "target": "Login"
+                },
+                {
+                    "name": "managerDashboard",
+                    "pattern": "manager/dashboard",
+                    "target": "ManagerDashboard"
+                },
+                {
+                    "name": "userDashboard",
+                    "pattern": "user/dashboard",
+                    "target": "UserDashboard"
+                },
+                {
+                    "name": "vacationRequest",
+                    "pattern": "vacation/new",
+                    "target": "VacationRequest"
+                },
+                {
+                    "name": "myTasks",
+                    "pattern": "my-tasks",
+                    "target": "MyTasks"
+                },
+                {
+                    "name": "RouteMainView",
+                    "pattern": "main",
+                    "target": "TargetMainView"
+                },
+                {
+                    "pattern": "taskDetails/{id}/{type}",
+                    "name": "taskDetails",
+                    "target": "TaskDetails"
+                },
+                {
+                    "pattern": "submit/equipment",
+                    "name": "EquipmentRequest",
+                    "target": "EquipmentRequest"
+                },
+                {
+                    "pattern": "submit/travel",
+                    "name": "TravelRequest",
+                    "target": "TravelRequest"
+                },
+                {
+                    "pattern": "submit/travel/:requestId/:mode",
+                    "name": "TravelRequestResubmit",
+                    "target": "TravelRequest"
+                }
+            ],
+            "targets": {
+                "Login": {
+                    "viewType": "XML",
+                    "viewName": "Login",
+                    "viewLevel": 1
+                },
+                "ManagerDashboard": {
+                    "viewType": "XML",
+                    "viewName": "ManagerDashboard",
+                    "viewLevel": 1
+                },
+                "UserDashboard": {
+                    "viewType": "XML",
+                    "viewName": "UserDashboard",
+                    "viewLevel": 1
+                },
+                "VacationRequest": {
+                    "viewType": "XML",
+                    "viewName": "VacationRequest",
+                    "viewLevel": 2
+                },
+                "MyTasks": {
+                    "viewType": "XML",
+                    "viewName": "MyTasks",
+                    "viewLevel": 2
+                },
+                "TargetMainView": {
+                    "viewType": "XML",
+                    "transition": "slide",
+                    "clearControlAggregation": false,
+                    "viewId": "MainView",
+                    "viewName": "MainView",
+                    "viewLevel": 1
+                },
+                "TaskDetails": {
+                    "viewType": "XML",
+                    "viewName": "TaskDetails",
+                    "viewLevel": 3
+                },
+                "EquipmentRequest": {
+                    "viewType": "XML",
+                    "viewName": "EquipmentRequest",
+                    "viewLevel": 3
+                },
+                "TravelRequest": {
+                    "viewType": "XML",
+                    "viewName": "TravelRequest",
+                    "viewLevel": 3
+                }
+            }
+        },
+        "rootView": {
+            "viewName": "taskManagement.view.App",
+            "type": "XML",
+            "async": true,
+            "id": "App"
+        }
+    }
+}

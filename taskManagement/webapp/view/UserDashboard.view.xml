@@ -1,0 +1,171 @@
+<mvc:View
+    controllerName="taskManagement.controller.UserDashboard"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    displayBlock="true"
+    height="100%"
+>
+    <SplitApp
+        id="userSplitApp"
+        initialMaster="masterPage"
+        initialDetail="detailPage"
+    >
+        <masterPages>
+            <Page id="masterPage">
+                <content>
+                    <FlexBox
+                        alignItems="Center"
+                        direction="Column"
+                        height="100%"
+                    >
+                        <core:Fragment
+                            fragmentName="taskManagement.view.fragments.Sidebar"
+                            type="XML"
+                        />
+                    </FlexBox>
+                </content>
+            </Page>
+        </masterPages>
+        <detailPages>
+            <Page id="detailPage">
+                <customHeader>
+                    <OverflowToolbar>
+                        <Button
+                            icon="sap-icon://nav-back"
+                            type="Transparent"
+                            press="onNavBack"
+                            visible="{pageModel>/navBackVisible}"
+                            class="sapUiHideOnDesktop sapUiHideOnTablet"
+                        />
+                        <ToolbarSpacer />
+                        <Title
+                            text="My Dashboard"
+                            level="H2"
+                        />
+                        <ToolbarSpacer />
+                        <Button
+                            icon="sap-icon://refresh"
+                            tooltip="Refresh"
+                            press="onRefresh"
+                            type="Transparent"
+                        />
+                        <Avatar
+                            initials="{= ${userModel>/currentUser/firstName}.charAt(0) + ${userModel>/currentUser/lastName}.charAt(0) }"
+                            press="onUserInfoPress"
+                            displaySize="XS"
+                            backgroundColor="Accent6"
+                            tooltip="{= ${userModel>/currentUser/firstName} + ' ' + ${userModel>/currentUser/lastName} }"
+                        />
+                    </OverflowToolbar>
+                </customHeader>
+                <content>
+                    <VBox class="sapUiMediumMargin">
+                        <!-- Welcome Section -->
+                        <VBox class="sapUiMediumMarginBottom">
+                            <Title
+                                text="Welcome, {userModel>/currentUser/firstName}!"
+                                level="H3"
+                                class="sapUiSmallMarginBottom"
+                            />
+                            <Text text="Here's an overview of your recent requests" />
+                        </VBox>
+
+                        <!-- Quick Actions -->
+                        <HBox
+                            justifyContent="Start"
+                            class="sapUiMediumMarginBottom"
+                        >
+                            <Button
+                                text="New Vacation Request"
+                                icon="sap-icon://vacation"
+                                type="Emphasized"
+                                press="onNewVacationRequest"
+                                class="sapUiTinyMarginEnd"
+                            />
+                            <Button
+                                text="View All My Tasks"
+                                icon="sap-icon://task"
+                                press="onViewAllTasks"
+                                class="sapUiTinyMarginEnd"
+                            />
+                        </HBox>
+
+                        <!-- Recent Tasks Section -->
+                        <Panel
+                            headerText="My Recent Requests (4 Most Recent)"
+                            class="sapUiMediumMarginBottom"
+                        >
+                            <content>
+                                <List
+                                    id="recentTasksList"
+                                    items="{dashboardModel>/recentTasks}"
+                                    noDataText="No recent requests found"
+                                >
+                                    <CustomListItem
+                                        type="Active"
+                                        press="onTaskPress"
+                                    >
+                                        <HBox
+                                            justifyContent="SpaceBetween"
+                                            alignItems="Center"
+                                            width="100%"
+                                        >
+                                            <HBox alignItems="Center">
+                                                <core:Icon
+                                                    src="{path: 'dashboardModel>type', formatter: '.formatter.getRequestTypeIcon'}"
+                                                    color="{path: 'dashboardModel>type', formatter: '.formatter.getRequestTypeColor'}"
+                                                    size="2rem"
+                                                    class="sapUiTinyMarginEnd"
+                                                />
+                                                <VBox>
+                                                    <HBox>
+                                                        <Text
+                                                            text="{dashboardModel>requestId}"
+                                                            class="sapUiTinyMarginEnd"
+                                                        />
+                                                        <ObjectStatus
+                                                            text="{dashboardModel>type}"
+                                                            state="Information"
+                                                        />
+                                                    </HBox>
+                                                    <Text
+                                                        text="{dashboardModel>subject}"
+                                                        class="sapUiTinyMarginTop"
+                                                    />
+                                                    <Text
+                                                        text="Submitted: {path: 'dashboardModel>submittedDate', formatter: '.formatter.formatDate'}"
+                                                        class="sapUiTinyMarginTop"
+                                                    />
+                                                </VBox>
+                                            </HBox>
+                                            <VBox alignItems="End">
+                                                <ObjectStatus
+                                                    text="{path: 'dashboardModel>status', formatter: '.formatter.formatStatus'}"
+                                                    state="{path: 'dashboardModel>status', formatter: '.formatter.formatStatusState'}"
+                                                />
+                                                <Button
+                                                    text="View Details"
+                                                    type="Transparent"
+                                                    press="onViewTaskDetails"
+                                                    class="sapUiTinyMarginTop"
+                                                />
+                                            </VBox>
+                                        </HBox>
+                                    </CustomListItem>
+                                </List>
+                            </content>
+                        </Panel>
+
+                        <!-- Activity Log Fragment -->
+                        <core:Fragment
+                            fragmentName="taskManagement.view.fragments.ActivityLog"
+                            type="XML"
+                        />
+                    </VBox>
+                </content>
+            </Page>
+        </detailPages>
+    </SplitApp>
+</mvc:View>
+

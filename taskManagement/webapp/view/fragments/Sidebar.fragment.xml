@@ -1,0 +1,110 @@
+<c:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:c="sap.ui.core"
+    xmlns:data="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+>
+    <Panel
+        width="300px"
+        class="sapUiMediumMarginTop"
+    >
+        <headerToolbar>
+            <Toolbar>
+                <Title text="Navigation" />
+            </Toolbar>
+        </headerToolbar>
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <!-- Manager Navigation -->
+                <VBox visible="{= ${userModel>/currentUser/role} === 'MANAGER' }">
+                    <Title
+                        text="Manager"
+                        level="H3"
+                        class="sapUiTinyMarginBottom"
+                    />
+                    <Button
+                        text="Manager Dashboard"
+                        icon="sap-icon://manager"
+                        width="100%"
+                        press="onPressRoute"
+                        data:route="managerDashboard"
+                        class="sapUiTinyMarginBottom"
+                    />
+                </VBox>
+                
+                <!-- User Navigation -->
+                <VBox>
+                    <Title
+                        text="My Workspace"
+                        level="H3"
+                        class="sapUiMediumMarginTop sapUiTinyMarginBottom"
+                    />
+                    <Button
+                        text="My Dashboard"
+                        icon="sap-icon://home"
+                        width="100%"
+                        press="onPressRoute"
+                        data:route="userDashboard"
+                        class="sapUiTinyMarginBottom"
+                    />
+                    <Button
+                        text="My Tasks"
+                        icon="sap-icon://task"
+                        width="100%"
+                        press="onPressRoute"
+                        data:route="myTasks"
+                        class="sapUiTinyMarginBottom"
+                    />
+                </VBox>
+                
+                <!-- Request Submission -->
+                <VBox>
+                    <Title
+                        text="Submit Request"
+                        level="H3"
+                        class="sapUiMediumMarginTop sapUiTinyMarginBottom"
+                    />
+                    <Button
+                        text="New Vacation Request"
+                        icon="sap-icon://vacation"
+                        width="100%"
+                        press="onPressRoute"
+                        data:route="vacationRequest"
+                        class="sapUiTinyMarginBottom"
+                    />
+                    <Button
+                        text="Submit Travel Costs"
+                        icon="sap-icon://travel-expense"
+                        width="100%"
+                        press="onPressRoute"
+                        data:route="TravelRequest"
+                        class="sapUiTinyMarginBottom"
+                    />
+                    <Button
+                        text="Request Equipment"
+                        icon="sap-icon://product"
+                        width="100%"
+                        press="onPressRoute"
+                        data:route="EquipmentRequest"
+                        class="sapUiTinyMarginBottom"
+                    />
+                </VBox>
+
+                <!-- Logout -->
+                <VBox>
+                    <Title
+                        text="Account"
+                        level="H3"
+                        class="sapUiMediumMarginTop sapUiTinyMarginBottom"
+                    />
+                    <Button
+                        text="Logout"
+                        icon="sap-icon://log"
+                        type="Reject"
+                        width="100%"
+                        press="onLogout"
+                    />
+                </VBox>
+            </VBox>
+        </content>
+    </Panel>
+</c:FragmentDefinition>

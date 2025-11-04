@@ -1,0 +1,119 @@
+<mvc:View
+    controllerName="taskManagement.controller.Login"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+    xmlns="sap.m"
+    displayBlock="true"
+    height="100%"
+>
+    <Page
+        showHeader="false"
+        class="loginPage"
+    >
+        <content>
+            <VBox
+                alignItems="Center"
+                justifyContent="Center"
+                class="sapUiLargeMarginTop"
+            >
+                <!-- Login Card -->
+                <VBox
+                    width="400px"
+                    class="loginCard sapUiMediumMargin"
+                >
+                    <!-- Logo/Title Section -->
+                    <VBox
+                        alignItems="Center"
+                        class="sapUiMediumMarginBottom"
+                    >
+                        <core:Icon
+                            src="sap-icon://employee"
+                            size="3rem"
+                            color="#0070f2"
+                            class="sapUiMediumMarginBottom"
+                        />
+                        <Title
+                            text="Task Management System"
+                            level="H1"
+                            class="sapUiSmallMarginBottom"
+                        />
+                        <Text
+                            text="Please sign in to continue"
+                            class="sapUiTinyMarginBottom"
+                        />
+                    </VBox>
+
+                    <!-- Login Form -->
+                    <form:SimpleForm
+                        id="loginForm"
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="12"
+                        labelSpanL="12"
+                        labelSpanM="12"
+                        labelSpanS="12"
+                        emptySpanXL="0"
+                        emptySpanL="0"
+                        emptySpanM="0"
+                        emptySpanS="0"
+                        columnsXL="1"
+                        columnsL="1"
+                        columnsM="1"
+                        singleContainerFullSize="true"
+                    >
+                        <form:content>
+                            <Label
+                                text="Email"
+                                required="true"
+                            />
+                            <Input
+                                id="emailInput"
+                                type="Email"
+                                placeholder="Enter your email address"
+                                value="{loginModel>/email}"
+                                submit="onLogin"
+                            />
+
+                            <Label
+                                text="Password"
+                                required="true"
+                            />
+                            <Input
+                                id="passwordInput"
+                                type="Password"
+                                placeholder="Enter your password"
+                                value="{loginModel>/password}"
+                                submit="onLogin"
+                            />
+
+                            <!-- Info Message -->
+                            <MessageStrip
+                                text="New user? Enter your details and we'll create an account for you automatically."
+                                type="Information"
+                                showIcon="true"
+                                class="sapUiSmallMarginTop"
+                            />
+                        </form:content>
+                    </form:SimpleForm>
+
+                    <!-- Login Button -->
+                    <VBox
+                        alignItems="Center"
+                        class="sapUiMediumMarginTop"
+                    >
+                        <Button
+                            id="loginButton"
+                            text="Sign In"
+                            type="Emphasized"
+                            width="100%"
+                            press="onLogin"
+                            icon="sap-icon://log"
+                        />
+                    </VBox>
+                </VBox>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>
+

@@ -1,0 +1,28 @@
+{
+    "name": "com.TaskManagement.taskManagement",
+    "scripts": {
+        "build": "mbt build --mtar com.TaskManagement.taskManagement.mtar",
+        "build:workspaces": "npm run build --workspaces --if-present",
+        "deploy": "cf deploy mta_archives/com.TaskManagement.taskManagement.mtar --retries 0",
+        "lint": "npm run lint --workspaces --if-present",
+        "ui5lint": "npm run ui5lint --workspaces --if-present",
+        "start:taskManagement": "npm start --workspace taskManagement",
+        "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
+        "prisma:migrate": "prisma migrate dev --name init --schema=prisma/schema.prisma",
+        "prisma:deploy": "prisma migrate deploy --schema=prisma/schema.prisma",
+        "prisma:seed": "node server/prisma/seed.js",
+        "server:start": "cd server && npm start"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.18.0",
+        "mbt": "^1"
+    },
+    "workspaces": [
+        "taskManagement"
+    ],
+    "devDependencies": {
+        "crypto": "^1.0.1",
+        "multer": "^2.0.2",
+        "prisma": "^6.18.0"
+    }
+}

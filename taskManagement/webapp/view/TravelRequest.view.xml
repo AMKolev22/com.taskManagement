@@ -1,0 +1,258 @@
+<mvc:View
+    controllerName="taskManagement.controller.TravelCost"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:u="sap.ui.unified"
+    xmlns:core="sap.ui.core"
+    xmlns:data="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    displayBlock="true">
+    <SplitApp
+        id="managerSplitApp"
+        initialMaster="masterPage"
+        initialDetail="detailPage"
+    >
+        <masterPages>
+            <Page id="masterPage">
+                <content>
+                    <FlexBox
+                        alignItems="Center"
+                        direction="Column"
+                        height="100%"
+                    >
+                        <core:Fragment
+                            fragmentName="taskManagement.view.fragments.Sidebar"
+                            type="XML"
+                        />
+                    </FlexBox>
+                </content>
+            </Page>
+        </masterPages>
+        <detailPages>
+            <Page id="detailPage">
+                <customHeader>
+                    <OverflowToolbar>
+                        <Button
+                            icon="sap-icon://nav-back"
+                            type="Transparent"
+                            press="onNavBack"
+                            visible="{pageModel>/navBackVisible}"
+                            class="sapUiHideOnDesktop sapUiHideOnTablet"
+                        />
+                        <ToolbarSpacer />
+                        <Title
+                            text="{i18n>pageTitle}"
+                            level="H2"
+                        />
+                        <ToolbarSpacer />
+                        <Avatar
+                            initials="Js"
+                            press="onUserInfoPress"
+                            displaySize="XS"
+                            backgroundColor="Accent6"
+                            tooltip="User Info"
+                        />
+                    </OverflowToolbar>
+                </customHeader>
+                <content>
+                    <l:VerticalLayout width="100%">
+                        
+                        <!-- Validation Message Strip -->
+                        <MessageStrip
+                            id="validationMessageStrip"
+                            type="{/validationMessageType}"
+                            showIcon="true"
+                            visible="{/showValidationMessage}"
+                            text="{/validationMessage}"
+                            class="sapUiSmallMargin"
+                        />
+                        
+                        <!-- Basic Information Section -->
+                        <Panel headerText="Travel Information">
+                            <f:SimpleForm
+                                editable="true"
+                                layout="ResponsiveGridLayout"
+                                labelSpanXL="3"
+                                labelSpanL="3"
+                                labelSpanM="3"
+                                labelSpanS="12"
+                                emptySpanXL="4"
+                                emptySpanL="4"
+                                emptySpanM="4"
+                                emptySpanS="0"
+                                columnsXL="1"
+                                columnsL="1"
+                                columnsM="1">
+                                <f:content>
+                                    <Label text="Destination" required="true"/>
+                                    <Input 
+                                        id="destinationInput"
+                                        value="{/destination}" 
+                                        placeholder="Enter destination city/country"
+                                        required="true"/>
+                                    
+                                    <Label text="Start Date" required="true"/>
+                                    <DatePicker 
+                                        id="startDatePicker"
+                                        value="{/startDate}"
+                                        placeholder="Select start date"
+                                        required="true"/>
+                                    
+                                    <Label text="End Date" required="true"/>
+                                    <DatePicker 
+                                        id="endDatePicker"
+                                        value="{/endDate}"
+                                        placeholder="Select end date"
+                                        required="true"/>
+                                    
+                                    <Label text="Reason for Travel" required="true"/>
+                                    <TextArea 
+                                        id="reasonTextArea"
+                                        value="{/reason}" 
+                                        rows="4"
+                                        placeholder="Describe the business purpose of your trip"
+                                        required="true"/>
+                                    
+                                    <Label text="Approving Manager" required="true"/>
+                                    <Select
+                                        id="managerSelect"
+                                        selectedKey="{/selectedManager}"
+                                        items="{/managers}"
+                                        required="true">
+                                        <core:Item key="{key}" text="{name}"/>
+                                    </Select>
+                                </f:content>
+                            </f:SimpleForm>
+                        </Panel>
+
+                        <!-- Food Costs Section -->
+                        <Panel headerText="Food Costs">
+                            <VBox class="sapUiSmallMargin">
+                                <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiTinyMarginBottom">
+                                    <Label text="Upload food receipts and invoices"/>
+                                    <Button 
+                                        text="Add Food Cost" 
+                                        icon="sap-icon://add"
+                                        type="Emphasized"
+                                        press=".onAddFile"
+                                        data:category="foodCosts"/>
+                                </HBox>
+                                <List 
+                                    id="foodCostsList"
+                                    items="{
+                                        path: '/foodCosts',
+                                        templateShareable: false
+                                    }"
+                                    noDataText="No food costs added yet. Click 'Add Food Cost' to upload receipts.">
+                                    <CustomListItem>
+                                        <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
+                                            <VBox width="80%">
+                                                <Text text="{fileName}" class="sapUiTinyMarginBottom"/>
+                                                <Text text="{description}" class="sapUiTinyText"/>
+                                                <Text text="Size: {fileSize}" class="sapUiTinyText"/>
+                                            </VBox>
+                                            <Button 
+                                                icon="sap-icon://delete" 
+                                                type="Transparent"
+                                                press=".onDeleteFile"
+                                                data:category="foodCosts"
+                                                data:index="{index}"/>
+                                        </HBox>
+                                    </CustomListItem>
+                                </List>
+                            </VBox>
+                        </Panel>
+
+                        <!-- Travel Costs Section -->
+                        <Panel headerText="Travel Costs" >
+                            <VBox class="sapUiSmallMargin">
+                                <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiTinyMarginBottom">
+                                    <Label text="Upload flight tickets, train tickets, taxi receipts, etc."/>
+                                    <Button 
+                                        text="Add Travel Cost" 
+                                        icon="sap-icon://add"
+                                        type="Emphasized"
+                                        press=".onAddFile"
+                                        data:category="travelCosts"/>
+                                </HBox>
+                                <List 
+                                    id="travelCostsList"
+                                    items="{
+                                        path: '/travelCosts',
+                                        templateShareable: false
+                                    }"
+                                    noDataText="No travel costs added yet. Click 'Add Travel Cost' to upload receipts.">
+                                    <CustomListItem>
+                                        <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
+                                            <VBox width="80%">
+                                                <Text text="{fileName}" class="sapUiTinyMarginBottom"/>
+                                                <Text text="{description}" class="sapUiTinyText"/>
+                                                <Text text="Size: {fileSize}" class="sapUiTinyText"/>
+                                            </VBox>
+                                            <Button 
+                                                icon="sap-icon://delete" 
+                                                type="Transparent"
+                                                press=".onDeleteFile"
+                                                data:category="travelCosts"
+                                                data:index="{index}"/>
+                                        </HBox>
+                                    </CustomListItem>
+                                </List>
+                            </VBox>
+                        </Panel>
+
+                        <!-- Stay Costs Section -->
+                        <Panel headerText="Stay Costs" >
+                            <VBox class="sapUiSmallMargin">
+                                <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiTinyMarginBottom">
+                                    <Label text="Upload hotel bills and accommodation receipts"/>
+                                    <Button 
+                                        text="Add Stay Cost" 
+                                        icon="sap-icon://add"
+                                        type="Emphasized"
+                                        press=".onAddFile"
+                                        data:category="stayCosts"/>
+                                </HBox>
+                                <List 
+                                    id="stayCostsList"
+                                    items="{
+                                        path: '/stayCosts',
+                                        templateShareable: false
+                                    }"
+                                    noDataText="No stay costs added yet. Click 'Add Stay Cost' to upload receipts.">
+                                    <CustomListItem>
+                                        <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
+                                            <VBox width="80%">
+                                                <Text text="{fileName}" class="sapUiTinyMarginBottom"/>
+                                                <Text text="{description}" class="sapUiTinyText"/>
+                                                <Text text="Size: {fileSize}" class="sapUiTinyText"/>
+                                            </VBox>
+                                            <Button 
+                                                icon="sap-icon://delete" 
+                                                type="Transparent"
+                                                press=".onDeleteFile"
+                                                data:category="stayCosts"
+                                                data:index="{index}"/>
+                                        </HBox>
+                                    </CustomListItem>
+                                </List>
+                            </VBox>
+                        </Panel>
+
+                        <!-- Submit Button -->
+                        <HBox justifyContent="End" >
+                            <Button 
+                                id="submitButton"
+                                text="Submit Reimbursement Request" 
+                                type="Success"
+                                icon="sap-icon://accept"
+                                press=".onSubmit"/>
+                        </HBox>
+                        
+                    </l:VerticalLayout>
+                </content>
+            </Page>
+        </detailPages>
+    </SplitApp>
+</mvc:View>

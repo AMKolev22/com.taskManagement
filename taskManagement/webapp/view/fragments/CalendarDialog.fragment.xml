@@ -1,0 +1,61 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:unified="sap.ui.unified"
+>
+    <Dialog
+        title="{calendarModel>/title}"
+        contentWidth="600px"
+        contentHeight="500px"
+    >
+        <content>
+            <VBox class="sapUiSmallMargin">
+                <Text
+                    text="Unavailable dates are highlighted in red"
+                    class="sapUiSmallMarginBottom"
+                />
+                
+                <unified:Calendar
+                    id="availabilityCalendar"
+                    width="100%"
+                    class="sapUiSmallMarginBottom"
+                >
+                    <unified:specialDates>
+                        <unified:DateTypeRange
+                            startDate="{calendarModel>startDate}"
+                            endDate="{calendarModel>endDate}"
+                            type="Type01"
+                            tooltip="{calendarModel>reason}"
+                        />
+                    </unified:specialDates>
+                </unified:Calendar>
+
+                <Panel
+                    headerText="Unavailability Details"
+                    expandable="true"
+                    expanded="true"
+                >
+                    <List
+                        items="{calendarModel>/availabilities}"
+                        noDataText="No unavailable dates"
+                    >
+                        <StandardListItem
+                            title="{path: 'calendarModel>startDate', formatter: '.formatter.formatDate'} - {path: 'calendarModel>endDate', formatter: '.formatter.formatDate'}"
+                            description="{calendarModel>reason}"
+                            icon="sap-icon://calendar"
+                            iconDensityAware="false"
+                            iconInset="false"
+                        />
+                    </List>
+                </Panel>
+            </VBox>
+        </content>
+        <buttons>
+            <Button
+                text="Close"
+                press="onCloseCalendar"
+            />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>
+

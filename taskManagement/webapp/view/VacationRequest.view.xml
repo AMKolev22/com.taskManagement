@@ -1,0 +1,346 @@
+<mvc:View
+    controllerName="taskManagement.controller.VacationRequest"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+    xmlns="sap.m"
+    displayBlock="true"
+    height="100%"
+>
+    <SplitApp
+        id="vacationRequestSplitApp"
+        initialMaster="masterPage"
+        initialDetail="detailPage"
+    >
+        <masterPages>
+            <Page id="masterPage">
+                <content>
+                    <FlexBox
+                        alignItems="Center"
+                        direction="Column"
+                        height="100%"
+                    >
+                        <core:Fragment
+                            fragmentName="taskManagement.view.fragments.Sidebar"
+                            type="XML"
+                        />
+                    </FlexBox>
+                </content>
+            </Page>
+        </masterPages>
+        <detailPages>
+            <Page id="detailPage">
+                <customHeader>
+                    <OverflowToolbar>
+                        <Button
+                            icon="sap-icon://nav-back"
+                            type="Transparent"
+                            press="onNavBack"
+                        />
+                        <ToolbarSpacer />
+                        <Title
+                            text="New Vacation Request"
+                            level="H2"
+                        />
+                        <ToolbarSpacer />
+                    </OverflowToolbar>
+                </customHeader>
+                <content>
+                    <VBox class="sapUiMediumMargin">
+                        <!-- Validation Message Strip -->
+                        <MessageStrip
+                            id="validationMessageStrip"
+                            type="{requestModel>/validationMessageType}"
+                            showIcon="true"
+                            visible="{requestModel>/showValidationMessage}"
+                            text="{requestModel>/validationMessage}"
+                            class="sapUiSmallMarginBottom"
+                        />
+                        
+                        <!-- Vacation Request Form -->
+                        <form:SimpleForm
+                            id="vacationRequestForm"
+                            editable="true"
+                            layout="ResponsiveGridLayout"
+                            labelSpanXL="4"
+                            labelSpanL="4"
+                            labelSpanM="4"
+                            labelSpanS="12"
+                            emptySpanXL="0"
+                            emptySpanL="0"
+                            emptySpanM="0"
+                            emptySpanS="0"
+                            columnsXL="2"
+                            columnsL="2"
+                            columnsM="1"
+                        >
+                            <form:content>
+                                <core:Title text="Vacation Information" />
+
+                                <Label
+                                    text="Vacation Type"
+                                    required="true"
+                                />
+                                <Select
+                                    id="vacationType"
+                                    selectedKey="{requestModel>/vacationType}"
+                                    valueState="{requestModel>/validation/vacationTypeState}"
+                                    valueStateText="{requestModel>/validation/vacationTypeMessage}"
+                                    change="onVacationTypeChange"
+                                >
+                                    <items>
+                                        <core:Item
+                                            key="ANNUAL_LEAVE"
+                                            text="Annual Leave"
+                                        />
+                                        <core:Item
+                                            key="SICK_LEAVE"
+                                            text="Sick Leave"
+                                        />
+                                        <core:Item
+                                            key="UNPAID_LEAVE"
+                                            text="Unpaid Leave"
+                                        />
+                                        <core:Item
+                                            key="PARENTAL_LEAVE"
+                                            text="Parental Leave"
+                                        />
+                                        <core:Item
+                                            key="OTHER"
+                                            text="Other"
+                                        />
+                                    </items>
+                                </Select>
+
+                                <Label
+                                    text="Start Date"
+                                    required="true"
+                                />
+                                <DatePicker
+                                    id="startDate"
+                                    value="{requestModel>/startDate}"
+                                    valueState="{requestModel>/validation/startDateState}"
+                                    valueStateText="{requestModel>/validation/startDateMessage}"
+                                    change="onDateChange"
+                                    minDate="{requestModel>/minDate}"
+                                />
+
+                                <Label
+                                    text="End Date"
+                                    required="true"
+                                />
+                                <DatePicker
+                                    id="endDate"
+                                    value="{requestModel>/endDate}"
+                                    valueState="{requestModel>/validation/endDateState}"
+                                    valueStateText="{requestModel>/validation/endDateMessage}"
+                                    change="onDateChange"
+                                    minDate="{requestModel>/startDate}"
+                                />
+
+                                <Label text="Duration" />
+                                <Text
+                                    text="{requestModel>/duration}"
+                                    class="sapUiSmallMarginTop"
+                                />
+
+                                <core:Title text="Approver and Substitute" />
+
+                                <Label
+                                    text="Manager"
+                                    required="true"
+                                />
+                                <HBox alignItems="Center">
+                                    <Select
+                                        id="managerSelect"
+                                        width="80%"
+                                        selectedKey="{requestModel>/managerId}"
+                                        valueState="{requestModel>/validation/managerState}"
+                                        valueStateText="{requestModel>/validation/managerMessage}"
+                                        items="{requestModel>/managers}"
+                                        change="onManagerChange"
+                                    >
+                                        <core:Item
+                                            key="{requestModel>userId}"
+                                            text="{requestModel>firstName} {requestModel>lastName} ({requestModel>department})"
+                                        />
+                                    </Select>
+                                    <Button
+                                        icon="sap-icon://calendar"
+                                        tooltip="View Manager Calendar"
+                                        press="onViewManagerCalendar"
+                                        type="Transparent"
+                                        class="sapUiTinyMarginBegin"
+                                    />
+                                </HBox>
+
+                                <Label
+                                    text="Substitute"
+                                    required="{
+                                        parts: ['requestModel>/vacationType', 'requestModel>/startDate', 'requestModel>/endDate'],
+                                        formatter: '.formatSubstituteRequired'
+                                    }"
+                                    visible="{
+                                        parts: ['requestModel>/vacationType', 'requestModel>/startDate', 'requestModel>/endDate'],
+                                        formatter: '.formatSubstituteRequired'
+                                    }"
+                                />
+                                <HBox 
+                                    alignItems="Center"
+                                    visible="{
+                                        parts: ['requestModel>/vacationType', 'requestModel>/startDate', 'requestModel>/endDate'],
+                                        formatter: '.formatShowSubstitute'
+                                    }">
+                                    <Select
+                                        id="substituteSelect"
+                                        width="80%"
+                                        selectedKey="{requestModel>/substituteId}"
+                                        valueState="{requestModel>/validation/substituteState}"
+                                        valueStateText="{requestModel>/validation/substituteMessage}"
+                                        items="{requestModel>/substitutes}"
+                                        change="onSubstituteChange"
+                                    >
+                                        <core:Item
+                                            key="{requestModel>userId}"
+                                            text="{requestModel>firstName} {requestModel>lastName} ({requestModel>department})"
+                                        />
+                                    </Select>
+                                    <Button
+                                        icon="sap-icon://calendar"
+                                        tooltip="View Substitute Calendar"
+                                        press="onViewSubstituteCalendar"
+                                        type="Transparent"
+                                        class="sapUiTinyMarginBegin"
+                                    />
+                                </HBox>
+
+                                <!-- Availability Warning Messages -->
+                                <MessageStrip
+                                    text="{i18n>error.managerNotAvailableMessage}"
+                                    type="Error"
+                                    showIcon="true"
+                                    visible="{requestModel>/managerNotAvailable}"
+                                    class="sapUiSmallMarginTop"
+                                />
+
+                                <MessageStrip
+                                    text="{i18n>error.substituteNotAvailableMessage}"
+                                    type="Error"
+                                    showIcon="true"
+                                    visible="{requestModel>/substituteNotAvailable}"
+                                    class="sapUiSmallMarginTop"
+                                />
+
+                                <core:Title text="Leave Details" />
+
+                                <Label
+                                    text="Paid Leave"
+                                    visible="{= ${requestModel>/vacationType} !== 'SICK_LEAVE' && ${requestModel>/vacationType} !== 'UNPAID_LEAVE'}"
+                                />
+                                <Switch
+                                    id="paidSwitch"
+                                    state="{requestModel>/paid}"
+                                    customTextOn="Yes"
+                                    customTextOff="No"
+                                    visible="{= ${requestModel>/vacationType} !== 'SICK_LEAVE' && ${requestModel>/vacationType} !== 'UNPAID_LEAVE'}"
+                                    change="onPaidChange"
+                                />
+
+                                <core:Title text="Reason" />
+
+                                <Label
+                                    text="Reason for Request"
+                                    required="true"
+                                />
+                                <TextArea
+                                    id="reason"
+                                    value="{requestModel>/reason}"
+                                    valueState="{requestModel>/validation/reasonState}"
+                                    valueStateText="{requestModel>/validation/reasonMessage}"
+                                    rows="5"
+                                    width="100%"
+                                    placeholder="Please provide a reason for your vacation request..."
+                                />
+
+                                <core:Title text="Attachments (Optional)" />
+
+                                <Label text="Upload Documents" />
+                                <VBox>
+                                    <FileUploader
+                                        id="fileUploader"
+                                        name="file"
+                                        uploadUrl="/api/upload"
+                                        change="onFileChange"
+                                        width="100%"
+                                        placeholder="Choose a file..."
+                                    />
+                                    <Button
+                                        text="Add Attachment"
+                                        icon="sap-icon://add"
+                                        press="onAddAttachment"
+                                        enabled="{requestModel>/canAddAttachment}"
+                                        class="sapUiTinyMarginTop"
+                                    />
+                                </VBox>
+
+                                <!-- Attachments List -->
+                                <Label text="Attached Files" />
+                                <List
+                                    id="attachmentsList"
+                                    items="{requestModel>/attachments}"
+                                    noDataText="No attachments added"
+                                >
+                                    <CustomListItem>
+                                        <HBox
+                                            justifyContent="SpaceBetween"
+                                            alignItems="Center"
+                                            width="100%"
+                                        >
+                                            <HBox alignItems="Center">
+                                                <core:Icon
+                                                    src="sap-icon://attachment"
+                                                    class="sapUiTinyMarginEnd"
+                                                />
+                                                <VBox>
+                                                    <Text text="{requestModel>fileName}" />
+                                                    <Text
+                                                        text="{requestModel>fileSize}"
+                                                        class="sapUiTinyMarginTop"
+                                                    />
+                                                </VBox>
+                                            </HBox>
+                                            <Button
+                                                icon="sap-icon://delete"
+                                                type="Transparent"
+                                                press="onDeleteAttachment"
+                                            />
+                                        </HBox>
+                                    </CustomListItem>
+                                </List>
+                            </form:content>
+                        </form:SimpleForm>
+
+                        <!-- Action Buttons -->
+                        <HBox
+                            justifyContent="End"
+                            class="sapUiMediumMarginTop"
+                        >
+                            <Button
+                                text="Cancel"
+                                press="onCancel"
+                                class="sapUiTinyMarginEnd"
+                            />
+                            <Button
+                                text="Submit Request"
+                                type="Emphasized"
+                                press="onSubmit"
+                                icon="sap-icon://paper-plane"
+                            />
+                        </HBox>
+                    </VBox>
+                </content>
+            </Page>
+        </detailPages>
+    </SplitApp>
+</mvc:View>
+

@@ -1,0 +1,287 @@
+<mvc:View
+    controllerName="taskManagement.controller.EquipmentRequest"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core">
+    <SplitApp
+        id="managerSplitApp"
+        initialMaster="masterPage"
+        initialDetail="detailPage"
+        xmlns:data="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    >
+        <masterPages>
+            <Page id="masterPage">
+                <content>
+                    <FlexBox
+                        alignItems="Center"
+                        direction="Column"
+                        height="100%"
+                    >
+                        <core:Fragment
+                            fragmentName="taskManagement.view.fragments.Sidebar"
+                            type="XML"
+                        />
+                    </FlexBox>
+                </content>
+            </Page>
+        </masterPages>
+        <detailPages>
+            <Page title="Equipment Request" class="sapUiContentPadding">
+                    <customHeader>
+                        <OverflowToolbar>
+                            <Button
+                                icon="sap-icon://nav-back"
+                                type="Transparent"
+                                press="onNavBack"
+                                visible="{pageModel>/navBackVisible}"
+                                class="sapUiHideOnDesktop sapUiHideOnTablet"
+                            />
+                            <ToolbarSpacer />
+                            <Title
+                                text="{i18n>pageTitle}"
+                                level="H2"
+                            />
+                            <ToolbarSpacer />
+                            <Avatar
+                                initials="Js"
+                                press="onUserInfoPress"
+                                displaySize="XS"
+                                backgroundColor="Accent6"
+                                tooltip="User Info"
+                            />
+                        </OverflowToolbar>
+                    </customHeader>
+                <content>
+                    <VBox class="sapUiMediumMargin">
+                        <!-- Validation Message Strip -->
+                        <MessageStrip
+                            id="validationMessageStrip"
+                            type="{/validationMessageType}"
+                            showIcon="true"
+                            visible="{/showValidationMessage}"
+                            text="{/validationMessage}"
+                            class="sapUiSmallMarginBottom"
+                        />
+                        
+                        <!-- Form Title -->
+                        <Title text="Equipment Request" class="sapUiMediumMarginBottom"/>
+                        <!-- Selected Items Table -->
+                        <VBox class="sapUiMediumMarginTop">
+                        <HBox
+                                alignItems="Center"
+                                class="sapUiSmallMarginBottom">
+                                <Title text="Select Equipment" level="H4"/>
+                                <Button
+                                    text="Add"
+                                    icon="sap-icon://add"
+                                    press="onOpenCatalogDialog"
+                                    class="sapUiSmallMarginBegin"
+                                    type="Outline"/>
+                            </HBox>
+                            <Table
+                                id="selectedItemsTable"
+                                items="{/selectedItems}"
+                                class="sapUiSmallMarginTop">
+                                <columns>
+                                    <Column
+                                        minScreenWidth="Phone"
+                                        demandPopin="true">
+                                        <Text text="Type"/>
+                                    </Column>
+
+                                    <Column
+                                        minScreenWidth="Tablet"
+                                        demandPopin="false">
+                                        <Text text="Name"/>
+                                    </Column>
+
+                                    <Column
+                                        minScreenWidth="Tablet"
+                                        hAlign="End"
+                                        demandPopin="true">
+                                        <Text text="Cost"/>
+                                    </Column>
+
+                                    <Column
+                                        hAlign="Center">
+                                        <Text text="Amount"/>
+                                    </Column>
+
+                                    <Column
+                                        minScreenWidth="Desktop"
+                                        demandPopin="true">
+                                        <Text text="Reason"/>
+                                    </Column>
+
+                                    <Column
+                                        hAlign="Center"
+                                        demandPopin="true"
+                                        minScreenWidth="Tablet">
+                                        <Text text=""/>
+                                    </Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <Text text="{type}"/>
+                                            <Text text="{name}"/>
+                                            <ObjectNumber number="{cost}" unit="EUR"/>
+                                            <Text text="{amount}"/>
+                                            <Text text="{reason}"/>
+                                            <Button
+                                                icon="sap-icon://delete"
+                                                type="Transparent"
+                                                press="onDeleteItem"/>
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </VBox>
+                        
+                        <!-- Total Cost and Manager Section -->
+                        <VBox class="sapUiLargeMarginTop">
+                            <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+                                <Label text="Total Cost:" class="sapUiTinyMarginEnd" design="Bold"/>
+                                <ObjectNumber 
+                                    number="{/totalCost}" 
+                                    unit="EUR"
+                                    emphasized="true"
+                                    state="Success"/>
+                            </HBox>
+                            
+                            <HBox alignItems="Center" class="sapUiMediumMarginTop">
+                                <Label text="Approving Manager:" class="sapUiMediumMarginEnd" required="true"/>
+                                <Select
+                                    selectedKey="{/selectedManager}"
+                                    items="{/managers}"
+                                    width="300px">
+                                    <core:Item key="{id}" text="{name}"/>
+                                </Select>
+                            </HBox>
+                        </VBox>
+                        
+                        <!-- Submit Button -->
+                        <HBox class="sapUiLargeMarginTop" justifyContent="End">
+                            <Button
+                                text="Submit Request"
+                                type="Emphasized"
+                                press="onSubmitRequest"
+                                enabled="{= ${/selectedItems}.length > 0 &amp;&amp; ${/selectedManager} !== '' }"/>
+                            <Button
+                                text="Cancel"
+                                press="onCancelRequest"
+                                class="sapUiTinyMarginBegin"/>
+                        </HBox>
+                    </VBox>
+                </content>
+            </Page>
+        </detailPages>
+    </SplitApp>
+    
+    <!-- Catalog Dialog -->
+    <Dialog
+        id="catalogDialog"
+        title="Select Equipment from Catalog"
+        contentWidth="90%"
+        contentHeight="80%"
+        resizable="true"
+        draggable="true">
+        <content>
+            <VBox height="100%">
+                <!-- Custom Filter Bar -->
+                <Toolbar class="sapUiTinyMarginBottom">
+                    <Label text="Filter by Type:" class="sapUiTinyMarginEnd"/>
+                    <Select
+                        id="typeFilter"
+                        selectedKey="{/filterType}"
+                        change="onFilterCatalog"
+                        width="150px">
+                        <core:Item key="" text="All"/>
+                        <core:Item key="Headphones" text="Headphones"/>
+                        <core:Item key="Laptops" text="Laptops"/>
+                        <core:Item key="Keyboards" text="Keyboards"/>
+                    </Select>
+                    <ToolbarSpacer/>
+                    <SearchField
+                        id="catalogSearch"
+                        width="300px"
+                        placeholder="Search by name..."
+                        search="onSearchCatalog"
+                        value="{/searchQuery}"/>
+                </Toolbar>
+                
+                <!-- Catalog Table -->
+                <Table
+                    id="catalogTable"
+                    mode="MultiSelect"
+                    items="{/filteredCatalogItems}"
+                    growing="true"
+                    growingThreshold="20"
+                    class="sapUiSmallMarginTop">
+                    <columns>
+                        <Column width="10em">
+                            <Text text="Type"/>
+                        </Column>
+                        <Column>
+                            <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
+                                <Text text="Name"/>
+                                <Button
+                                    icon="{= ${/sortBy} === 'name' ? (${/sortOrder} === 'asc' ? 'sap-icon://sort-ascending' : 'sap-icon://sort-descending') : 'sap-icon://sort'}"
+                                    type="Transparent"
+                                    press="onSortByName"
+                                    tooltip="Sort by Name"/>
+                            </HBox>
+                        </Column>
+                        <Column width="10em" hAlign="End">
+                            <HBox justifyContent="End" alignItems="Center" width="100%">
+                                <Text text="Cost"/>
+                                <Button
+                                    icon="{= ${/sortBy} === 'cost' ? (${/sortOrder} === 'asc' ? 'sap-icon://sort-ascending' : 'sap-icon://sort-descending') : 'sap-icon://sort'}"
+                                    type="Transparent"
+                                    press="onSortByCost"
+                                    tooltip="Sort by Cost"/>
+                            </HBox>
+                        </Column>
+                        <Column width="10em" hAlign="Center">
+                            <Text text="Amount"/>
+                        </Column>
+                        <Column minScreenWidth="Tablet" demandPopin="true">
+                            <Text text="Reason"/>
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="{type}"/>
+                                <Text text="{name}"/>
+                                <ObjectNumber number="{cost}" unit="EUR"/>
+                                <Input
+                                    value="{amount}"
+                                    type="Number"
+                                    width="80px"
+                                    textAlign="Center"
+                                    min="1"
+                                    max="999"/>
+                                <Input
+                                    value="{reason}"
+                                    placeholder="Enter reason..."/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                text="Add Selected"
+                type="Emphasized"
+                press="onAddSelectedItems"/>
+        </beginButton>
+        <endButton>
+            <Button
+                text="Cancel"
+                press="onCloseCatalogDialog"/>
+        </endButton>
+    </Dialog>
+</mvc:View>

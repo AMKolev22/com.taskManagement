@@ -1,0 +1,34 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Dialog
+        id="forwardDialog"
+        title="Forward to Another Manager"
+        contentWidth="400px">
+        <content>
+            <VBox class="sapUiSmallMargin">
+                <Label text="Select Manager" required="true" labelFor="managerSelect"/>
+                <Select
+                    id="managerSelect"
+                    width="100%"
+                    items="{forwardModel>/managers}">
+                    <core:Item
+                        key="{forwardModel>userId}"
+                        text="{forwardModel>firstName} {forwardModel>lastName} ({forwardModel>department})"/>
+                </Select>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                text="Forward"
+                type="Emphasized"
+                press="onForwardConfirm"/>
+        </beginButton>
+        <endButton>
+            <Button
+                text="Cancel"
+                press="onForwardCancel"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
+

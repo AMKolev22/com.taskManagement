@@ -1,0 +1,223 @@
+<mvc:View
+    controllerName="taskManagement.controller.ManagerDashboard"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    displayBlock="true"
+    height="100%"
+>
+    <SplitApp
+        id="managerSplitApp"
+        initialMaster="masterPage"
+        initialDetail="detailPage"
+    >
+        <masterPages>
+            <Page id="masterPage">
+                <content>
+                    <FlexBox
+                        alignItems="Center"
+                        direction="Column"
+                        height="100%"
+                    >
+                        <core:Fragment
+                            fragmentName="taskManagement.view.fragments.Sidebar"
+                            type="XML"
+                        />
+                    </FlexBox>
+                </content>
+            </Page>
+        </masterPages>
+        <detailPages>
+            <Page id="detailPage">
+                <customHeader>
+                    <OverflowToolbar>
+                        <Button
+                            icon="sap-icon://nav-back"
+                            type="Transparent"
+                            press="onNavBack"
+                            visible="{pageModel>/navBackVisible}"
+                            class="sapUiHideOnDesktop sapUiHideOnTablet"
+                        />
+                        <ToolbarSpacer />
+                        <Title
+                            text="Manager Dashboard - Pending Tasks"
+                            level="H2"
+                        />
+                        <ToolbarSpacer />
+                        <Button
+                            icon="sap-icon://refresh"
+                            tooltip="Refresh"
+                            press="onRefresh"
+                            type="Transparent"
+                        />
+                        <Avatar
+                            initials="{= ${userModel>/currentUser/firstName}.charAt(0) + ${userModel>/currentUser/lastName}.charAt(0) }"
+                            press="onUserInfoPress"
+                            displaySize="XS"
+                            backgroundColor="Accent6"
+                            tooltip="{= ${userModel>/currentUser/firstName} + ' ' + ${userModel>/currentUser/lastName} }"
+                        />
+                    </OverflowToolbar>
+                </customHeader>
+                <content>
+                    <VBox class="sapUiMediumMarginTop">
+                        <!-- Search and Filter Bar -->
+                        <Toolbar>
+                            <SearchField
+                                id="searchField"
+                                width="40%"
+                                placeholder="Search tasks..."
+                                value="{filterModel>/searchQuery}"
+                                search="onSearch"
+                                liveChange="onSearch"
+                            />
+                            <ToolbarSpacer />
+                            <Select
+                                id="typeFilter"
+                                width="150px"
+                                selectedKey="{filterModel>/typeFilter}"
+                                change="onFilterChange"
+                            >
+                                <items>
+                                    <core:Item
+                                        key="all"
+                                        text="All Types"
+                                    />
+                                    <core:Item
+                                        key="Vacation"
+                                        text="Vacation"
+                                    />
+                                    <core:Item
+                                        key="Travel"
+                                        text="Travel"
+                                    />
+                                    <core:Item
+                                        key="Equipment"
+                                        text="Equipment"
+                                    />
+                                </items>
+                            </Select>
+                            <Select
+                                id="statusFilter"
+                                width="150px"
+                                selectedKey="{filterModel>/statusFilter}"
+                                change="onFilterChange"
+                                class="sapUiSmallMarginBegin"
+                            >
+                                <items>
+                                    <core:Item
+                                        key="all"
+                                        text="All Status"
+                                    />
+                                    <core:Item
+                                        key="PENDING_APPROVAL"
+                                        text="Pending"
+                                    />
+                                    <core:Item
+                                        key="APPROVED"
+                                        text="Approved"
+                                    />
+                                    <core:Item
+                                        key="REJECTED"
+                                        text="Rejected"
+                                    />
+                                    <core:Item
+                                        key="PARTIALLY_REJECTED"
+                                        text="Partially Rejected"
+                                    />
+                                </items>
+                            </Select>
+                        </Toolbar>
+
+                        <!-- Pending Tasks Table -->
+                        <Table
+                            id="pendingTasksTable"
+                            items="{dashboardModel>/tasks}"
+                            mode="None"
+                            growing="true"
+                            growingThreshold="20"
+                        >
+                            <columns>
+                                <Column width="4rem">
+                                    <Text text="" />
+                                </Column>
+                                <Column>
+                                    <Text text="Request ID" />
+                                </Column>
+                                <Column>
+                                    <Text text="Type" />
+                                </Column>
+                                <Column>
+                                    <Text text="From" />
+                                </Column>
+                                <Column>
+                                    <Text text="Subject" />
+                                </Column>
+                                <Column>
+                                    <Text text="Submitted" />
+                                </Column>
+                                <Column>
+                                    <Text text="Status" />
+                                </Column>
+                                <Column
+                                    width="10rem"
+                                    hAlign="Center"
+                                >
+                                    <Text text="Actions" />
+                                </Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem
+                                    type="Active"
+                                    press="onTaskPress"
+                                >
+                                    <cells>
+                                        <core:Icon
+                                            src="{path: 'dashboardModel>type', formatter: '.formatter.getRequestTypeIcon'}"
+                                            color="{path: 'dashboardModel>type', formatter: '.formatter.getRequestTypeColor'}"
+                                        />
+                                        <Text text="{dashboardModel>requestId}" />
+                                        <ObjectStatus
+                                            text="{dashboardModel>type}"
+                                            state="Information"
+                                        />
+                                        <Text text="{dashboardModel>submittedBy}" />
+                                        <Text text="{dashboardModel>subject}" />
+                                        <Text text="{path: 'dashboardModel>submittedDate', formatter: '.formatter.formatDate'}" />
+                                        <ObjectStatus
+                                            text="{path: 'dashboardModel>status', formatter: '.formatter.formatStatus'}"
+                                            state="{path: 'dashboardModel>status', formatter: '.formatter.formatStatusState'}"
+                                        />
+                                        <HBox justifyContent="Center">
+                                            <Button
+                                                icon="sap-icon://detail-view"
+                                                type="Transparent"
+                                                tooltip="View Details"
+                                                press="onViewDetails"
+                                                class="sapUiTinyMarginEnd"
+                                            />
+                                            <Button
+                                                icon="sap-icon://accept"
+                                                type="Accept"
+                                                tooltip="Approve"
+                                                press="onQuickApprove"
+                                                class="sapUiTinyMarginEnd"
+                                            />
+                                            <Button
+                                                icon="sap-icon://decline"
+                                                type="Reject"
+                                                tooltip="Reject"
+                                                press="onQuickReject"
+                                            />
+                                        </HBox>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </VBox>
+                </content>
+            </Page>
+        </detailPages>
+    </SplitApp>
+</mvc:View>
+

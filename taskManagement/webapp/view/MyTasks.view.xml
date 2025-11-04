@@ -1,0 +1,185 @@
+<mvc:View
+    controllerName="taskManagement.controller.MyTasks"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    displayBlock="true"
+    height="100%"
+>
+    <SplitApp
+        id="myTasksSplitApp"
+        initialMaster="masterPage"
+        initialDetail="detailPage"
+    >
+        <masterPages>
+            <Page id="masterPage">
+                <content>
+                    <FlexBox
+                        alignItems="Center"
+                        direction="Column"
+                        height="100%"
+                    >
+                        <core:Fragment
+                            fragmentName="taskManagement.view.fragments.Sidebar"
+                            type="XML"
+                        />
+                    </FlexBox>
+                </content>
+            </Page>
+        </masterPages>
+        <detailPages>
+            <Page id="detailPage">
+                <customHeader>
+                    <OverflowToolbar>
+                        <Button
+                            icon="sap-icon://nav-back"
+                            type="Transparent"
+                            press="onNavBack"
+                        />
+                        <ToolbarSpacer />
+                        <Title
+                            text="My Tasks"
+                            level="H2"
+                        />
+                        <ToolbarSpacer />
+                        <Button
+                            icon="sap-icon://refresh"
+                            tooltip="Refresh"
+                            press="onRefresh"
+                            type="Transparent"
+                        />
+                    </OverflowToolbar>
+                </customHeader>
+                <content>
+                    <VBox class="sapUiMediumMargin">
+                        <!-- Filter Bar -->
+                        <Toolbar>
+                            <SearchField
+                                id="searchField"
+                                width="40%"
+                                placeholder="Search my tasks..."
+                                value="{filterModel>/searchQuery}"
+                                search="onSearch"
+                                liveChange="onSearch"
+                            />
+                            <ToolbarSpacer />
+                            <Select
+                                id="statusFilter"
+                                width="200px"
+                                selectedKey="{filterModel>/statusFilter}"
+                                change="onFilterChange"
+                            >
+                                <items>
+                                    <core:Item
+                                        key="all"
+                                        text="All Status"
+                                    />
+                                    <core:Item
+                                        key="PENDING_APPROVAL"
+                                        text="Pending"
+                                    />
+                                    <core:Item
+                                        key="APPROVED"
+                                        text="Approved"
+                                    />
+                                    <core:Item
+                                        key="REJECTED"
+                                        text="Rejected"
+                                    />
+                                    <core:Item
+                                        key="PARTIALLY_REJECTED"
+                                        text="Partially Rejected"
+                                    />
+                                </items>
+                            </Select>
+                        </Toolbar>
+
+                        <!-- Tasks List -->
+                        <List
+                            id="myTasksList"
+                            items="{tasksModel>/tasks}"
+                            growing="true"
+                            growingThreshold="20"
+                            noDataText="No tasks found"
+                        >
+                            <CustomListItem
+                                type="Active"
+                                press="onTaskPress"
+                            >
+                                <HBox
+                                    justifyContent="SpaceBetween"
+                                    alignItems="Center"
+                                    width="100%"
+                                >
+                                    <HBox
+                                        alignItems="Center"
+                                        width="70%"
+                                    >
+                                        <core:Icon
+                                            src="{path: 'tasksModel>type', formatter: '.formatter.getRequestTypeIcon'}"
+                                            color="{path: 'tasksModel>type', formatter: '.formatter.getRequestTypeColor'}"
+                                            size="2rem"
+                                            class="sapUiTinyMarginEnd"
+                                        />
+                                        <VBox>
+                                            <HBox>
+                                                <Text
+                                                    text="{tasksModel>requestId}"
+                                                    class="sapUiTinyMarginEnd"
+                                                />
+                                                <ObjectStatus
+                                                    text="{tasksModel>type}"
+                                                    state="Information"
+                                                />
+                                            </HBox>
+                                            <Text
+                                                text="{tasksModel>subject}"
+                                                class="sapUiTinyMarginTop"
+                                            />
+                                            <Text
+                                                text="Submitted: {path: 'tasksModel>submittedDate', formatter: '.formatter.formatDate'}"
+                                                class="sapUiTinyMarginTop"
+                                            />
+                                            
+                                            <!-- Warning for Partially Rejected -->
+                                            <MessageStrip
+                                                text="Action Required: Some attachments were rejected. View details to see comments."
+                                                type="Warning"
+                                                showIcon="true"
+                                                visible="{= ${tasksModel>status} === 'PARTIALLY_REJECTED' }"
+                                                class="sapUiTinyMarginTop"
+                                            />
+                                        </VBox>
+                                    </HBox>
+                                    <VBox alignItems="End">
+                                        <ObjectStatus
+                                            text="{path: 'tasksModel>status', formatter: '.formatter.formatStatus'}"
+                                            state="{path: 'tasksModel>status', formatter: '.formatter.formatStatusState'}"
+                                        />
+                                        <Button
+                                            text="View Details"
+                                            type="Transparent"
+                                            press="onViewTaskDetails"
+                                            class="sapUiTinyMarginTop"
+                                        />
+                                        
+                                        <!-- Resubmit button for partially rejected tasks -->
+                                        <Button
+                                            text="Resubmit"
+                                            type="Emphasized"
+                                            icon="sap-icon://upload"
+                                            press="onResubmit"
+                                            visible="{= ${tasksModel>status} === 'PARTIALLY_REJECTED' }"
+                                            class="sapUiTinyMarginTop"
+                                        />
+                                    </VBox>
+                                </HBox>
+                            </CustomListItem>
+                        </List>
+                    </VBox>
+                </content>
+            </Page>
+        </detailPages>
+    </SplitApp>
+</mvc:View>
+

@@ -1,0 +1,197 @@
+<mvc:View
+    controllerName="taskManagement.controller.MainView"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    displayBlock="true"
+    height="100%"
+    busyIndicatorDelay="0"
+>
+    <SplitApp
+        id="managerSplitApp"
+        initialMaster="masterPage"
+        initialDetail="detailPage"
+        xmlns:data="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    >
+        <masterPages>
+            <Page id="masterPage">
+                <content>
+                    <FlexBox
+                        alignItems="Center"
+                        direction="Column"
+                        height="100%"
+                    >
+                        <core:Fragment
+                            fragmentName="taskManagement.view.fragments.Sidebar"
+                            type="XML"
+                        />
+                    </FlexBox>
+                </content>
+            </Page>
+        </masterPages>
+        <detailPages>
+            <Page id="detailPage">
+                <customHeader>
+                    <OverflowToolbar>
+                        <Button
+                            icon="sap-icon://nav-back"
+                            type="Transparent"
+                            press="onNavBack"
+                            visible="{pageModel>/navBackVisible}"
+                            class="sapUiHideOnDesktop sapUiHideOnTablet"
+                        />
+                        <ToolbarSpacer />
+                        <Title
+                            text="{i18n>pageTitle}"
+                            level="H2"
+                        />
+                        <ToolbarSpacer />
+                        <Avatar
+                            initials="Js"
+                            press="onUserInfoPress"
+                            displaySize="XS"
+                            backgroundColor="Accent6"
+                            tooltip="User Info"
+                        />
+                    </OverflowToolbar>
+                </customHeader>
+        <content>
+            <VBox class ="sapUiMediumMarginTop">
+                <!-- Search and Filter Bar -->
+                <Toolbar>
+                    <SearchField
+                        id="titleSearchField"
+                        width="30%"
+                        placeholder="Search by title"
+                        value="{filterModel>/titleQuery}"
+                        search="onSearch"
+                        liveChange="onSearch"/>
+                    <SearchField
+                        id="employeeSearchField"
+                        width="30%"
+                        placeholder="Search by employee name"
+                        value="{filterModel>/employeeQuery}"
+                        search="onSearch"
+                        liveChange="onSearch"
+                        class="sapUiSmallMarginBegin"/>
+                    <ToolbarSpacer/>
+                    <Select
+                        id="typeFilter"
+                        width="200px"
+                        selectedKey="{filterModel>/typeFilter}"
+                        change="onTypeFilter">
+                        <items>
+                            <core:Item key="all" text="All Types"/>
+                            <core:Item key="Travel" text="Travel"/>
+                            <core:Item key="Equipment" text="Equipment"/>
+                        </items>
+                    </Select>
+                </Toolbar>
+                
+                <!-- Table -->
+                <Table
+                    id="requestsTable"
+                    items="{/requests}"
+                    mode="None">
+                    <columns>
+                        <Column>
+                            <Text text="Title"/>
+                        </Column>
+                        <Column>
+                            <Text text="Type"/>
+                        </Column>
+                        <Column>
+                            <Text text="From"/>
+                        </Column>
+                        <Column width="3rem" hAlign="Center">
+                            <Text text="Files"/>
+                        </Column>
+                        <Column width="8rem" hAlign="Center">
+                            <Text text="Actions"/>
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem type="Active" press="onItemPress">
+                            <cells>
+                                <Text text="{title}"/>
+                                <ObjectStatus 
+                                    text="{type}"
+                                    state="{= ${type} === 'Travel' ? 'Success' : (${type} === 'Equipment' ? 'Information' : 'Warning')}"/>
+                                <Text text="{from}"/>
+                                <core:Icon
+                                    src="{= ${hasFiles} ? 'sap-icon://attachment' : 'sap-icon://document' }"
+                                    color="{= ${hasFiles} ? '#007bff' : '#6c757d' }"/>
+                                <HBox justifyContent="Center">
+                                    <Button
+                                        icon="sap-icon://accept"
+                                        type="Accept"
+                                        press="onApprove"
+                                        class="sapUiTinyMarginEnd"/>
+                                    <Button
+                                        icon="sap-icon://decline"
+                                        type="Reject"
+                                        press="onReject"/>
+                                </HBox>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+                
+                <!-- Request Detail Section (shown on click) -->
+<!-- Request Detail Section (shown on click) -->
+                <Panel 
+                    headerText="Request Details"
+                    expanded="{viewModel>/showDetail}"
+                    expandable="true"
+                    visible="{viewModel>/showDetail}"
+                    class="sapUiMediumMarginTop">
+                    <content>
+                        <!-- Request ID -->
+                        <VBox class="sapUiSmallMargin">
+                            <HBox class="sapUiSmallMarginBottom">
+                                <Label text="Request ID:" class="sapUiTinyMarginEnd"/>
+                                <Text text="{viewModel>/selectedRequest/requestId}" class="sapUiTinyMarginBegin"/>
+                            </HBox>
+                            
+                            <!-- Type and Status -->
+                            <HBox class="sapUiSmallMarginBottom">
+                                <Label text="Type:" class="sapUiTinyMarginEnd"/>
+                                <ObjectStatus 
+                                    text="{viewModel>/selectedRequest/type}"
+                                    state="{= ${viewModel>/selectedRequest/type} === 'Travel' ? 'Success' : 'Information'}"
+                                    class="sapUiTinyMarginBegin"/>
+                                <Label text="Status:" class="sapUiMediumMarginBegin"/>
+                                <ObjectStatus 
+                                    text="{viewModel>/selectedRequest/status}"
+                                    state="{= ${viewModel>/selectedRequest/status} === 'APPROVED' ? 'Success' : (${viewModel>/selectedRequest/status} === 'REJECTED' ? 'Error' : 'Warning')}"
+                                    class="sapUiTinyMarginBegin"/>
+                            </HBox>
+                            
+                            <!-- Submitted Date and From -->
+                            <HBox class="sapUiSmallMarginBottom">
+                                <Label text="From:" class="sapUiTinyMarginEnd"/>
+                                <Text text="{viewModel>/selectedRequest/from}" class="sapUiTinyMarginBegin"/>
+                            </HBox>
+                            
+                            <!-- View Details Button -->
+                            <HBox class="sapUiMediumMarginTop" justifyContent="Center">
+                                <Button
+                                    text="View Full Details"
+                                    type="Emphasized"
+                                    icon="sap-icon://detail-view"
+                                    press="onViewDetails"
+                                    class="sapUiTinyMargin"/>
+                                <Button
+                                    text="Close"
+                                    press="onCloseDetail"
+                                    class="sapUiTinyMarginBegin"/>
+                            </HBox>
+                        </VBox>
+                    </content>
+                </Panel>
+            </VBox>
+        </content>
+            </Page>
+        </detailPages>
+    </SplitApp>
+</mvc:View>

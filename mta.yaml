@@ -1,0 +1,33 @@
+_schema-version: "3.2"
+ID: com.TaskManagement.taskManagement
+version: 0.0.1
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm install
+        - npm run build:workspaces
+
+modules:
+  - name: com.TaskManagement.taskManagement-approuter
+    type: nodejs
+    path: approuter
+    requires:
+      - name: com.TaskManagement.taskManagement-destination-service
+    provides:
+      - name: approuter
+        properties:
+          callback-url: ${default-url}/login/callback
+    parameters:
+      disk-quota: 1024M
+      memory: 1024M
+
+resources:
+  - name: com.TaskManagement.taskManagement-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-name: com.TaskManagement.taskManagement-destination-service
+      service-plan: lite
+
