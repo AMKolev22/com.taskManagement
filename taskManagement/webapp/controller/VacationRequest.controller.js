@@ -85,7 +85,7 @@ sap.ui.define([
                         // );
 
                         oRequestModel.setProperty("/managers", aManagers);
-                        oRequestModel.setProperty("/substitutes", aManagers);
+                        oRequestModel.setProperty("/substitutes", aManagers );
                     }
                 })
         },
