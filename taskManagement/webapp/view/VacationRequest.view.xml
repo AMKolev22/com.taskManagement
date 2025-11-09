@@ -87,6 +87,7 @@
                                     required="true"
                                 />
                                 <Select
+                                    width="100%"
                                     id="vacationType"
                                     selectedKey="{requestModel>/vacationType}"
                                     valueState="{requestModel>/validation/vacationTypeState}"
@@ -102,7 +103,6 @@
                                             key="SICK_LEAVE"
                                             text="Sick Leave"
                                         />
-                                        <!-- Only Annual and Sick leave are selectable per requirement -->
                                     </items>
                                 </Select>
 
@@ -299,4 +299,3 @@
         </detailPages>
     </SplitApp>
 </mvc:View>
-
