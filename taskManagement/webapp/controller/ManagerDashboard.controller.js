@@ -37,28 +37,14 @@ sap.ui.define([
 
             const oFilterModel = Models.createManagerDashboardFilterModel();
             this.setModel(oFilterModel, "filterModel");
-            oFilterModel.attachPropertyChange(this._onFilterChange.bind(this), this);
+
 
             this.subscribeEvent("tasks", "taskSubmitted", this._onTaskSubmitted, this);
             this._loadTasks();
             this.oRouter.getRoute("managerDashboard").attachPatternMatched(this._onRouteMatched, this);
             
-            // Store table reference after view is loaded
-            this.attachViewLoaded();
         },
-
-        attachViewLoaded: function () {
-            const oView = this.getView();
-            if (oView && oView.byId) {
-                this._oPendingTasksTable = oView.byId("pendingTasksTable");
-            } else {
-                setTimeout(this.attachViewLoaded.bind(this), 100);
-            }
-        },
-
-        _onFilterChange: function () {
-            this._applyFilters();
-        },
+        
 
         onExit: function () {
             this.unsubscribeEvent("tasks", "taskSubmitted", this._onTaskSubmitted, this);
@@ -190,6 +176,7 @@ sap.ui.define([
             const oSearchField = oEvent.getSource();
             const sValue = oEvent.getParameter("query") || oSearchField.getValue();
             oFilterModel.setProperty("/searchQuery", sValue);
+            this._applyFilters();
         },
 
         onFilterChange: function (oEvent) {
@@ -206,10 +193,12 @@ sap.ui.define([
         },
 
         _applyFilters: function () {
-            if (!this._oPendingTasksTable) return;
+            let _oPendingTasksTable = this.getView().byId("pendingTasksTable");
+            if (!_oPendingTasksTable) return;
             
-            const oBinding = this._oPendingTasksTable.getBinding("items");
-            if (!oBinding) return;
+            const oBinding = _oPendingTasksTable.getBinding("items");
+            if (!oBinding) 
+                {return};
 
             const oFilterModel = this.getModel("filterModel");
             const sSearchQuery = oFilterModel.getProperty("/searchQuery") || "";
@@ -250,9 +239,6 @@ sap.ui.define([
         },
 
         onViewDetails: function (oEvent) {
-            // Stop event propagation to prevent row selection
-            oEvent.preventDefault();
-            
             const oButton = oEvent.getSource();
             const oListItem = this._getListItem(oButton);
             
@@ -271,7 +257,6 @@ sap.ui.define([
         },
 
         onQuickApprove: function (oEvent) {
-            oEvent.preventDefault();
             const oListItem = this._getListItem(oEvent.getSource());
             
             if (oListItem) {
@@ -283,7 +268,6 @@ sap.ui.define([
         },
 
         onQuickReject: function (oEvent) {
-            oEvent.preventDefault();
             const oListItem = this._getListItem(oEvent.getSource());
             
             if (oListItem) {

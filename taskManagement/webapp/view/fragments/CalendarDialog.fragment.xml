@@ -19,6 +19,7 @@
                     id="availabilityCalendar"
                     width="100%"
                     class="sapUiSmallMarginBottom"
+                    specialDates="{calendarModel>/availabilities}"
                 >
                     <unified:specialDates>
                         <unified:DateTypeRange

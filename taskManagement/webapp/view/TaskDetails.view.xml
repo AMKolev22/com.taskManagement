@@ -46,6 +46,25 @@
                             level="H2"
                         />
                         <ToolbarSpacer />
+                        <SegmentedButton
+                            visible="{detailModel>/isManager}"
+                            selectedKey="{detailModel>/viewMode}"
+                            selectionChange="onViewModeChange"
+                        >
+                            <items>
+                                <SegmentedButtonItem
+                                    key="USER"
+                                    text="User Mode"
+                                    icon="sap-icon://employee"
+                                />
+                                <SegmentedButtonItem
+                                    key="MANAGER"
+                                    text="Manager Mode"
+                                    icon="sap-icon://manager"
+                                />
+                            </items>
+                        </SegmentedButton>
+                        <ToolbarSpacer />
                         <Avatar
                             initials="Js"
                             press="onUserInfoPress"
@@ -265,7 +284,7 @@
                                         icon="sap-icon://decline"
                                         type="Transparent"
                                         press="onRejectCategory"
-                                        visible="{detailModel>/canApprove}">
+                                        visible="{= ${detailModel>/canApprove} &amp;&amp; ${detailModel>/viewMode} === 'MANAGER'}">
                                         <customData>
                                             <core:CustomData key="category" value="Food Costs"/>
                                         </customData>
@@ -275,7 +294,7 @@
                                         icon="sap-icon://decline"
                                         type="Transparent"
                                         press="onRejectCategory"
-                                        visible="{detailModel>/canApprove}">
+                                        visible="{= ${detailModel>/canApprove} &amp;&amp; ${detailModel>/viewMode} === 'MANAGER'}">
                                         <customData>
                                             <core:CustomData key="category" value="Travel Costs"/>
                                         </customData>
@@ -285,7 +304,7 @@
                                         icon="sap-icon://decline"
                                         type="Transparent"
                                         press="onRejectCategory"
-                                        visible="{detailModel>/canApprove}">
+                                        visible="{= ${detailModel>/canApprove} &amp;&amp; ${detailModel>/viewMode} === 'MANAGER'}">
                                         <customData>
                                             <core:CustomData key="category" value="Stay Costs"/>
                                         </customData>
@@ -333,7 +352,6 @@
                                         class="sapUiSmallMarginTop">
                                         <columns>
                                             <Column>
-                                                <Text text="Category"/>
                                                 <customData>
                                                     <core:CustomData key="p13nData" value='\{"sortProperty": "category", "filterProperty": "category"}'/>
                                                 </customData>
@@ -362,7 +380,7 @@
                                                     <core:CustomData key="p13nData" value='\{"sortProperty": "status", "filterProperty": "status"}'/>
                                                 </customData>
                                             </Column>
-                                            <Column hAlign="Center" width="10rem" visible="{detailModel>/canApprove}">
+                                            <Column hAlign="Center" width="10rem" visible="{= ${detailModel>/canApprove} &amp;&amp; ${detailModel>/viewMode} === 'MANAGER'}">
                                                 <Text text="Actions"/>
                                             </Column>
                                         </columns>
@@ -377,7 +395,7 @@
                                                     text="{path: 'detailModel>status', formatter: '.formatter.formatAttachmentStatus'}"
                                                     state="{= ${detailModel>status} === 'APPROVED' ? 'Success' : (${detailModel>status} === 'REJECTED' ? 'Error' : 'Warning')}"
                                                 />
-                                                <HBox justifyContent="Center" visible="{detailModel>/canApprove}">
+                                                <HBox justifyContent="Center" visible="{= ${detailModel>/canApprove} &amp;&amp; ${detailModel>/viewMode} === 'MANAGER'}">
                                                     <Button
                                                         icon="sap-icon://accept"
                                                         type="Accept"
@@ -406,12 +424,28 @@
                         <Panel 
                             headerText="Resubmit Rejected Attachments" 
                             expanded="true"
-                            visible="{= ${detailModel>/isOwner} &amp;&amp; (${detailModel>/status} === 'REJECTED' || ${detailModel>/status} === 'PARTIALLY_REJECTED')}"
-                            class="sapUiMediumMarginTop">
+                            visible="{= ${detailModel>/viewMode} === 'USER' &amp;&amp; ${detailModel>/isOwner} &amp;&amp; (${detailModel>/status} === 'REJECTED' || ${detailModel>/status} === 'PARTIALLY_REJECTED')}" class="sapUiMediumMarginTop">
+                            <headerToolbar>
+                                <Toolbar>
+                                    <Title text="Rejected Attachments" level="H4"/>
+                                    <ToolbarSpacer/>
+                                    <Select
+                                        id="rejectedCategoryFilter"
+                                        width="12rem"
+                                        selectedKey="{filterModel>/rejectedCategoryFilter}"
+                                        change="onRejectedCategoryFilterChange"
+                                        class="sapUiTinyMarginBegin">
+                                        <core:Item key="" text="All Categories"/>
+                                        <core:Item key="Food Costs" text="Food Costs"/>
+                                        <core:Item key="Travel Costs" text="Travel Costs"/>
+                                        <core:Item key="Stay Costs" text="Stay Costs"/>
+                                    </Select>
+                                </Toolbar>
+                            </headerToolbar>
                             <content>
                                 <VBox class="sapUiSmallMargin">
                                     <Text text="Please upload new files to replace the rejected attachments below:" class="sapUiSmallMarginBottom"/>
-                                    <Table items="{detailModel>/attachments}" noDataText="No rejected attachments" class="sapUiSmallMarginTop">
+                                    <Table id="rejectedAttachmentsTable" items="{detailModel>/attachments}" noDataText="No rejected attachments" class="sapUiSmallMarginTop">
                                         <columns>
                                             <Column>
                                                 <Text text="Category"/>
@@ -435,7 +469,18 @@
                                                     <Text text="{detailModel>category}"/>
                                                     <Text text="{detailModel>description}"/>
                                                     <Link text="{detailModel>fileName}" href="{detailModel>fileUrl}" target="_blank"/>
-                                                    <Text text="{detailModel>rejectionReason}" class="sapUiTinyMargin"/>
+                                                    <VBox class="sapUiTinyMargin">
+                                                        <Label
+                                                            text="Reason"
+                                                            visible="{= ${detailModel>rejectionReason} ? true : false}"
+                                                        />
+                                                        <Text
+                                                            text="{detailModel>rejectionReason}"
+                                                            wrapping="true"
+                                                            class="sapUiTinyMarginTop"
+                                                            visible="{= ${detailModel>rejectionReason} ? true : false}"
+                                                        />
+                                                    </VBox>
                                                     <unified:FileUploader
                                                         sameFilenameAllowed="true"
                                                         buttonText="Upload Replacement"
@@ -467,7 +512,7 @@
                                 type="Accept"
                                 icon="sap-icon://accept"
                                 press="onApproveAll"
-                                visible="{detailModel>/canApprove}"
+                                visible="{= ${detailModel>/canApprove} &amp;&amp; ${detailModel>/viewMode} === 'MANAGER'}"
                                 class="sapUiTinyMarginEnd"
                             />
                             <Button
@@ -475,7 +520,7 @@
                                 type="Reject"
                                 icon="sap-icon://decline"
                                 press="onRejectAll"
-                                visible="{detailModel>/canApprove}"
+                                visible="{= ${detailModel>/canApprove} &amp;&amp; ${detailModel>/viewMode} === 'MANAGER'}"
                                 class="sapUiTinyMarginEnd"
                             />
                             <Button
@@ -483,7 +528,7 @@
                                 type="Emphasized"
                                 icon="sap-icon://approvals"
                                 press="onPartialApprove"
-                                visible="{= ${detailModel>/canApprove} &amp;&amp; ${detailModel>/type} === 'Travel'}"
+                                visible="{= ${detailModel>/canApprove} &amp;&amp; ${detailModel>/type} === 'Travel' &amp;&amp; ${detailModel>/viewMode} === 'MANAGER'}"
                                 class="sapUiTinyMarginEnd"
                             />
                             
@@ -492,22 +537,21 @@
                                 text="Edit Request"
                                 icon="sap-icon://edit"
                                 press="onEditRequest"
-                                visible="{= ${detailModel>/isOwner} &amp;&amp; (${detailModel>/status} === 'PENDING_APPROVAL' || ${detailModel>/status} === 'PARTIALLY_REJECTED')}"
+                                visible="{= ${detailModel>/isOwner} &amp;&amp; (${detailModel>/status} === 'PENDING_APPROVAL' || ${detailModel>/status} === 'PARTIALLY_REJECTED') &amp;&amp; ${detailModel>/viewMode} === 'USER'}"
                                 class="sapUiTinyMarginEnd"
                             />
                             <Button
                                 text="Resubmit Request"
                                 icon="sap-icon://refresh"
-                                type="Emphasized"
-                                press="onEditRequest"
-                                visible="{= ${detailModel>/isOwner} &amp;&amp; ${detailModel>/status} === 'REJECTED'}"
+                                press="onResubmitRequestInline"
                                 class="sapUiTinyMarginEnd"
+                                visible="{= ${detailModel>/isOwner} &amp;&amp; (${detailModel>/status} === 'REJECTED' || ${detailModel>/status} === 'PARTIALLY_REJECTED') &amp;&amp; ${detailModel>/viewMode} === 'USER'}"
                             />
                             <Button
                                 text="Forward to Another Manager"
                                 icon="sap-icon://forward"
                                 press="onForwardRequest"
-                                visible="{= ${detailModel>/isOwner} || ${detailModel>/isManager}}"
+                                visible="{= (${detailModel>/viewMode} === 'USER' &amp;&amp; ${detailModel>/isOwner}) || (${detailModel>/viewMode} === 'MANAGER' &amp;&amp; ${detailModel>/isManager})}"
                                 class="sapUiTinyMarginEnd"
                             />
                         </HBox>

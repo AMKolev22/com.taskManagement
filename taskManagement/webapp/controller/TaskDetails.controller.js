@@ -3,13 +3,14 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
+    "sap/ui/model/Sorter",
     "sap/m/MessageBox",
     "sap/m/MessageToast",
     "taskManagement/controller/Base.controller",
     "taskManagement/model/models",
     "sap/ui/core/Fragment",
     "taskManagement/model/formatter"
-], function (Controller, JSONModel, Filter, FilterOperator, MessageBox, MessageToast, Base, Models, Fragment, formatter) {
+], function (Controller, JSONModel, Filter, FilterOperator, Sorter, MessageBox, MessageToast, Base, Models, Fragment, formatter) {
     "use strict";
 
     return Base.extend("taskManagement.controller.TaskDetails", {
@@ -37,6 +38,7 @@ sap.ui.define([
 
             const bIsManager = oCurrentUser.role === "MANAGER";
             oDetailModel.setProperty("/isManager", bIsManager);
+            oDetailModel.setProperty("/viewMode", bIsManager ? "MANAGER" : "USER");
             
             // Get the request ID from the route - this will be triggered on navigation AND on page reload
             const oRoute = this.oRouter.getRoute("taskDetails");
@@ -77,6 +79,7 @@ sap.ui.define([
             const oView = this.getView();
             if (oView && oView.byId) {
                 this._oAttachmentsTable = oView.byId("attachmentsTable");
+                this._oRejectedAttachmentsTable = oView.byId("rejectedAttachmentsTable");
             } else {
                 setTimeout(this.attachViewLoaded.bind(this), 100);
             }
@@ -84,6 +87,7 @@ sap.ui.define([
 
         _onFilterChange: function () {
             this._applyAttachmentFilters();
+            this._applyRejectedAttachmentFilters();
         },
 
         _applyAttachmentFilters: function () {
@@ -109,6 +113,32 @@ sap.ui.define([
 
             if (sStatusFilter) {
                 aFilters.push(new Filter("status", FilterOperator.EQ, sStatusFilter));
+            }
+
+            oBinding.filter(aFilters);
+        },
+
+        // Rejected attachments: filter by category (like expense section)
+        onRejectedCategoryFilterChange: function (oEvent) {
+            const oFilterModel = this.getModel("filterModel");
+            const sSelectedCategory = oEvent.getSource().getSelectedKey();
+            oFilterModel.setProperty("/rejectedCategoryFilter", sSelectedCategory);
+            this._applyRejectedAttachmentFilters();
+        },
+
+        _applyRejectedAttachmentFilters: function () {
+            if (!this._oRejectedAttachmentsTable) return;
+            const oBinding = this._oRejectedAttachmentsTable.getBinding("items");
+            if (!oBinding) return;
+
+            const oFilterModel = this.getModel("filterModel");
+            const sCategoryFilter = oFilterModel.getProperty("/rejectedCategoryFilter") || "";
+
+            const aFilters = [];
+            // Ensure we only display rejected
+            aFilters.push(new Filter("status", FilterOperator.EQ, "REJECTED"));
+            if (sCategoryFilter) {
+                aFilters.push(new Filter("category", FilterOperator.EQ, sCategoryFilter));
             }
 
             oBinding.filter(aFilters);
@@ -163,6 +193,8 @@ sap.ui.define([
             const bCanApprove = this.isManager() && oData.status === "PENDING_APPROVAL";
             const bIsOwner = oData.userId === oCurrentUser.userId;
 
+            const sCurrentViewMode = oDetailModel.getProperty("/viewMode") || (this.isManager() ? "MANAGER" : "USER");
+
             const oModelData = {
                 taskId: oData.id,
                 requestId: oData.requestId,
@@ -172,7 +204,8 @@ sap.ui.define([
                 isManager: this.isManager(),
                 canApprove: bCanApprove,
                 isOwner: bIsOwner,
-                comments: oData.comments || []
+                comments: oData.comments || [],
+                viewMode: sCurrentViewMode
             };
 
             if (sType === "Vacation") {
@@ -265,7 +298,62 @@ sap.ui.define([
             oDetailModel.setData(oModelData);
         },
 
-        onApproveAll: function () {
+        onViewModeChange: function (oEvent) {
+            var oItem = oEvent.getParameter("item") || oEvent.getParameter("button");
+            if (!oItem) {
+                return;
+            }
+            var sSelectedKey = oItem.getKey();
+            var oDetailModel = this.getModel("detailModel");
+            if (sSelectedKey === "MANAGER" && !oDetailModel.getProperty("/isManager")) {
+                return;
+            }
+            oDetailModel.setProperty("/viewMode", sSelectedKey);
+        },
+
+                onResubmitRequestInline: function () {
+            var oDetailModel = this.getModel("detailModel");
+            var sTaskId = oDetailModel.getProperty("/taskId");
+            var sType = oDetailModel.getProperty("/type");
+
+            var mEndpoints = {
+                "Vacation": "/vacation-requests/" + sTaskId + "/status",
+                "Travel": "/travel-requests/" + sTaskId + "/status",
+                "Equipment": "/equipment-requests/" + sTaskId + "/status"
+            };
+            var sEndpoint = mEndpoints[sType];
+            if (!sEndpoint) {
+                this.showError("error.unknownRequestType");
+                return;
+            }
+
+            var fnResubmit = function () {
+                this.setBusy(true);
+                this.callAPI(sEndpoint, "PATCH", { status: "PENDING_APPROVAL" })
+                    .then(function (oResponse) {
+                        this.setBusy(false);
+                        if (oResponse && oResponse.success) {
+                            this.showSuccess("success.requestResubmitted");
+                            this._loadTaskDetails(sTaskId, sType);
+                        } else {
+                            this.showError("error.resubmitFailed", [oResponse?.message || this.getText("error.unknownError")]);
+                        }
+                    }.bind(this))
+                    .catch(function (error) {
+                        this.setBusy(false);
+                        this.showError("error.resubmitFailed", [error && error.message ? error.message : this.getText("error.unknownError")]);
+                    }.bind(this));
+            }.bind(this);
+
+            sap.m.MessageBox.confirm(this.getText("confirm.resubmitRequest"), {
+                actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                onClose: function (sAction) {
+                    if (sAction === sap.m.MessageBox.Action.OK) {
+                        fnResubmit();
+                    }
+                }
+            });
+        },onApproveAll: function () {
             const oDetailModel = this.getModel("detailModel");
             const sTaskId = oDetailModel.getProperty("/taskId");
             const sType = oDetailModel.getProperty("/type");
@@ -414,14 +502,15 @@ sap.ui.define([
         },
 
         _showRejectAttachmentDialog: function (sPath, oAttachment, sTaskId, sType) {
-            const oTextArea = new sap.m.TextArea({
-                id: this.createId("rejectAttachmentReason"),
-                width: "100%",
-                rows: 3,
-                placeholder: this.getText("placeholder.rejectionReason")
-            });
-
+            // Create dialog only once and reuse it
             if (!this._rejectAttachmentDialog) {
+                const oTextArea = new sap.m.TextArea({
+                    id: this.createId("rejectAttachmentReason"),
+                    width: "100%",
+                    rows: 3,
+                    placeholder: this.getText("placeholder.rejectionReason")
+                });
+        
                 this._rejectAttachmentDialog = new sap.m.Dialog({
                     title: this.getText("error.rejectAttachmentTitle", [oAttachment.fileName]),
                     type: "Message",
@@ -435,8 +524,11 @@ sap.ui.define([
                         press: () => {
                             const sReason = oTextArea.getValue();
                             if (sReason && sReason.trim()) {
-                                this._updateExpenseStatus(sTaskId, sType, oAttachment, "REJECTED", sReason, sPath);
+                                // Get current context from dialog's custom data
+                                const oData = this._rejectAttachmentDialog.data();
+                                this._updateExpenseStatus(oData.taskId, oData.type, oData.attachment, "REJECTED", sReason, oData.path);
                                 this._rejectAttachmentDialog.close();
+                                oTextArea.setValue(""); // Clear for next use
                             } else {
                                 this.setFieldError(this.createId("rejectAttachmentReason"), true, "error.rejectionReasonRequired");
                             }
@@ -444,13 +536,28 @@ sap.ui.define([
                     }),
                     endButton: new sap.m.Button({
                         text: this.getText("button.cancel"),
-                        press: () => this._rejectAttachmentDialog.close()
+                        press: () => {
+                            this._rejectAttachmentDialog.close();
+                            oTextArea.setValue(""); // Clear on cancel
+                        }
                     })
                 });
                 this.getView().addDependent(this._rejectAttachmentDialog);
             }
             
+            // Store current context in dialog's custom data
+            this._rejectAttachmentDialog.data("path", sPath);
+            this._rejectAttachmentDialog.data("attachment", oAttachment);
+            this._rejectAttachmentDialog.data("taskId", sTaskId);
+            this._rejectAttachmentDialog.data("type", sType);
+            
+            // Update title and clear previous value
             this._rejectAttachmentDialog.setTitle(this.getText("error.rejectAttachmentTitle", [oAttachment.fileName]));
+            const oTextArea = sap.ui.getCore().byId(this.createId("rejectAttachmentReason"));
+            if (oTextArea) {
+                oTextArea.setValue("");
+            }
+            
             this._rejectAttachmentDialog.open();
         },
 
@@ -907,3 +1014,6 @@ sap.ui.define([
         }
     });
 });
+
+
+

@@ -35,7 +35,6 @@ sap.ui.define([
         attachViewLoaded: function () {
             const oView = this.getView();
             if (oView && oView.byId) {
-                this._oFileUploader = oView.byId("fileUploader");
                 this._oStartDatePicker = oView.byId("startDate");
                 this._oEndDatePicker = oView.byId("endDate");
                 this._oManagerSelect = oView.byId("managerSelect");
@@ -49,17 +48,18 @@ sap.ui.define([
 
         _onRouteMatched: function () {
             const oRequestModel = this.getModel("requestModel");
-            oRequestModel.setProperty("/vacationType", "ANNUAL_LEAVE");
-            oRequestModel.setProperty("/startDate", null);
-            oRequestModel.setProperty("/endDate", null);
-            oRequestModel.setProperty("/duration", "");
-            oRequestModel.setProperty("/managerId", "");
-            oRequestModel.setProperty("/substituteId", "");
-            oRequestModel.setProperty("/reason", "");
-            oRequestModel.setProperty("/paid", true);
-            oRequestModel.setProperty("/attachments", []);
-            oRequestModel.setProperty("/managerNotAvailable", false);
-            oRequestModel.setProperty("/substituteNotAvailable", false);
+            oRequestModel.setProperty("", {
+                "vacationType": "ANNUAL_LEAVE",
+                "startDate": null,
+                "endDate": null,
+                "duration": "",
+                "managerId": "",
+                "substituteId": "",
+                "reason": "",
+                "paid": true,
+                "managerNotAvailable": false,
+                "substituteNotAvailable": false,
+            })
             this._clearValidationStates();
         },
 
@@ -216,6 +216,12 @@ sap.ui.define([
             oRequestModel.setProperty("/validation/managerState", "None");
             oRequestModel.setProperty("/validation/managerMessage", "");
             this._checkAvailability();
+
+            // Load sidebar calendar for selected manager
+            const sManagerId = oRequestModel.getProperty("/managerId");
+            if (sManagerId) {
+                this._loadCalendarDataToView(sManagerId, "Manager Availability");
+            }
         },
 
         onSubstituteChange: function () {
@@ -285,61 +291,26 @@ sap.ui.define([
                 });
         },
 
+        _loadCalendarDataToView: function (sUserId, sTitle) {
+            this.callAPI(`/availability?userId=${sUserId}`, "GET")
+                .then((oResponse) => {
+                    if (oResponse.success && oResponse.data) {
+                        const oCalendarModel = Models.createCalendarModel(sTitle || "", sUserId, oResponse.data);
+                        this.getView().setModel(oCalendarModel, "calendarModel");
+                    }
+                })
+                .catch(() => {
+                    // Non-blocking
+                });
+        },
+
         onCloseCalendar: function () {
             if (this._oCalendarDialog) {
                 this._oCalendarDialog.close();
             }
         },
 
-        onFileChange: function (oEvent) {
-            const oRequestModel = this.getModel("requestModel");
-            const oFileUploader = this._oFileUploader || oEvent.getSource();
-            oRequestModel.setProperty("/canAddAttachment", !!oFileUploader.getValue());
-        },
-
-        onAddAttachment: function () {
-            const oRequestModel = this.getModel("requestModel");
-            const oFileUploader = this._oFileUploader;
-            if (!oFileUploader) return;
-            
-            const oFile = oFileUploader.oFileUpload.files[0];
-
-            if (!oFile) {
-                this.setFieldError(oFileUploader, true, "error.fileRequired");
-                return;
-            }
-
-            const aAttachments = oRequestModel.getProperty("/attachments");
-            aAttachments.push({
-                file: oFile,
-                fileName: oFile.name,
-                fileSize: this._formatFileSize(oFile.size),
-                fileType: oFile.type
-            });
-
-            oRequestModel.setProperty("/attachments", aAttachments);
-            oFileUploader.clear();
-            oRequestModel.setProperty("/canAddAttachment", false);
-            this.showSuccess("success.fileAddedSimple");
-        },
-
-        _formatFileSize: function (iBytes) {
-            if (iBytes < 1024) return `${iBytes} B`;
-            if (iBytes < 1024 * 1024) return `${(iBytes / 1024).toFixed(2)} KB`;
-            return `${(iBytes / (1024 * 1024)).toFixed(2)} MB`;
-        },
-
-        onDeleteAttachment: function (oEvent) {
-            const oListItem = oEvent.getSource().getParent().getParent();
-            const oContext = oListItem.getBindingContext("requestModel");
-            const iIndex = parseInt(oContext.getPath().split("/").pop());
-
-            const oRequestModel = this.getModel("requestModel");
-            const aAttachments = oRequestModel.getProperty("/attachments");
-            aAttachments.splice(iIndex, 1);
-            oRequestModel.setProperty("/attachments", aAttachments);
-            this.showSuccess("success.attachmentRemoved");
-        },
+        // Attachment handlers removed (no attachments on new Vacation requests)
 
         onSubmit: function () {
             const oRequestModel = this.getModel("requestModel");

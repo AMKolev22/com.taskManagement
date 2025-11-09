@@ -465,10 +465,10 @@ app.patch('/api/travel-requests/:id/status', async (req, res) => {
         const { id } = req.params;
         const { status, approvedBy, rejectionReason, attachments } = req.body;
 
-        if (!['APPROVED', 'REJECTED', 'PARTIALLY_REJECTED', 'CANCELLED'].includes(status)) {
+        if (!['APPROVED', 'REJECTED', 'PARTIALLY_REJECTED', 'PENDING_APPROVAL', 'CANCELLED'].includes(status)) {
             return res.status(400).json({
                 error: 'Invalid status',
-                message: 'Status must be APPROVED, REJECTED, PARTIALLY_REJECTED, or CANCELLED'
+                message: 'Status must be APPROVED, REJECTED, PARTIALLY_REJECTED, PENDING_APPROVAL, or CANCELLED'
             });
         }
 
@@ -482,6 +482,10 @@ app.patch('/api/travel-requests/:id/status', async (req, res) => {
             updateData.approvedDate = new Date();
         } else if (status === 'REJECTED' || status === 'PARTIALLY_REJECTED') {
             updateData.rejectionReason = rejectionReason;
+        } else if (status === 'PENDING_APPROVAL') {
+            updateData.rejectionReason = null;
+            updateData.approvedBy = null;
+            updateData.approvedDate = null;
         }
 
         // Handle attachment status updates for partial rejection (for travel expenses)
@@ -1168,10 +1172,10 @@ app.patch('/api/vacation-requests/:id/status', async (req, res) => {
         const { id } = req.params;
         const { status, approvedBy, rejectionReason, attachments } = req.body;
 
-        if (!['APPROVED', 'REJECTED', 'PARTIALLY_REJECTED', 'CANCELLED'].includes(status)) {
+        if (!['APPROVED', 'REJECTED', 'PARTIALLY_REJECTED', 'PENDING_APPROVAL', 'CANCELLED'].includes(status)) {
             return res.status(400).json({
                 error: 'Invalid status',
-                message: 'Status must be APPROVED, REJECTED, PARTIALLY_REJECTED, or CANCELLED'
+                message: 'Status must be APPROVED, REJECTED, PARTIALLY_REJECTED, PENDING_APPROVAL, or CANCELLED'
             });
         }
 
@@ -1185,6 +1189,10 @@ app.patch('/api/vacation-requests/:id/status', async (req, res) => {
             updateData.approvedDate = new Date();
         } else if (status === 'REJECTED' || status === 'PARTIALLY_REJECTED') {
             updateData.rejectionReason = rejectionReason;
+        } else if (status === 'PENDING_APPROVAL') {
+            updateData.rejectionReason = null;
+            updateData.approvedBy = null;
+            updateData.approvedDate = null;
         }
 
         // Handle attachment status updates for partial rejection
@@ -1534,10 +1542,10 @@ app.patch('/api/equipment-requests/:id/status', async (req, res) => {
         const { id } = req.params;
         const { status, approvedBy, rejectionReason, attachments } = req.body;
 
-        if (!['APPROVED', 'REJECTED', 'PARTIALLY_REJECTED', 'CANCELLED'].includes(status)) {
+        if (!['APPROVED', 'REJECTED', 'PARTIALLY_REJECTED', 'PENDING_APPROVAL', 'CANCELLED'].includes(status)) {
             return res.status(400).json({
                 error: 'Invalid status',
-                message: 'Status must be APPROVED, REJECTED, PARTIALLY_REJECTED, or CANCELLED'
+                message: 'Status must be APPROVED, REJECTED, PARTIALLY_REJECTED, PENDING_APPROVAL, or CANCELLED'
             });
         }
 
@@ -1551,6 +1559,10 @@ app.patch('/api/equipment-requests/:id/status', async (req, res) => {
             updateData.approvedDate = new Date();
         } else if (status === 'REJECTED' || status === 'PARTIALLY_REJECTED') {
             updateData.rejectionReason = rejectionReason;
+        } else if (status === 'PENDING_APPROVAL') {
+            updateData.rejectionReason = null;
+            updateData.approvedBy = null;
+            updateData.approvedDate = null;
         }
 
         // Handle equipment item updates for partial rejection
@@ -1768,3 +1780,5 @@ process.on('exit', (code) => {
     console.log('⏳ beforeExit triggered');
   });
   
+
+

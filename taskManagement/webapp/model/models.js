@@ -26,7 +26,8 @@ sap.ui.define([
                 comments: [],
                 totalCost: "",
                 isManager: false,
-                canApprove: false
+                canApprove: false,
+                viewMode: "USER"
             });
         },
 
@@ -120,13 +121,11 @@ sap.ui.define([
                 substituteId: "",
                 reason: "",
                 paid: true,
-                attachments: [],
                 managers: [],
                 substitutes: [],
                 minDate: new Date(), // Default to today for planned leave
                 managerNotAvailable: false,
                 substituteNotAvailable: false,
-                canAddAttachment: false,
                 showValidationMessage: false,
                 validationMessage: "",
                 validation: {
@@ -202,7 +201,8 @@ sap.ui.define([
             return new JSONModel({
                 descriptionQuery: "",
                 categoryFilter: "",
-                statusFilter: ""
+                statusFilter: "",
+                rejectedCategoryFilter: ""
             });
         }
     };

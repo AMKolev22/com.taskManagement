@@ -3,6 +3,7 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns:form="sap.ui.layout.form"
+    xmlns:unified="sap.ui.unified"
     xmlns="sap.m"
     displayBlock="true"
     height="100%"
@@ -24,6 +25,34 @@
                             fragmentName="taskManagement.view.fragments.Sidebar"
                             type="XML"
                         />
+
+                        <!-- Manager Availability Calendar (side panel) -->
+                        <Panel
+                            headerText="Manager Calendar"
+                            expandable="true"
+                            expanded="true"
+                            class="sapUiSmallMargin"
+                        >
+                            <content>
+                                <VBox class="sapUiSmallMargin">
+                                    <Text text="Unavailable dates are highlighted"/>
+                                    <unified:Calendar
+                                        width="100%"
+                                        class="sapUiSmallMarginTop"
+                                        specialDates="{calendarModel>/availabilities}"
+                                    >
+                                        <unified:specialDates>
+                                            <unified:DateTypeRange
+                                                startDate="{calendarModel>startDate}"
+                                                endDate="{calendarModel>endDate}"
+                                                type="Type01"
+                                                tooltip="{calendarModel>reason}"
+                                            />
+                                        </unified:specialDates>
+                                    </unified:Calendar>
+                                </VBox>
+                            </content>
+                        </Panel>
                     </FlexBox>
                 </content>
             </Page>
@@ -235,14 +264,14 @@
 
                                 <Label
                                     text="Paid Leave"
-                                    visible="{= ${requestModel>/vacationType} !== 'SICK_LEAVE' && ${requestModel>/vacationType} !== 'UNPAID_LEAVE'}"
+                                    visible="{= ${requestModel>/vacationType} !== 'SICK_LEAVE' &amp;&amp; ${requestModel>/vacationType} !== 'UNPAID_LEAVE'}"
                                 />
                                 <Switch
                                     id="paidSwitch"
                                     state="{requestModel>/paid}"
                                     customTextOn="Yes"
                                     customTextOff="No"
-                                    visible="{= ${requestModel>/vacationType} !== 'SICK_LEAVE' && ${requestModel>/vacationType} !== 'UNPAID_LEAVE'}"
+                                    visible="{= ${requestModel>/vacationType} !== 'SICK_LEAVE' &amp;&amp; ${requestModel>/vacationType} !== 'UNPAID_LEAVE'}"
                                     change="onPaidChange"
                                 />
 
@@ -262,61 +291,7 @@
                                     placeholder="Please provide a reason for your vacation request..."
                                 />
 
-                                <core:Title text="Attachments (Optional)" />
-
-                                <Label text="Upload Documents" />
-                                <VBox>
-                                    <FileUploader
-                                        id="fileUploader"
-                                        name="file"
-                                        uploadUrl="/api/upload"
-                                        change="onFileChange"
-                                        width="100%"
-                                        placeholder="Choose a file..."
-                                    />
-                                    <Button
-                                        text="Add Attachment"
-                                        icon="sap-icon://add"
-                                        press="onAddAttachment"
-                                        enabled="{requestModel>/canAddAttachment}"
-                                        class="sapUiTinyMarginTop"
-                                    />
-                                </VBox>
-
-                                <!-- Attachments List -->
-                                <Label text="Attached Files" />
-                                <List
-                                    id="attachmentsList"
-                                    items="{requestModel>/attachments}"
-                                    noDataText="No attachments added"
-                                >
-                                    <CustomListItem>
-                                        <HBox
-                                            justifyContent="SpaceBetween"
-                                            alignItems="Center"
-                                            width="100%"
-                                        >
-                                            <HBox alignItems="Center">
-                                                <core:Icon
-                                                    src="sap-icon://attachment"
-                                                    class="sapUiTinyMarginEnd"
-                                                />
-                                                <VBox>
-                                                    <Text text="{requestModel>fileName}" />
-                                                    <Text
-                                                        text="{requestModel>fileSize}"
-                                                        class="sapUiTinyMarginTop"
-                                                    />
-                                                </VBox>
-                                            </HBox>
-                                            <Button
-                                                icon="sap-icon://delete"
-                                                type="Transparent"
-                                                press="onDeleteAttachment"
-                                            />
-                                        </HBox>
-                                    </CustomListItem>
-                                </List>
+                                <!-- Attachments removed for new Vacation requests as per requirements -->
                             </form:content>
                         </form:SimpleForm>
 
