@@ -48,18 +48,22 @@ sap.ui.define([
 
         _onRouteMatched: function () {
             const oRequestModel = this.getModel("requestModel");
-            oRequestModel.setProperty("", {
-                "vacationType": "ANNUAL_LEAVE",
-                "startDate": null,
-                "endDate": null,
-                "duration": "",
-                "managerId": "",
-                "substituteId": "",
-                "reason": "",
-                "paid": true,
-                "managerNotAvailable": false,
-                "substituteNotAvailable": false,
-            })
+            // Preserve managers/substitutes lists
+            const aManagers = oRequestModel.getProperty("/managers") || [];
+            const aSubstitutes = oRequestModel.getProperty("/substitutes") || [];
+
+            oRequestModel.setProperty("/vacationType", "ANNUAL_LEAVE");
+            oRequestModel.setProperty("/startDate", null);
+            oRequestModel.setProperty("/endDate", null);
+            oRequestModel.setProperty("/duration", "");
+            oRequestModel.setProperty("/managerId", "");
+            oRequestModel.setProperty("/substituteId", "");
+            oRequestModel.setProperty("/reason", "");
+            oRequestModel.setProperty("/paid", true);
+            oRequestModel.setProperty("/managerNotAvailable", false);
+            oRequestModel.setProperty("/substituteNotAvailable", false);
+            oRequestModel.setProperty("/managers", aManagers);
+            oRequestModel.setProperty("/substitutes", aSubstitutes);
             this._clearValidationStates();
         },
 
@@ -70,15 +74,18 @@ sap.ui.define([
                 .then((oResponse) => {
                     if (oResponse.success && oResponse.data) {
                         const oRequestModel = this.getModel("requestModel");
+                        console.log("oResponse.data", oResponse.data);
+                        console.log(oResponse.data);
                         const aManagers = oResponse.data.filter((oUser) => 
-                            oUser.role === "MANAGER" && oUser.userId !== oCurrentUser.userId
+                            oUser.role === "MANAGER"
                         );
-                        const aSubstitutes = oResponse.data.filter((oUser) => 
-                            oUser.userId !== oCurrentUser.userId
-                        );
+                        console.log("aManagers", aManagers);  
+                        // const aSubstitutes = oResponse.data.filter((oUser) => 
+                        //     oUser.userId !== oCurrentUser.userId
+                        // );
 
                         oRequestModel.setProperty("/managers", aManagers);
-                        oRequestModel.setProperty("/substitutes", aSubstitutes);
+                        oRequestModel.setProperty("/substitutes", aManagers);
                     }
                 })
         },
@@ -93,11 +100,9 @@ sap.ui.define([
             oRequestModel.setProperty("/validation/vacationTypeMessage", "");
             
             // Set paid/unpaid logic based on vacation type
-            // SICK_LEAVE is always paid, others can be unpaid
+            // Sick Leave is always paid; Annual Leave uses current switch state
             if (sVacationType === "SICK_LEAVE") {
                 oRequestModel.setProperty("/paid", true);
-            } else if (sVacationType === "UNPAID_LEAVE") {
-                oRequestModel.setProperty("/paid", false);
             }
             
             // Update minDate based on vacation type
@@ -221,6 +226,8 @@ sap.ui.define([
             const sManagerId = oRequestModel.getProperty("/managerId");
             if (sManagerId) {
                 this._loadCalendarDataToView(sManagerId, "Manager Availability");
+                const oDSC = this.byId("vacationDSC");
+                if (oDSC) { oDSC.setShowSideContent(true); }
             }
         },
 
@@ -246,7 +253,10 @@ sap.ui.define([
                 return;
             }
 
-            this._showCalendar(sManagerId, "Manager");
+            // Show in side panel calendar
+            this._loadCalendarDataToView(sManagerId, "Manager Availability");
+            const oDSC = this.byId("vacationDSC");
+            if (oDSC) { oDSC.setShowSideContent(true); }
         },
 
         onViewSubstituteCalendar: function () {
@@ -308,6 +318,8 @@ sap.ui.define([
             if (this._oCalendarDialog) {
                 this._oCalendarDialog.close();
             }
+            const oDSC = this.byId("vacationDSC");
+            if (oDSC) { oDSC.setShowSideContent(false); }
         },
 
         // Attachment handlers removed (no attachments on new Vacation requests)
@@ -399,24 +411,23 @@ sap.ui.define([
         },
 
         _isPlannedLeaveType: function (sVacationType) {
-            // Planned leave types that cannot start in the past
-            return sVacationType === "ANNUAL_LEAVE" || 
-                   sVacationType === "UNPAID_LEAVE" || 
-                   sVacationType === "PARENTAL_LEAVE";
+            // Only Annual Leave is considered planned in this form
+            return sVacationType === "ANNUAL_LEAVE";
         },
 
         _requiresSubstitute: function (sVacationType, sStartDate, sEndDate) {
-            // Substitute is required for planned leave types when duration > 3 days
-            if (!this._isPlannedLeaveType(sVacationType)) {
-                return false;
-            }
-
+            // Sick Leave: require substitute only if duration > 3 days
             if (!sStartDate || !sEndDate) {
                 return false;
             }
 
             const iDurationDays = formatter.calculateDurationDays(sStartDate, sEndDate);
-            return iDurationDays > 3;
+            if (sVacationType === "SICK_LEAVE") {
+                return iDurationDays > 3;
+            }
+
+            // Annual Leave: manager only by default
+            return false;
         },
 
         _updateSubstituteRequirement: function () {

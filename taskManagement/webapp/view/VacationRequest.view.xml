@@ -4,6 +4,7 @@
     xmlns:core="sap.ui.core"
     xmlns:form="sap.ui.layout.form"
     xmlns:unified="sap.ui.unified"
+    xmlns:layout="sap.ui.layout"
     xmlns="sap.m"
     displayBlock="true"
     height="100%"
@@ -17,42 +18,15 @@
             <Page id="masterPage">
                 <content>
                     <FlexBox
-                        alignItems="Center"
+                        alignItems="Stretch"
                         direction="Column"
-                        height="100%"
                     >
                         <core:Fragment
                             fragmentName="taskManagement.view.fragments.Sidebar"
                             type="XML"
                         />
 
-                        <!-- Manager Availability Calendar (side panel) -->
-                        <Panel
-                            headerText="Manager Calendar"
-                            expandable="true"
-                            expanded="true"
-                            class="sapUiSmallMargin"
-                        >
-                            <content>
-                                <VBox class="sapUiSmallMargin">
-                                    <Text text="Unavailable dates are highlighted"/>
-                                    <unified:Calendar
-                                        width="100%"
-                                        class="sapUiSmallMarginTop"
-                                        specialDates="{calendarModel>/availabilities}"
-                                    >
-                                        <unified:specialDates>
-                                            <unified:DateTypeRange
-                                                startDate="{calendarModel>startDate}"
-                                                endDate="{calendarModel>endDate}"
-                                                type="Type01"
-                                                tooltip="{calendarModel>reason}"
-                                            />
-                                        </unified:specialDates>
-                                    </unified:Calendar>
-                                </VBox>
-                            </content>
-                        </Panel>
+                        
                     </FlexBox>
                 </content>
             </Page>
@@ -75,7 +49,9 @@
                     </OverflowToolbar>
                 </customHeader>
                 <content>
-                    <VBox class="sapUiMediumMargin">
+                    <layout:DynamicSideContent id="vacationDSC" containerQuery="true" sideContentFallDown="OnMinimumWidth" showSideContent="false">
+                        <layout:mainContent>
+                            <VBox class="sapUiMediumMargin">
                         <!-- Validation Message Strip -->
                         <MessageStrip
                             id="validationMessageStrip"
@@ -91,20 +67,20 @@
                             id="vacationRequestForm"
                             editable="true"
                             layout="ResponsiveGridLayout"
-                            labelSpanXL="4"
-                            labelSpanL="4"
-                            labelSpanM="4"
+                            labelSpanXL="12"
+                            labelSpanL="12"
+                            labelSpanM="12"
                             labelSpanS="12"
                             emptySpanXL="0"
                             emptySpanL="0"
                             emptySpanM="0"
                             emptySpanS="0"
-                            columnsXL="2"
-                            columnsL="2"
+                            columnsXL="1"
+                            columnsL="1"
                             columnsM="1"
                         >
                             <form:content>
-                                <core:Title text="Vacation Information" />
+                                <core:Title text="Leave Information" />
 
                                 <Label
                                     text="Vacation Type"
@@ -126,18 +102,7 @@
                                             key="SICK_LEAVE"
                                             text="Sick Leave"
                                         />
-                                        <core:Item
-                                            key="UNPAID_LEAVE"
-                                            text="Unpaid Leave"
-                                        />
-                                        <core:Item
-                                            key="PARENTAL_LEAVE"
-                                            text="Parental Leave"
-                                        />
-                                        <core:Item
-                                            key="OTHER"
-                                            text="Other"
-                                        />
+                                        <!-- Only Annual and Sick leave are selectable per requirement -->
                                     </items>
                                 </Select>
 
@@ -152,6 +117,7 @@
                                     valueStateText="{requestModel>/validation/startDateMessage}"
                                     change="onDateChange"
                                     minDate="{requestModel>/minDate}"
+                                    width="100%"
                                 />
 
                                 <Label
@@ -165,6 +131,7 @@
                                     valueStateText="{requestModel>/validation/endDateMessage}"
                                     change="onDateChange"
                                     minDate="{requestModel>/startDate}"
+                                    width="100%"
                                 />
 
                                 <Label text="Duration" />
@@ -179,10 +146,10 @@
                                     text="Manager"
                                     required="true"
                                 />
-                                <HBox alignItems="Center">
+                                <HBox alignItems="Center" width="100%">
                                     <Select
                                         id="managerSelect"
-                                        width="80%"
+                                        width="100%"
                                         selectedKey="{requestModel>/managerId}"
                                         valueState="{requestModel>/validation/managerState}"
                                         valueStateText="{requestModel>/validation/managerMessage}"
@@ -193,6 +160,9 @@
                                             key="{requestModel>userId}"
                                             text="{requestModel>firstName} {requestModel>lastName} ({requestModel>department})"
                                         />
+                                        <layoutData>
+                                            <FlexItemData growFactor="1"/>
+                                        </layoutData>
                                     </Select>
                                     <Button
                                         icon="sap-icon://calendar"
@@ -216,13 +186,14 @@
                                 />
                                 <HBox 
                                     alignItems="Center"
+                                    width="100%"
                                     visible="{
                                         parts: ['requestModel>/vacationType', 'requestModel>/startDate', 'requestModel>/endDate'],
                                         formatter: '.formatShowSubstitute'
                                     }">
                                     <Select
                                         id="substituteSelect"
-                                        width="80%"
+                                        width="100%"
                                         selectedKey="{requestModel>/substituteId}"
                                         valueState="{requestModel>/validation/substituteState}"
                                         valueStateText="{requestModel>/validation/substituteMessage}"
@@ -233,6 +204,9 @@
                                             key="{requestModel>userId}"
                                             text="{requestModel>firstName} {requestModel>lastName} ({requestModel>department})"
                                         />
+                                        <layoutData>
+                                            <FlexItemData growFactor="1"/>
+                                        </layoutData>
                                     </Select>
                                     <Button
                                         icon="sap-icon://calendar"
@@ -264,14 +238,13 @@
 
                                 <Label
                                     text="Paid Leave"
-                                    visible="{= ${requestModel>/vacationType} !== 'SICK_LEAVE' &amp;&amp; ${requestModel>/vacationType} !== 'UNPAID_LEAVE'}"
                                 />
                                 <Switch
                                     id="paidSwitch"
                                     state="{requestModel>/paid}"
                                     customTextOn="Yes"
                                     customTextOff="No"
-                                    visible="{= ${requestModel>/vacationType} !== 'SICK_LEAVE' &amp;&amp; ${requestModel>/vacationType} !== 'UNPAID_LEAVE'}"
+                                    enabled="{= ${requestModel>/vacationType} === 'ANNUAL_LEAVE'}"
                                     change="onPaidChange"
                                 />
 
@@ -296,23 +269,31 @@
                         </form:SimpleForm>
 
                         <!-- Action Buttons -->
-                        <HBox
-                            justifyContent="End"
-                            class="sapUiMediumMarginTop"
-                        >
-                            <Button
-                                text="Cancel"
-                                press="onCancel"
-                                class="sapUiTinyMarginEnd"
-                            />
-                            <Button
-                                text="Submit Request"
-                                type="Emphasized"
-                                press="onSubmit"
-                                icon="sap-icon://paper-plane"
-                            />
+                        <HBox justifyContent="End" class="sapUiMediumMarginTop">
+                            <Button text="Cancel" press="onCancel" class="sapUiTinyMarginEnd"/>
+                            <Button text="Submit Request" type="Emphasized" press="onSubmit" icon="sap-icon://paper-plane"/>
                         </HBox>
-                    </VBox>
+                            </VBox>
+                        </layout:mainContent>
+                        <layout:sideContent>
+                            <Panel headerText="Manager Availability" class="sapUiMediumMargin">
+                                <headerToolbar>
+                                    <Toolbar>
+                                        <Title text="Manager Availability"/>
+                                        <ToolbarSpacer/>
+                                        <Button icon="sap-icon://decline" type="Transparent" tooltip="Close" press="onCloseCalendar"/>
+                                    </Toolbar>
+                                </headerToolbar>
+                                <content>
+                                    <unified:Calendar width="100%" class="sapUiSmallMarginTop" specialDates="{calendarModel>/availabilities}">
+                                        <unified:specialDates>
+                                            <unified:DateTypeRange startDate="{calendarModel>startDate}" endDate="{calendarModel>endDate}" type="Type01" tooltip="{calendarModel>reason}"/>
+                                        </unified:specialDates>
+                                    </unified:Calendar>
+                                </content>
+                            </Panel>
+                        </layout:sideContent>
+                    </layout:DynamicSideContent>
                 </content>
             </Page>
         </detailPages>
