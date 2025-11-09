@@ -85,7 +85,7 @@ sap.ui.define([
                         // );
 
                         oRequestModel.setProperty("/managers", aManagers);
-                        oRequestModel.setProperty("/substitutes", aManagers );
+                        oRequestModel.setProperty("/substitutes", aManagers);
                     }
                 })
         },
@@ -221,14 +221,6 @@ sap.ui.define([
             oRequestModel.setProperty("/validation/managerState", "None");
             oRequestModel.setProperty("/validation/managerMessage", "");
             this._checkAvailability();
-
-            // Load sidebar calendar for selected manager
-            const sManagerId = oRequestModel.getProperty("/managerId");
-            if (sManagerId) {
-                this._loadCalendarDataToView(sManagerId, "Manager Availability");
-                const oDSC = this.byId("vacationDSC");
-                if (oDSC) { oDSC.setShowSideContent(true); }
-            }
         },
 
         onSubstituteChange: function () {
@@ -244,7 +236,7 @@ sap.ui.define([
             oRequestModel.setProperty("/paid", bState);
         },
 
-        onViewManagerCalendar: function () {
+        onViewManagerCalendar: function (oEvent) {
             const oRequestModel = this.getModel("requestModel");
             const sManagerId = oRequestModel.getProperty("/managerId");
             
@@ -253,13 +245,11 @@ sap.ui.define([
                 return;
             }
 
-            // Show in side panel calendar
-            this._loadCalendarDataToView(sManagerId, "Manager Availability");
-            const oDSC = this.byId("vacationDSC");
-            if (oDSC) { oDSC.setShowSideContent(true); }
+            // Load into side panel so the form stays interactive
+            this._showCalendar(sManagerId, "Manager", oEvent && oEvent.getSource());
         },
 
-        onViewSubstituteCalendar: function () {
+        onViewSubstituteCalendar: function (oEvent) {
             const oRequestModel = this.getModel("requestModel");
             const sSubstituteId = oRequestModel.getProperty("/substituteId");
             
@@ -268,23 +258,27 @@ sap.ui.define([
                 return;
             }
 
-            this._showCalendar(sSubstituteId, "Substitute");
+            this._showCalendar(sSubstituteId, "Substitute", oEvent && oEvent.getSource());
         },
 
-        _showCalendar: function (sUserId, sTitle) {
-            if (!this._oCalendarDialog) {
+        _showCalendar: function (sUserId, sTitle, oOpenBy) {
+            if (!this._oCalendarPopover) {
                 Fragment.load({
                     name: "taskManagement.view.fragments.CalendarDialog",
                     controller: this
-                }).then((oDialog) => {
-                    this._oCalendarDialog = oDialog;
-                    this.getView().addDependent(oDialog);
+                }).then((oPopover) => {
+                    this._oCalendarPopover = oPopover;
+                    this.getView().addDependent(oPopover);
                     this._loadCalendarData(sUserId, sTitle);
-                    this._oCalendarDialog.open();
+                    if (oOpenBy && this._oCalendarPopover.openBy) {
+                        this._oCalendarPopover.openBy(oOpenBy);
+                    }
                 });
             } else {
                 this._loadCalendarData(sUserId, sTitle);
-                this._oCalendarDialog.open();
+                if (oOpenBy && this._oCalendarPopover.openBy) {
+                    this._oCalendarPopover.openBy(oOpenBy);
+                }
             }
         },
 
@@ -293,7 +287,9 @@ sap.ui.define([
                 .then((oResponse) => {
                     if (oResponse.success && oResponse.data) {
                         const oCalendarModel = Models.createCalendarModel(`${sTitle} Availability`, sUserId, oResponse.data);
-                        this._oCalendarDialog.setModel(oCalendarModel, "calendarModel");
+                        if (this._oCalendarPopover) {
+                            this._oCalendarPopover.setModel(oCalendarModel, "calendarModel");
+                        }
                     }
                 })
                 .catch(() => {
@@ -315,8 +311,8 @@ sap.ui.define([
         },
 
         onCloseCalendar: function () {
-            if (this._oCalendarDialog) {
-                this._oCalendarDialog.close();
+            if (this._oCalendarPopover && this._oCalendarPopover.close) {
+                this._oCalendarPopover.close();
             }
             const oDSC = this.byId("vacationDSC");
             if (oDSC) { oDSC.setShowSideContent(false); }

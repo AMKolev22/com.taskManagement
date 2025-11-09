@@ -3,10 +3,12 @@
     xmlns:core="sap.ui.core"
     xmlns:unified="sap.ui.unified"
 >
-    <Dialog
+    <Popover
         title="{calendarModel>/title}"
+        placement="Auto"
         contentWidth="600px"
         contentHeight="500px"
+        modal="false"
     >
         <content>
             <VBox class="sapUiSmallMargin">
@@ -51,12 +53,15 @@
                 </Panel>
             </VBox>
         </content>
-        <buttons>
-            <Button
-                text="Close"
-                press="onCloseCalendar"
-            />
-        </buttons>
-    </Dialog>
+        <footer>
+            <Toolbar>
+                <ToolbarSpacer />
+                <Button
+                    text="Close"
+                    press="onCloseCalendar"
+                />
+            </Toolbar>
+        </footer>
+    </Popover>
 </core:FragmentDefinition>
 
