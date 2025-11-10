@@ -135,6 +135,7 @@
                                 <Column
                                     width="10rem"
                                     hAlign="Center"
+                                    visible="{dashboardModel>/hasPending}"
                                 >
                                     <Text text="{i18n>column.actions}" />
                                 </Column>
@@ -158,7 +159,7 @@
                                             text="{path: 'dashboardModel>status', formatter: '.formatter.formatStatus'}"
                                             state="{path: 'dashboardModel>status', formatter: '.formatter.formatStatusState'}"
                                         />
-                                        <HBox justifyContent="Center">
+                                        <HBox justifyContent="Center" visible="{= ${dashboardModel>status} === 'PENDING_APPROVAL' }">
                                             <Button icon="sap-icon://detail-view" type="Transparent" tooltip="{i18n>tooltip.viewDetails}" press="onViewDetails" class="sapUiTinyMarginEnd"/>
                                             <Button
                                                 icon="sap-icon://accept"

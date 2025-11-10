@@ -211,6 +211,7 @@ sap.ui.define([
             });
 
             oDash.setProperty("/filteredTasks", aFiltered);
+            oDash.setProperty("/hasPending", aFiltered.some(function (t) { return t.status === "PENDING_APPROVAL"; }));
         },
 
         onTaskPress: function (oEvent) {
@@ -280,7 +281,6 @@ sap.ui.define([
             this.callAPI(sEndpoint, "PATCH", oData)
                 .then(() => {
                     this.showSuccess("success.requestApproved", [sStatus.toLowerCase()]);
-                    // Notify other parts of the app (e.g., MyTasks, UserDashboard)
                     this.publishEvent("tasks", "taskUpdated", {
                         taskId: oTask.id,
                         type: oTask.type,
