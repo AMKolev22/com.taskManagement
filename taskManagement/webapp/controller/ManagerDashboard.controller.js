@@ -280,6 +280,12 @@ sap.ui.define([
             this.callAPI(sEndpoint, "PATCH", oData)
                 .then(() => {
                     this.showSuccess("success.requestApproved", [sStatus.toLowerCase()]);
+                    // Notify other parts of the app (e.g., MyTasks, UserDashboard)
+                    this.publishEvent("tasks", "taskUpdated", {
+                        taskId: oTask.id,
+                        type: oTask.type,
+                        status: sStatus
+                    });
                     this._loadTasks();
                 })
                 .catch(() => {
