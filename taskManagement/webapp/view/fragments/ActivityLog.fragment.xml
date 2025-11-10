@@ -53,6 +53,7 @@
 
                 <!-- Activity Feed -->
                 <List
+                    class="activityLogList"
                     id="activityFeedList"
                     items="{dashboardModel>/activities}"
                     growing="true"

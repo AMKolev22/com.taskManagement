@@ -97,7 +97,7 @@
                                     <items>
                                         <core:Item
                                             key="ANNUAL_LEAVE"
-                                            text="Annual Leave"
+                                            text="Planned Leave"
                                         />
                                         <core:Item
                                             key="SICK_LEAVE"

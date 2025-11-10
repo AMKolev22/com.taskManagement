@@ -123,7 +123,7 @@ sap.ui.define([
             }
             
             const typeMap = {
-                "ANNUAL_LEAVE": "Annual Leave",
+                "ANNUAL_LEAVE": "Planned Leave",
                 "SICK_LEAVE": "Sick Leave",
                 "UNPAID_LEAVE": "Unpaid Leave",
                 "PARENTAL_LEAVE": "Parental Leave",
