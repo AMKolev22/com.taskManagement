@@ -27,7 +27,7 @@
             </Page>
         </masterPages>
         <detailPages>
-            <Page title="Equipment Request" class="sapUiContentPadding">
+            <Page title="{i18n>title.equipmentRequest}" class="sapUiContentPadding">
                     <customHeader>
                         <OverflowToolbar>
                             <Button
@@ -43,13 +43,7 @@
                                 level="H2"
                             />
                             <ToolbarSpacer />
-                            <Avatar
-                                initials="Js"
-                                press="onUserInfoPress"
-                                displaySize="XS"
-                                backgroundColor="Accent6"
-                                tooltip="User Info"
-                            />
+                            <Avatar initials="Js" press="onUserInfoPress" displaySize="XS" backgroundColor="Accent6" tooltip="{i18n>text.userInfo}"/>
                         </OverflowToolbar>
                     </customHeader>
                 <content>
@@ -65,15 +59,15 @@
                         />
                         
                         <!-- Form Title -->
-                        <Title text="Equipment Request" class="sapUiMediumMarginBottom"/>
+                        <Title text="{i18n>title.equipmentRequest}" class="sapUiMediumMarginBottom"/>
                         <!-- Selected Items Table -->
                         <VBox class="sapUiMediumMarginTop">
                         <HBox
                                 alignItems="Center"
                                 class="sapUiSmallMarginBottom">
-                                <Title text="Select Equipment" level="H4"/>
+                                <Title text="{i18n>title.selectEquipment}" level="H4"/>
                                 <Button
-                                    text="Add"
+                                    text="{i18n>button.add}"
                                     icon="sap-icon://add"
                                     press="onOpenCatalogDialog"
                                     class="sapUiSmallMarginBegin"
@@ -87,20 +81,20 @@
                                     <Column
                                         minScreenWidth="Phone"
                                         demandPopin="true">
-                                        <Text text="Type"/>
+                                        <Text text="{i18n>column.type}"/>
                                     </Column>
 
                                     <Column
                                         minScreenWidth="Tablet"
                                         demandPopin="false">
-                                        <Text text="Name"/>
+                                        <Text text="{i18n>label.name}"/>
                                     </Column>
 
                                     <Column
                                         minScreenWidth="Tablet"
                                         hAlign="End"
                                         demandPopin="true">
-                                        <Text text="Cost"/>
+                                        <Text text="{i18n>label.cost}"/>
                                     </Column>
 
                                     <Column
@@ -230,7 +224,7 @@
                                     icon="{= ${/sortBy} === 'name' ? (${/sortOrder} === 'asc' ? 'sap-icon://sort-ascending' : 'sap-icon://sort-descending') : 'sap-icon://sort'}"
                                     type="Transparent"
                                     press="onSortByName"
-                                    tooltip="Sort by Name"/>
+                                    tooltip="{i18n>tooltip.sortByName}"/>
                             </HBox>
                         </Column>
                         <Column width="10em" hAlign="End">
@@ -240,14 +234,14 @@
                                     icon="{= ${/sortBy} === 'cost' ? (${/sortOrder} === 'asc' ? 'sap-icon://sort-ascending' : 'sap-icon://sort-descending') : 'sap-icon://sort'}"
                                     type="Transparent"
                                     press="onSortByCost"
-                                    tooltip="Sort by Cost"/>
+                                    tooltip="{i18n>tooltip.sortByCost}"/>
                             </HBox>
                         </Column>
                         <Column width="10em" hAlign="Center">
-                            <Text text="Amount"/>
+                            <Text text="{i18n>label.amount}"/>
                         </Column>
                         <Column minScreenWidth="Tablet" demandPopin="true">
-                            <Text text="Reason"/>
+                            <Text text="{i18n>label.reason}"/>
                         </Column>
                     </columns>
                     <items>
@@ -263,9 +257,7 @@
                                     textAlign="Center"
                                     min="1"
                                     max="999"/>
-                                <Input
-                                    value="{reason}"
-                                    placeholder="Enter reason..."/>
+                                <Input value="{reason}" placeholder="{i18n>placeholder.reasonEquipment}"/>
                             </cells>
                         </ColumnListItem>
                     </items>
@@ -273,15 +265,10 @@
             </VBox>
         </content>
         <beginButton>
-            <Button
-                text="Add Selected"
-                type="Emphasized"
-                press="onAddSelectedItems"/>
+            <Button text="{i18n>button.addSelected}" type="Emphasized" press="onAddSelectedItems"/>
         </beginButton>
         <endButton>
-            <Button
-                text="Cancel"
-                press="onCloseCatalogDialog"/>
+            <Button text="{i18n>button.cancel}" press="onCloseCatalogDialog"/>
         </endButton>
     </Dialog>
 </mvc:View>

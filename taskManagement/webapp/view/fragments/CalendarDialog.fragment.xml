@@ -12,10 +12,7 @@
     >
         <content>
             <VBox class="sapUiSmallMargin">
-                <Text
-                    text="Unavailable dates are highlighted in red"
-                    class="sapUiSmallMarginBottom"
-                />
+                <Text text="{i18n>calendar.unavailableHint}" class="sapUiSmallMarginBottom"/>
                 
                 <unified:Calendar
                     id="availabilityCalendar"
@@ -34,14 +31,11 @@
                 </unified:Calendar>
 
                 <Panel
-                    headerText="Unavailability Details"
+                    headerText="{i18n>calendar.detailsTitle}"
                     expandable="true"
                     expanded="true"
                 >
-                    <List
-                        items="{calendarModel>/availabilities}"
-                        noDataText="No unavailable dates"
-                    >
+                    <List items="{calendarModel>/availabilities}" noDataText="{i18n>calendar.noUnavailable}">
                         <StandardListItem
                             title="{path: 'calendarModel>startDate', formatter: '.formatter.formatDate'} - {path: 'calendarModel>endDate', formatter: '.formatter.formatDate'}"
                             description="{calendarModel>reason}"
@@ -56,10 +50,7 @@
         <footer>
             <Toolbar>
                 <ToolbarSpacer />
-                <Button
-                    text="Close"
-                    press="onCloseCalendar"
-                />
+                <Button text="{i18n>button.close}" press="onCloseCalendar"/>
             </Toolbar>
         </footer>
     </Popover>

@@ -3,11 +3,11 @@
     xmlns:core="sap.ui.core">
     <Dialog
         id="forwardDialog"
-        title="Forward to Another Manager"
+        title="{i18n>dialog.titleForward}"
         contentWidth="400px">
         <content>
             <VBox class="sapUiSmallMargin">
-                <Label text="Select Manager" required="true" labelFor="managerSelect"/>
+                <Label text="{i18n>label.selectManager}" required="true" labelFor="managerSelect"/>
                 <Select
                     id="managerSelect"
                     width="100%"
@@ -19,15 +19,10 @@
             </VBox>
         </content>
         <beginButton>
-            <Button
-                text="Forward"
-                type="Emphasized"
-                press="onForwardConfirm"/>
+            <Button text="{i18n>button.forward}" type="Emphasized" press="onForwardConfirm"/>
         </beginButton>
         <endButton>
-            <Button
-                text="Cancel"
-                press="onForwardCancel"/>
+            <Button text="{i18n>button.cancel}" press="onForwardCancel"/>
         </endButton>
     </Dialog>
 </core:FragmentDefinition>

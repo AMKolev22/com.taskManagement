@@ -46,13 +46,7 @@
                             level="H2"
                         />
                         <ToolbarSpacer />
-                        <Avatar
-                            initials="Js"
-                            press="onUserInfoPress"
-                            displaySize="XS"
-                            backgroundColor="Accent6"
-                            tooltip="User Info"
-                        />
+                        <Avatar initials="Js" press="onUserInfoPress" displaySize="XS" backgroundColor="Accent6" tooltip="{i18n>text.userInfo}"/>
                     </OverflowToolbar>
                 </customHeader>
                 <content>
@@ -69,7 +63,7 @@
                         />
                         
                         <!-- Basic Information Section -->
-                        <Panel headerText="Travel Information">
+                        <Panel headerText="{i18n>section.travelInformation}">
                             <f:SimpleForm
                                 editable="true"
                                 layout="ResponsiveGridLayout"
@@ -85,21 +79,21 @@
                                 columnsL="1"
                                 columnsM="1">
                                 <f:content>
-                                    <Label text="Destination" required="true"/>
+                                    <Label text="{i18n>label.destination}" required="true"/>
                                     <Input 
                                         id="destinationInput"
                                         value="{/destination}" 
-                                        placeholder="Enter destination city/country"
+                                        placeholder="{i18n>placeholder.destination}"
                                         required="true"/>
                                     
-                                    <Label text="Start Date" required="true"/>
+                                    <Label text="{i18n>label.startDate}" required="true"/>
                                     <DatePicker 
                                         id="startDatePicker"
                                         value="{/startDate}"
-                                        placeholder="Select start date"
+                                        placeholder="{i18n>placeholder.startDate}"
                                         required="true"/>
                                     
-                                    <Label text="End Date" required="true"/>
+                                    <Label text="{i18n>label.endDate}" required="true"/>
                                     <DatePicker 
                                         id="endDatePicker"
                                         value="{/endDate}"
@@ -127,16 +121,17 @@
                         </Panel>
 
                         <!-- Food Costs Section -->
-                        <Panel headerText="Food Costs">
+                        <Panel headerText="{i18n>title.foodCosts}">
                             <VBox class="sapUiSmallMargin">
                                 <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiTinyMarginBottom">
-                                    <Label text="Upload food receipts and invoices"/>
+                                    <Label text="{i18n>text.uploadFoodHint}"/>
                                     <Button 
-                                        text="Add Food Cost" 
+                                        text="{i18n>button.addFoodCost}" 
                                         icon="sap-icon://add"
                                         type="Emphasized"
                                         press=".onAddFile"
-                                        data:category="foodCosts"/>
+                                        data:category="foodCosts"
+                                        tooltip="{i18n>tooltip.addFoodCost}"/>
                                 </HBox>
                                 <List 
                                     id="foodCostsList"
@@ -144,7 +139,7 @@
                                         path: '/foodCosts',
                                         templateShareable: false
                                     }"
-                                    noDataText="No food costs added yet. Click 'Add Food Cost' to upload receipts.">
+                                    noDataText="{i18n>text.noFoodCosts}">
                                     <CustomListItem>
                                         <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
                                             <VBox width="80%">
@@ -157,7 +152,8 @@
                                                 type="Transparent"
                                                 press=".onDeleteFile"
                                                 data:category="foodCosts"
-                                                data:index="{index}"/>
+                                                data:index="{index}"
+                                                tooltip="{i18n>tooltip.deleteFile}"/>
                                         </HBox>
                                     </CustomListItem>
                                 </List>
@@ -165,16 +161,17 @@
                         </Panel>
 
                         <!-- Travel Costs Section -->
-                        <Panel headerText="Travel Costs" >
+                        <Panel headerText="{i18n>title.travelCosts}" >
                             <VBox class="sapUiSmallMargin">
                                 <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiTinyMarginBottom">
-                                    <Label text="Upload flight tickets, train tickets, taxi receipts, etc."/>
+                                    <Label text="{i18n>text.uploadTravelHint}"/>
                                     <Button 
-                                        text="Add Travel Cost" 
+                                        text="{i18n>button.addTravelCost}" 
                                         icon="sap-icon://add"
                                         type="Emphasized"
                                         press=".onAddFile"
-                                        data:category="travelCosts"/>
+                                        data:category="travelCosts"
+                                        tooltip="{i18n>tooltip.addTravelCost}"/>
                                 </HBox>
                                 <List 
                                     id="travelCostsList"
@@ -182,7 +179,7 @@
                                         path: '/travelCosts',
                                         templateShareable: false
                                     }"
-                                    noDataText="No travel costs added yet. Click 'Add Travel Cost' to upload receipts.">
+                                    noDataText="{i18n>text.noTravelCosts}">
                                     <CustomListItem>
                                         <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
                                             <VBox width="80%">
@@ -195,7 +192,8 @@
                                                 type="Transparent"
                                                 press=".onDeleteFile"
                                                 data:category="travelCosts"
-                                                data:index="{index}"/>
+                                                data:index="{index}"
+                                                tooltip="{i18n>tooltip.deleteFile}"/>
                                         </HBox>
                                     </CustomListItem>
                                 </List>
@@ -203,16 +201,17 @@
                         </Panel>
 
                         <!-- Stay Costs Section -->
-                        <Panel headerText="Stay Costs" >
+                        <Panel headerText="{i18n>title.stayCosts}" >
                             <VBox class="sapUiSmallMargin">
                                 <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiTinyMarginBottom">
-                                    <Label text="Upload hotel bills and accommodation receipts"/>
+                                    <Label text="{i18n>text.uploadStayHint}"/>
                                     <Button 
-                                        text="Add Stay Cost" 
+                                        text="{i18n>button.addStayCost}" 
                                         icon="sap-icon://add"
                                         type="Emphasized"
                                         press=".onAddFile"
-                                        data:category="stayCosts"/>
+                                        data:category="stayCosts"
+                                        tooltip="{i18n>tooltip.addStayCost}"/>
                                 </HBox>
                                 <List 
                                     id="stayCostsList"
@@ -220,20 +219,21 @@
                                         path: '/stayCosts',
                                         templateShareable: false
                                     }"
-                                    noDataText="No stay costs added yet. Click 'Add Stay Cost' to upload receipts.">
+                                    noDataText="{i18n>text.noStayCosts}">
                                     <CustomListItem>
                                         <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
                                             <VBox width="80%">
                                                 <Text text="{fileName}" class="sapUiTinyMarginBottom"/>
                                                 <Text text="{description}" class="sapUiTinyText"/>
-                                                <Text text="Size: {fileSize}" class="sapUiTinyText"/>
+                                                <Text text="{= ${i18n>text.sizePrefix}.replace('{0}', ${fileSize}) }" class="sapUiTinyText"/>
                                             </VBox>
                                             <Button 
                                                 icon="sap-icon://delete" 
                                                 type="Transparent"
                                                 press=".onDeleteFile"
                                                 data:category="stayCosts"
-                                                data:index="{index}"/>
+                                                data:index="{index}"
+                                                tooltip="{i18n>tooltip.deleteFile}"/>
                                         </HBox>
                                     </CustomListItem>
                                 </List>
@@ -244,10 +244,11 @@
                         <HBox justifyContent="End" >
                             <Button 
                                 id="submitButton"
-                                text="Submit Reimbursement Request" 
+                                text="{i18n>button.submitReimbursementRequest}" 
                                 type="Success"
                                 icon="sap-icon://accept"
-                                press=".onSubmit"/>
+                                press=".onSubmit"
+                                tooltip="{i18n>tooltip.submit}"/>
                         </HBox>
                         
                     </l:VerticalLayout>
