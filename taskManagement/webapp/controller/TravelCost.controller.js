@@ -29,7 +29,6 @@ sap.ui.define([
             this.oRouter.getRoute("TravelRequest").attachPatternMatched(this._onRouteMatched, this);
             this.oRouter.getRoute("TravelRequestResubmit").attachPatternMatched(this._onResubmitRouteMatched, this);
             
-            // No byId caching; rely on model bindings
         },
 
         _onRouteMatched: function (oEvent) {

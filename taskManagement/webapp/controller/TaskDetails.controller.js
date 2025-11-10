@@ -70,7 +70,6 @@ sap.ui.define([
                 }.bind(this), 100);
             }
             
-            // No need to store table references; filtering is model-driven
         },
 
         _onFilterChange: function () {

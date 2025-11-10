@@ -25,11 +25,8 @@ sap.ui.define([
             const oFilterModel = Models.createFilterModel();
             this.getView().setModel(oFilterModel, "filterModel");
             
-            // We will compute filtered array in model instead of binding filters
-            
             this._loadRequests();
             
-            // No byId caching; use model-driven filtering
         },
 
         _onFilterChange: function () {

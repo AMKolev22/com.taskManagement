@@ -17,7 +17,6 @@ sap.ui.define([
             oModel.setProperty("/filteredCatalogItems", oModel.getProperty("/catalogItems"));
             this.getView().setModel(oModel);
             
-            // No byId caching; drive UI from model
         },
 
         onOpenCatalogDialog: function () {
