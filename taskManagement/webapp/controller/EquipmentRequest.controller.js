@@ -17,19 +17,7 @@ sap.ui.define([
             oModel.setProperty("/filteredCatalogItems", oModel.getProperty("/catalogItems"));
             this.getView().setModel(oModel);
             
-            // Store field references after view is loaded
-            this.attachViewLoaded();
-        },
-
-        attachViewLoaded: function () {
-            const oView = this.getView();
-            if (oView && oView.byId) {
-                this._oCatalogDialog = oView.byId("catalogDialog");
-                this._oCatalogTable = oView.byId("catalogTable");
-                this._oManagerSelect = oView.byId("managerSelect");
-            } else {
-                setTimeout(this.attachViewLoaded.bind(this), 100);
-            }
+            // No byId caching; drive UI from model
         },
 
         onOpenCatalogDialog: function () {
@@ -42,19 +30,15 @@ sap.ui.define([
             
             this._applyFiltersAndSort();
             
-            if (this._oCatalogTable) {
-                this._oCatalogTable.removeSelections(true);
-            }
-            
-            if (this._oCatalogDialog) {
-                this._oCatalogDialog.open();
-            }
+            var oTable = this.byId && this.byId("catalogTable");
+            if (oTable) { oTable.removeSelections(true); }
+            var oDialog = this.byId && this.byId("catalogDialog");
+            if (oDialog) { oDialog.open(); }
         },
 
         onCloseCatalogDialog: function () {
-            if (this._oCatalogDialog) {
-                this._oCatalogDialog.close();
-            }
+            var oDialog = this.byId && this.byId("catalogDialog");
+            if (oDialog) { oDialog.close(); }
         },
 
         onFilterCatalog: function () {
@@ -70,8 +54,9 @@ sap.ui.define([
         },
 
         _saveSelection: function () {
-            if (!this._oCatalogTable) return;
-            const aSelectedItems = this._oCatalogTable.getSelectedItems();
+            var oTable = this.byId && this.byId("catalogTable");
+            if (!oTable) return;
+            const aSelectedItems = oTable.getSelectedItems();
             const oModel = this.getView().getModel();
             const aSelectedIds = aSelectedItems.map((oItem) => oItem.getBindingContext().getObject().id);
 
@@ -79,17 +64,18 @@ sap.ui.define([
         },
 
         _restoreSelection: function () {
-            if (!this._oCatalogTable) return;
+            var oTable = this.byId && this.byId("catalogTable");
+            if (!oTable) return;
             const oModel = this.getView().getModel();
             const aSelectedIds = oModel.getProperty("/selectedCatalogIds");
-            const aItems = this._oCatalogTable.getItems();
+            const aItems = oTable.getItems();
 
-            this._oCatalogTable.removeSelections(true);
+            oTable.removeSelections(true);
 
             aItems.forEach((oItem) => {
                 const oData = oItem.getBindingContext().getObject();
                 if (aSelectedIds.indexOf(oData.id) > -1) {
-                    this._oCatalogTable.setSelectedItem(oItem, true);
+                    oTable.setSelectedItem(oItem, true);
                 }
             });
         },
@@ -149,8 +135,9 @@ sap.ui.define([
         },
 
         onAddSelectedItems: function () {
-            if (!this._oCatalogTable) return;
-            const aSelectedItems = this._oCatalogTable.getSelectedItems();
+            var oTable = this.byId && this.byId("catalogTable");
+            if (!oTable) return;
+            const aSelectedItems = oTable.getSelectedItems();
 
             if (aSelectedItems.length === 0) {
                 this.showError("error.catalogItemRequired");

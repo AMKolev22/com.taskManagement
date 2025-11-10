@@ -29,24 +29,12 @@ sap.ui.define([
 
             const oFilterModel = Models.createUserDashboardFilterModel();
             this.setModel(oFilterModel, "filterModel");
-            oFilterModel.attachPropertyChange(this._onFilterChange.bind(this), this);
 
             this.subscribeEvent("tasks", "taskSubmitted", this._onTaskSubmitted, this);
             this.subscribeEvent("tasks", "taskUpdated", this._onTaskUpdated, this);
             this._loadRecentTasks();
             this.oRouter.getRoute("userDashboard").attachPatternMatched(this._onRouteMatched, this);
             
-            // Store list reference after view is loaded
-            this.attachViewLoaded();
-        },
-
-        attachViewLoaded: function () {
-            const oView = this.getView();
-            if (oView && oView.byId) {
-                this._oActivityFeedList = oView.byId("activityFeedList");
-            } else {
-                setTimeout(this.attachViewLoaded.bind(this), 100);
-            }
         },
 
         _onFilterChange: function () {
@@ -93,6 +81,7 @@ sap.ui.define([
                         const oDashboardModel = this.getModel("dashboardModel");
                         oDashboardModel.setProperty("/recentTasks", aTasks);
                         oDashboardModel.setProperty("/activities", aActivities);
+                        oDashboardModel.setProperty("/activitiesFiltered", aActivities);
                     }
 
                     this.setBusy(false);
@@ -232,33 +221,21 @@ sap.ui.define([
         },
 
         _applyActivityFilters: function () {
-            if (!this._oActivityFeedList) return;
-            
-            const oBinding = this._oActivityFeedList.getBinding("items");
-            if (!oBinding) return;
-
             const oFilterModel = this.getModel("filterModel");
-            const sSearchQuery = oFilterModel.getProperty("/searchQuery") || "";
+            const oDashboardModel = this.getModel("dashboardModel");
+            const aAll = oDashboardModel.getProperty("/activities") || [];
+            const sSearchQuery = (oFilterModel.getProperty("/searchQuery") || "").toLowerCase();
             const sTypeFilter = oFilterModel.getProperty("/typeFilter") || "all";
 
-            const aFilters = [];
+            const aFiltered = aAll.filter(function (a) {
+                var bSearch = !sSearchQuery || [a.description, a.actorName]
+                    .filter(Boolean)
+                    .some(function (v) { return String(v).toLowerCase().indexOf(sSearchQuery) !== -1; });
+                var bType = sTypeFilter === "all" || a.action === sTypeFilter;
+                return bSearch && bType;
+            });
 
-            if (sSearchQuery) {
-                const oSearchFilter = new sap.ui.model.Filter({
-                    filters: [
-                        new sap.ui.model.Filter("description", sap.ui.model.FilterOperator.Contains, sSearchQuery),
-                        new sap.ui.model.Filter("actorName", sap.ui.model.FilterOperator.Contains, sSearchQuery)
-                    ],
-                    and: false
-                });
-                aFilters.push(oSearchFilter);
-            }
-
-            if (sTypeFilter && sTypeFilter !== "all") {
-                aFilters.push(new sap.ui.model.Filter("action", sap.ui.model.FilterOperator.EQ, sTypeFilter));
-            }
-
-            oBinding.filter(aFilters);
+            oDashboardModel.setProperty("/activitiesFiltered", aFiltered);
         },
 
         onActivityPress: function (oEvent) {

@@ -27,23 +27,6 @@ sap.ui.define([
 
             this._loadUsers();
             this.oRouter.getRoute("vacationRequest").attachPatternMatched(this._onRouteMatched, this);
-            
-            // Store field references after view is loaded
-            this.attachViewLoaded();
-        },
-
-        attachViewLoaded: function () {
-            const oView = this.getView();
-            if (oView && oView.byId) {
-                this._oStartDatePicker = oView.byId("startDate");
-                this._oEndDatePicker = oView.byId("endDate");
-                this._oManagerSelect = oView.byId("managerSelect");
-                this._oSubstituteSelect = oView.byId("substituteSelect");
-                this._oVacationTypeSelect = oView.byId("vacationType");
-                this._oReasonTextArea = oView.byId("reason");
-            } else {
-                setTimeout(this.attachViewLoaded.bind(this), 100);
-            }
         },
 
         _onRouteMatched: function () {
@@ -74,15 +57,9 @@ sap.ui.define([
                 .then((oResponse) => {
                     if (oResponse.success && oResponse.data) {
                         const oRequestModel = this.getModel("requestModel");
-                        console.log("oResponse.data", oResponse.data);
-                        console.log(oResponse.data);
                         const aManagers = oResponse.data.filter((oUser) => 
                             oUser.role === "MANAGER"
                         );
-                        console.log("aManagers", aManagers);  
-                        // const aSubstitutes = oResponse.data.filter((oUser) => 
-                        //     oUser.userId !== oCurrentUser.userId
-                        // );
 
                         oRequestModel.setProperty("/managers", aManagers);
                         oRequestModel.setProperty("/substitutes", aManagers);
@@ -149,10 +126,7 @@ sap.ui.define([
                     
                     if (oStartDate < oToday) {
                         oRequestModel.setProperty("/validation/startDateState", "Error");
-                        oRequestModel.setProperty("/validation/startDateMessage", "Start date cannot be in the past for planned leave");
-                        if (this._oStartDatePicker) {
-                            this.setFieldError(this._oStartDatePicker, true, "error.startDateInPast");
-                        }
+                        oRequestModel.setProperty("/validation/startDateMessage", this.getText("error.startDateInPast"));
                     }
                 }
 
@@ -224,9 +198,9 @@ sap.ui.define([
             // If the calendar popover is open, refresh it for the selected manager
             const sManagerId = oRequestModel.getProperty("/managerId");
             if (this._oCalendarPopover && sManagerId) {
-                this._loadCalendarData(sManagerId, "Manager");
+                this._loadCalendarData(sManagerId, this.getText("title.managerAvailability"));
             } else if (this._oCalendarPopover) {
-                const oCalendarModel = Models.createCalendarModel("Manager Availability", "", []);
+                const oCalendarModel = Models.createCalendarModel(this.getText("title.managerAvailability"), "", []);
                 this._oCalendarPopover.setModel(oCalendarModel, "calendarModel");
             }
         },
@@ -239,9 +213,9 @@ sap.ui.define([
             // If the calendar popover is open, refresh it for the selected substitute
             const sSubstituteId = oRequestModel.getProperty("/substituteId");
             if (this._oCalendarPopover && sSubstituteId) {
-                this._loadCalendarData(sSubstituteId, "Substitute");
+                this._loadCalendarData(sSubstituteId, this.getText("title.substituteAvailability"));
             } else if (this._oCalendarPopover) {
-                const oCalendarModel = Models.createCalendarModel("Substitute Availability", "", []);
+                const oCalendarModel = Models.createCalendarModel(this.getText("title.substituteAvailability"), "", []);
                 this._oCalendarPopover.setModel(oCalendarModel, "calendarModel");
             }
         },
@@ -255,23 +229,23 @@ sap.ui.define([
         onViewManagerCalendar: function (oEvent) {
             const oRequestModel = this.getModel("requestModel");
             const sManagerId = oRequestModel.getProperty("/managerId");
-            
             if (!sManagerId) {
-                this.setFieldError(this._oManagerSelect, true, "error.managerRequiredFirst");
+                oRequestModel.setProperty("/validation/managerState", "Error");
+                oRequestModel.setProperty("/validation/managerMessage", this.getText("error.managerRequiredFirst"));
             }
             // Open popover even without a selection (empty initially)
-            this._showCalendar(sManagerId || "", "Manager", oEvent && oEvent.getSource());
+            this._showCalendar(sManagerId || "", this.getText("title.managerAvailability"), oEvent && oEvent.getSource());
         },
 
         onViewSubstituteCalendar: function (oEvent) {
             const oRequestModel = this.getModel("requestModel");
             const sSubstituteId = oRequestModel.getProperty("/substituteId");
-            
             if (!sSubstituteId) {
-                this.setFieldError(this._oSubstituteSelect, true, "error.substituteRequiredFirst");
+                oRequestModel.setProperty("/validation/substituteState", "Error");
+                oRequestModel.setProperty("/validation/substituteMessage", this.getText("error.substituteRequiredFirst"));
             }
             // Open popover even without a selection (empty initially)
-            this._showCalendar(sSubstituteId || "", "Substitute", oEvent && oEvent.getSource());
+            this._showCalendar(sSubstituteId || "", this.getText("title.substituteAvailability"), oEvent && oEvent.getSource());
         },
 
         _showCalendar: function (sUserId, sTitle, oOpenBy) {
@@ -286,7 +260,7 @@ sap.ui.define([
                     if (sUserId) {
                         this._loadCalendarData(sUserId, sTitle);
                     } else {
-                        const oCalendarModel = Models.createCalendarModel(`${sTitle} Availability`, "", []);
+                        const oCalendarModel = Models.createCalendarModel(`${sTitle}`, "", []);
                         this._oCalendarPopover.setModel(oCalendarModel, "calendarModel");
                     }
                     if (oOpenBy && this._oCalendarPopover.openBy) {
@@ -482,30 +456,21 @@ sap.ui.define([
             // Validate vacation type
             if (!oData.vacationType) {
                 oRequestModel.setProperty("/validation/vacationTypeState", "Error");
-                oRequestModel.setProperty("/validation/vacationTypeMessage", "Vacation type is required");
-                if (this._oVacationTypeSelect) {
-                    this.setFieldError(this._oVacationTypeSelect, true, "error.fieldRequired");
-                }
+                oRequestModel.setProperty("/validation/vacationTypeMessage", this.getText("error.fieldRequired"));
                 bIsValid = false;
             }
 
             // Validate start date
             if (!oData.startDate) {
                 oRequestModel.setProperty("/validation/startDateState", "Error");
-                oRequestModel.setProperty("/validation/startDateMessage", "Start date is required");
-                if (this._oStartDatePicker) {
-                    this.setFieldError(this._oStartDatePicker, true, "error.dateRequired");
-                }
+                oRequestModel.setProperty("/validation/startDateMessage", this.getText("error.dateRequired"));
                 bIsValid = false;
             }
 
             // Validate end date
             if (!oData.endDate) {
                 oRequestModel.setProperty("/validation/endDateState", "Error");
-                oRequestModel.setProperty("/validation/endDateMessage", "End date is required");
-                if (this._oEndDatePicker) {
-                    this.setFieldError(this._oEndDatePicker, true, "error.dateRequired");
-                }
+                oRequestModel.setProperty("/validation/endDateMessage", this.getText("error.dateRequired"));
                 bIsValid = false;
             }
 
@@ -516,10 +481,7 @@ sap.ui.define([
 
                 if (dFromDate > dToDate) {
                     oRequestModel.setProperty("/validation/endDateState", "Error");
-                    oRequestModel.setProperty("/validation/endDateMessage", "End date must be after start date");
-                    if (this._oEndDatePicker) {
-                        this.setFieldError(this._oEndDatePicker, true, "error.endDateBeforeStartDate");
-                    }
+                    oRequestModel.setProperty("/validation/endDateMessage", this.getText("error.endDateBeforeStartDate"));
                     bIsValid = false;
                 }
 
@@ -530,10 +492,7 @@ sap.ui.define([
 
                     if (dFromDate < dToday) {
                         oRequestModel.setProperty("/validation/startDateState", "Error");
-                        oRequestModel.setProperty("/validation/startDateMessage", "Start date cannot be in the past for planned leave");
-                        if (this._oStartDatePicker) {
-                            this.setFieldError(this._oStartDatePicker, true, "error.startDateInPast");
-                        }
+                        oRequestModel.setProperty("/validation/startDateMessage", this.getText("error.startDateInPast"));
                         bIsValid = false;
                     }
                 }
@@ -542,10 +501,7 @@ sap.ui.define([
             // Validate manager
             if (!oData.managerId) {
                 oRequestModel.setProperty("/validation/managerState", "Error");
-                oRequestModel.setProperty("/validation/managerMessage", "Manager is required");
-                if (this._oManagerSelect) {
-                    this.setFieldError(this._oManagerSelect, true, "error.managerRequired");
-                }
+                oRequestModel.setProperty("/validation/managerMessage", this.getText("error.managerRequired"));
                 bIsValid = false;
             }
 
@@ -553,10 +509,7 @@ sap.ui.define([
             if (this._requiresSubstitute(oData.vacationType, oData.startDate, oData.endDate)) {
                 if (!oData.substituteId) {
                     oRequestModel.setProperty("/validation/substituteState", "Error");
-                    oRequestModel.setProperty("/validation/substituteMessage", "Substitute is required for planned leave longer than 3 days");
-                    if (this._oSubstituteSelect) {
-                        this.setFieldError(this._oSubstituteSelect, true, "error.substituteRequired");
-                    }
+                    oRequestModel.setProperty("/validation/substituteMessage", this.getText("error.substituteRequired"));
                     bIsValid = false;
                 }
             }
@@ -564,10 +517,7 @@ sap.ui.define([
             // Validate reason
             if (!oData.reason || oData.reason.trim() === "") {
                 oRequestModel.setProperty("/validation/reasonState", "Error");
-                oRequestModel.setProperty("/validation/reasonMessage", "Reason is required");
-                if (this._oReasonTextArea) {
-                    this.setFieldError(this._oReasonTextArea, true, "error.reasonRequiredVacation");
-                }
+                oRequestModel.setProperty("/validation/reasonMessage", this.getText("error.reasonRequiredVacation"));
                 bIsValid = false;
             }
 

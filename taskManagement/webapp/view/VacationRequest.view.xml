@@ -41,10 +41,7 @@
                             press="onNavBack"
                         />
                         <ToolbarSpacer />
-                        <Title
-                            text="New Vacation Request"
-                            level="H2"
-                        />
+                        <Title text="{i18n>title.newVacationRequest}" level="H2"/>
                         <ToolbarSpacer />
                     </OverflowToolbar>
                 </customHeader>
@@ -80,12 +77,9 @@
                             columnsM="1"
                         >
                             <form:content>
-                                <core:Title text="Leave Information" />
+                                <core:Title text="{i18n>section.leaveInformation}" />
 
-                                <Label
-                                    text="Vacation Type"
-                                    required="true"
-                                />
+                                <Label text="{i18n>label.vacationType}" required="true"/>
                                 <Select
                                     width="100%"
                                     id="vacationType"
@@ -95,21 +89,12 @@
                                     change="onVacationTypeChange"
                                 >
                                     <items>
-                                        <core:Item
-                                            key="ANNUAL_LEAVE"
-                                            text="Planned Leave"
-                                        />
-                                        <core:Item
-                                            key="SICK_LEAVE"
-                                            text="Sick Leave"
-                                        />
+                                        <core:Item key="ANNUAL_LEAVE" text="{i18n>vacationType.ANNUAL_LEAVE}"/>
+                                        <core:Item key="SICK_LEAVE" text="{i18n>vacationType.SICK_LEAVE}"/>
                                     </items>
                                 </Select>
 
-                                <Label
-                                    text="Start Date"
-                                    required="true"
-                                />
+                                <Label text="{i18n>label.startDate}" required="true"/>
                                 <DatePicker
                                     id="startDate"
                                     value="{requestModel>/startDate}"
@@ -120,10 +105,7 @@
                                     width="100%"
                                 />
 
-                                <Label
-                                    text="End Date"
-                                    required="true"
-                                />
+                                <Label text="{i18n>label.endDate}" required="true"/>
                                 <DatePicker
                                     id="endDate"
                                     value="{requestModel>/endDate}"
@@ -134,18 +116,15 @@
                                     width="100%"
                                 />
 
-                                <Label text="Duration" />
+                                <Label text="{i18n>label.duration}" />
                                 <Text
                                     text="{requestModel>/duration}"
                                     class="sapUiSmallMarginTop"
                                 />
 
-                                <core:Title text="Approver and Substitute" />
+                                <core:Title text="{i18n>section.approverAndSubstitute}" />
 
-                                <Label
-                                    text="Manager"
-                                    required="true"
-                                />
+                                <Label text="{i18n>label.manager}" required="true"/>
                                 <HBox alignItems="Center" width="100%">
                                     <Select
                                         id="managerSelect"
@@ -164,17 +143,11 @@
                                             <FlexItemData growFactor="1"/>
                                         </layoutData>
                                     </Select>
-                                    <Button
-                                        icon="sap-icon://calendar"
-                                        tooltip="View Manager Calendar"
-                                        press="onViewManagerCalendar"
-                                        type="Transparent"
-                                        class="sapUiTinyMarginBegin"
-                                    />
+                                    <Button icon="sap-icon://calendar" tooltip="{i18n>tooltip.viewManagerCalendar}" press="onViewManagerCalendar" type="Transparent" class="sapUiTinyMarginBegin"/>
                                 </HBox>
 
                                 <Label
-                                    text="Substitute"
+                                    text="{i18n>label.substitute}"
                                     required="{
                                         parts: ['requestModel>/vacationType', 'requestModel>/startDate', 'requestModel>/endDate'],
                                         formatter: '.formatSubstituteRequired'
@@ -208,13 +181,7 @@
                                             <FlexItemData growFactor="1"/>
                                         </layoutData>
                                     </Select>
-                                    <Button
-                                        icon="sap-icon://calendar"
-                                        tooltip="View Substitute Calendar"
-                                        press="onViewSubstituteCalendar"
-                                        type="Transparent"
-                                        class="sapUiTinyMarginBegin"
-                                    />
+                                    <Button icon="sap-icon://calendar" tooltip="{i18n>tooltip.viewSubstituteCalendar}" press="onViewSubstituteCalendar" type="Transparent" class="sapUiTinyMarginBegin"/>
                                 </HBox>
 
                                 <!-- Availability Warning Messages -->
@@ -234,11 +201,9 @@
                                     class="sapUiSmallMarginTop"
                                 />
 
-                                <core:Title text="Leave Details" />
+                                <core:Title text="{i18n>section.leaveDetails}" />
 
-                                <Label
-                                    text="Paid Leave"
-                                />
+                                <Label text="{i18n>label.paidLeave}"/>
                                 <Switch
                                     id="paidSwitch"
                                     state="{requestModel>/paid}"
@@ -261,7 +226,7 @@
                                     valueStateText="{requestModel>/validation/reasonMessage}"
                                     rows="5"
                                     width="100%"
-                                    placeholder="Please provide a reason for your vacation request..."
+                                    placeholder="{i18n>placeholder.reasonVacation}"
                                 />
 
                                 <!-- Attachments removed for new Vacation requests as per requirements -->
@@ -270,18 +235,18 @@
 
                         <!-- Action Buttons -->
                         <HBox justifyContent="End" class="sapUiMediumMarginTop">
-                            <Button text="Cancel" press="onCancel" class="sapUiTinyMarginEnd"/>
-                            <Button text="Submit Request" type="Emphasized" press="onSubmit" icon="sap-icon://paper-plane"/>
+                            <Button text="{i18n>button.cancel}" press="onCancel" class="sapUiTinyMarginEnd"/>
+                            <Button text="{i18n>button.submit}" type="Emphasized" press="onSubmit" icon="sap-icon://paper-plane"/>
                         </HBox>
                             </VBox>
                         </layout:mainContent>
                         <layout:sideContent>
-                            <Panel headerText="Manager Availability" class="sapUiMediumMargin">
+                            <Panel headerText="{i18n>title.managerAvailability}" class="sapUiMediumMargin">
                                 <headerToolbar>
                                     <Toolbar>
-                                        <Title text="Manager Availability"/>
+                                        <Title text="{i18n>title.managerAvailability}"/>
                                         <ToolbarSpacer/>
-                                        <Button icon="sap-icon://decline" type="Transparent" tooltip="Close" press="onCloseCalendar"/>
+                                        <Button icon="sap-icon://decline" type="Transparent" tooltip="{i18n>tooltip.close}" press="onCloseCalendar"/>
                                     </Toolbar>
                                 </headerToolbar>
                                 <content>

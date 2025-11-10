@@ -40,13 +40,13 @@
                         />
                         <ToolbarSpacer />
                         <Title
-                            text="Manager Dashboard - Pending Tasks"
+                            text="{i18n>title.managerDashboardPending}"
                             level="H2"
                         />
                         <ToolbarSpacer />
                         <Button
                             icon="sap-icon://refresh"
-                            tooltip="Refresh"
+                            tooltip="{i18n>tooltip.refresh}"
                             press="onRefresh"
                             type="Transparent"
                         />
@@ -66,7 +66,7 @@
                             <SearchField
                                 id="searchField"
                                 width="40%"
-                                placeholder="Search tasks..."
+                                placeholder="{i18n>placeholder.searchTasks}"
                                 value="{filterModel>/searchQuery}"
                                 search="onSearch"
                                 liveChange="onSearch"
@@ -79,22 +79,10 @@
                                 change="onFilterChange"
                             >
                                 <items>
-                                    <core:Item
-                                        key="all"
-                                        text="All Types"
-                                    />
-                                    <core:Item
-                                        key="Vacation"
-                                        text="Vacation"
-                                    />
-                                    <core:Item
-                                        key="Travel"
-                                        text="Travel"
-                                    />
-                                    <core:Item
-                                        key="Equipment"
-                                        text="Equipment"
-                                    />
+                                    <core:Item key="all" text="{i18n>filter.allTypes}"/>
+                                    <core:Item key="Vacation" text="{i18n>filter.type.vacation}"/>
+                                    <core:Item key="Travel" text="{i18n>filter.type.travel}"/>
+                                    <core:Item key="Equipment" text="{i18n>filter.type.equipment}"/>
                                 </items>
                             </Select>
                             <Select
@@ -105,26 +93,11 @@
                                 class="sapUiSmallMarginBegin"
                             >
                                 <items>
-                                    <core:Item
-                                        key="all"
-                                        text="All Status"
-                                    />
-                                    <core:Item
-                                        key="PENDING_APPROVAL"
-                                        text="Pending"
-                                    />
-                                    <core:Item
-                                        key="APPROVED"
-                                        text="Approved"
-                                    />
-                                    <core:Item
-                                        key="REJECTED"
-                                        text="Rejected"
-                                    />
-                                    <core:Item
-                                        key="PARTIALLY_REJECTED"
-                                        text="Partially Rejected"
-                                    />
+                                    <core:Item key="all" text="{i18n>filter.allStatus}"/>
+                                    <core:Item key="PENDING_APPROVAL" text="{i18n>filter.status.pending}"/>
+                                    <core:Item key="APPROVED" text="{i18n>filter.status.approved}"/>
+                                    <core:Item key="REJECTED" text="{i18n>filter.status.rejected}"/>
+                                    <core:Item key="PARTIALLY_REJECTED" text="{i18n>filter.status.partiallyRejected}"/>
                                 </items>
                             </Select>
                         </Toolbar>
@@ -132,7 +105,7 @@
                         <!-- Pending Tasks Table -->
                         <Table
                             id="pendingTasksTable"
-                            items="{dashboardModel>/tasks}"
+                            items="{dashboardModel>/filteredTasks}"
                             mode="None"
                             growing="true"
                             growingThreshold="20"
@@ -142,28 +115,28 @@
                                     <Text text="" />
                                 </Column>
                                 <Column>
-                                    <Text text="Request ID" />
+                                    <Text text="{i18n>column.requestId}" />
                                 </Column>
                                 <Column>
-                                    <Text text="Type" />
+                                    <Text text="{i18n>column.type}" />
                                 </Column>
                                 <Column>
-                                    <Text text="From" />
+                                    <Text text="{i18n>column.from}" />
                                 </Column>
                                 <Column>
-                                    <Text text="Subject" />
+                                    <Text text="{i18n>column.subject}" />
                                 </Column>
                                 <Column>
-                                    <Text text="Submitted" />
+                                    <Text text="{i18n>column.submitted}" />
                                 </Column>
                                 <Column>
-                                    <Text text="Status" />
+                                    <Text text="{i18n>column.status}" />
                                 </Column>
                                 <Column
                                     width="10rem"
                                     hAlign="Center"
                                 >
-                                    <Text text="Actions" />
+                                    <Text text="{i18n>column.actions}" />
                                 </Column>
                             </columns>
                             <items>
@@ -177,10 +150,7 @@
                                             color="{path: 'dashboardModel>type', formatter: '.formatter.getRequestTypeColor'}"
                                         />
                                         <Text text="{dashboardModel>requestId}" />
-                                        <ObjectStatus
-                                            text="{dashboardModel>type}"
-                                            state="Information"
-                                        />
+                                        <ObjectStatus text="{path: 'dashboardModel>type', formatter: '.formatter.formatRequestType'}" state="Information"/>
                                         <Text text="{dashboardModel>submittedBy}" />
                                         <Text text="{dashboardModel>subject}" />
                                         <Text text="{path: 'dashboardModel>submittedDate', formatter: '.formatter.formatDate'}" />
@@ -189,24 +159,18 @@
                                             state="{path: 'dashboardModel>status', formatter: '.formatter.formatStatusState'}"
                                         />
                                         <HBox justifyContent="Center">
-                                            <Button
-                                                icon="sap-icon://detail-view"
-                                                type="Transparent"
-                                                tooltip="View Details"
-                                                press="onViewDetails"
-                                                class="sapUiTinyMarginEnd"
-                                            />
+                                            <Button icon="sap-icon://detail-view" type="Transparent" tooltip="{i18n>tooltip.viewDetails}" press="onViewDetails" class="sapUiTinyMarginEnd"/>
                                             <Button
                                                 icon="sap-icon://accept"
                                                 type="Accept"
-                                                tooltip="Approve"
+                                                tooltip="{i18n>tooltip.approve}"
                                                 press="onQuickApprove"
                                                 class="sapUiTinyMarginEnd"
                                             />
                                             <Button
                                                 icon="sap-icon://decline"
                                                 type="Reject"
-                                                tooltip="Reject"
+                                                tooltip="{i18n>tooltip.reject}"
                                                 press="onQuickReject"
                                             />
                                         </HBox>

@@ -29,6 +29,12 @@ sap.ui.define([
 
                 // set the device model
                 this.setModel(models.createDeviceModel(), "device");
+
+                // Make i18n model accessible on Core so formatters can use it
+                var oI18nModel = this.getModel("i18n");
+                if (oI18nModel) {
+                    sap.ui.getCore().setModel(oI18nModel, "i18n");
+                }
             }
         });
     }

@@ -28,24 +28,12 @@ sap.ui.define([
 
             const oFilterModel = Models.createMyTasksFilterModel();
             this.setModel(oFilterModel, "filterModel");
-            oFilterModel.attachPropertyChange(this._onFilterChange.bind(this), this);
 
             this.subscribeEvent("tasks", "taskSubmitted", this._onTaskUpdated, this);
             this.subscribeEvent("tasks", "taskUpdated", this._onTaskUpdated, this);
             this._loadMyTasks();
             this.oRouter.getRoute("myTasks").attachPatternMatched(this._onRouteMatched, this);
             
-            // Store list reference after view is loaded
-            this.attachViewLoaded();
-        },
-
-        attachViewLoaded: function () {
-            const oView = this.getView();
-            if (oView && oView.byId) {
-                this._oMyTasksList = oView.byId("myTasksList");
-            } else {
-                setTimeout(this.attachViewLoaded.bind(this), 100);
-            }
         },
 
         _onFilterChange: function () {
@@ -90,6 +78,7 @@ sap.ui.define([
                     }
 
                     this.getModel("tasksModel").setProperty("/tasks", aTasks);
+                    this._applyFilters();
                     this.setBusy(false);
                 })
                 .catch((error) => {
@@ -167,42 +156,32 @@ sap.ui.define([
             const oSearchField = oEvent.getSource();
             const sValue = oEvent.getParameter("query") || oSearchField.getValue();
             oFilterModel.setProperty("/searchQuery", sValue);
+            this._applyFilters();
         },
 
         onFilterChange: function (oEvent) {
             const oFilterModel = this.getModel("filterModel");
             const sSelectedKey = oEvent.getParameter("selectedItem").getKey();
             oFilterModel.setProperty("/statusFilter", sSelectedKey);
+            this._applyFilters();
         },
 
         _applyFilters: function () {
-            if (!this._oMyTasksList) return;
-            
-            const oBinding = this._oMyTasksList.getBinding("items");
-            if (!oBinding) return;
-
             const oFilterModel = this.getModel("filterModel");
-            const sSearchQuery = oFilterModel.getProperty("/searchQuery") || "";
+            const oTasksModel = this.getModel("tasksModel");
+            const aAll = oTasksModel.getProperty("/tasks") || [];
+            const sSearchQuery = (oFilterModel.getProperty("/searchQuery") || "").toLowerCase();
             const sStatusFilter = oFilterModel.getProperty("/statusFilter") || "all";
 
-            const aFilters = [];
+            const aFiltered = aAll.filter(function (t) {
+                var bMatchesSearch = !sSearchQuery || [t.requestId, t.subject]
+                    .filter(Boolean)
+                    .some(function (v) { return String(v).toLowerCase().indexOf(sSearchQuery) !== -1; });
+                var bMatchesStatus = sStatusFilter === "all" || t.status === sStatusFilter;
+                return bMatchesSearch && bMatchesStatus;
+            });
 
-            if (sSearchQuery) {
-                const oSearchFilter = new Filter({
-                    filters: [
-                        new Filter("requestId", FilterOperator.Contains, sSearchQuery),
-                        new Filter("subject", FilterOperator.Contains, sSearchQuery)
-                    ],
-                    and: false
-                });
-                aFilters.push(oSearchFilter);
-            }
-
-            if (sStatusFilter && sStatusFilter !== "all") {
-                aFilters.push(new Filter("status", FilterOperator.EQ, sStatusFilter));
-            }
-
-            oBinding.filter(aFilters);
+            oTasksModel.setProperty("/filteredTasks", aFiltered);
         },
 
         onTaskPress: function (oEvent) {

@@ -39,17 +39,9 @@
                             class="sapUiHideOnDesktop sapUiHideOnTablet"
                         />
                         <ToolbarSpacer />
-                        <Title
-                            text="My Dashboard"
-                            level="H2"
-                        />
+                        <Title text="{i18n>title.myDashboard}" level="H2"/>
                         <ToolbarSpacer />
-                        <Button
-                            icon="sap-icon://refresh"
-                            tooltip="Refresh"
-                            press="onRefresh"
-                            type="Transparent"
-                        />
+                        <Button icon="sap-icon://refresh" tooltip="{i18n>tooltip.refresh}" press="onRefresh" type="Transparent"/>
                         <Avatar
                             initials="{= ${userModel>/currentUser/firstName}.charAt(0) + ${userModel>/currentUser/lastName}.charAt(0) }"
                             press="onUserInfoPress"
@@ -63,12 +55,8 @@
                     <VBox class="sapUiMediumMargin">
                         <!-- Welcome Section -->
                         <VBox class="sapUiMediumMarginBottom">
-                            <Title
-                                text="Welcome, {userModel>/currentUser/firstName}!"
-                                level="H3"
-                                class="sapUiSmallMarginBottom"
-                            />
-                            <Text text="Here's an overview of your recent requests" />
+                            <Title text="{i18n>title.welcome}" level="H3" class="sapUiSmallMarginBottom"/>
+                            <Text text="{i18n>text.overviewRecent}" />
                         </VBox>
 
                         <!-- Quick Actions -->
@@ -76,32 +64,14 @@
                             justifyContent="Start"
                             class="sapUiMediumMarginBottom"
                         >
-                            <Button
-                                text="New Vacation Request"
-                                icon="sap-icon://vacation"
-                                type="Emphasized"
-                                press="onNewVacationRequest"
-                                class="sapUiTinyMarginEnd"
-                            />
-                            <Button
-                                text="View All My Tasks"
-                                icon="sap-icon://task"
-                                press="onViewAllTasks"
-                                class="sapUiTinyMarginEnd"
-                            />
+                            <Button text="{i18n>button.newVacationRequest}" icon="sap-icon://vacation" type="Emphasized" press="onNewVacationRequest" class="sapUiTinyMarginEnd"/>
+                            <Button text="{i18n>button.viewAllMyTasks}" icon="sap-icon://task" press="onViewAllTasks" class="sapUiTinyMarginEnd"/>
                         </HBox>
 
                         <!-- Recent Tasks Section -->
-                        <Panel
-                            headerText="My Recent Requests (4 Most Recent)"
-                            class="sapUiMediumMarginBottom"
-                        >
+                        <Panel headerText="{i18n>title.recentRequests}" class="sapUiMediumMarginBottom">
                             <content>
-                                <List
-                                    id="recentTasksList"
-                                    items="{dashboardModel>/recentTasks}"
-                                    noDataText="No recent requests found"
-                                >
+                                <List id="recentTasksList" items="{dashboardModel>/recentTasks}" noDataText="{i18n>text.noRecentRequests}">
                                     <CustomListItem
                                         type="Active"
                                         press="onTaskPress"
@@ -124,19 +94,13 @@
                                                             text="{dashboardModel>requestId}"
                                                             class="sapUiTinyMarginEnd"
                                                         />
-                                                        <ObjectStatus
-                                                            text="{dashboardModel>type}"
-                                                            state="Information"
-                                                        />
+                                                        <ObjectStatus text="{path: 'dashboardModel>type', formatter: '.formatter.formatRequestType'}" state="Information"/>
                                                     </HBox>
                                                     <Text
                                                         text="{dashboardModel>subject}"
                                                         class="sapUiTinyMarginTop"
                                                     />
-                                                    <Text
-                                                        text="Submitted: {path: 'dashboardModel>submittedDate', formatter: '.formatter.formatDate'}"
-                                                        class="sapUiTinyMarginTop"
-                                                    />
+                                                    <Text text="{= ${i18n>text.submittedPrefix}.replace('{0}', ${path: 'dashboardModel>submittedDate', formatter: '.formatter.formatDate'}) }" class="sapUiTinyMarginTop"/>
                                                 </VBox>
                                             </HBox>
                                             <VBox alignItems="End">
@@ -144,12 +108,7 @@
                                                     text="{path: 'dashboardModel>status', formatter: '.formatter.formatStatus'}"
                                                     state="{path: 'dashboardModel>status', formatter: '.formatter.formatStatusState'}"
                                                 />
-                                                <Button
-                                                    text="View Details"
-                                                    type="Transparent"
-                                                    press="onViewTaskDetails"
-                                                    class="sapUiTinyMarginTop"
-                                                />
+                                                <Button text="{i18n>button.viewDetails}" type="Transparent" press="onViewTaskDetails" class="sapUiTinyMarginTop"/>
                                             </VBox>
                                         </HBox>
                                     </CustomListItem>

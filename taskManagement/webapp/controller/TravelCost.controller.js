@@ -29,23 +29,7 @@ sap.ui.define([
             this.oRouter.getRoute("TravelRequest").attachPatternMatched(this._onRouteMatched, this);
             this.oRouter.getRoute("TravelRequestResubmit").attachPatternMatched(this._onResubmitRouteMatched, this);
             
-            // Store field references after view is loaded
-            this.attachViewLoaded();
-        },
-
-        attachViewLoaded: function () {
-            const oView = this.getView();
-            if (oView && oView.byId) {
-                // Store field references to avoid using byId() later
-                this._oDestinationInput = oView.byId("destinationInput");
-                this._oStartDatePicker = oView.byId("startDatePicker");
-                this._oEndDatePicker = oView.byId("endDatePicker");
-                this._oReasonTextArea = oView.byId("reasonTextArea");
-                this._oManagerSelect = oView.byId("managerSelect");
-            } else {
-                // If view not loaded yet, try again after a short delay
-                setTimeout(this.attachViewLoaded.bind(this), 100);
-            }
+            // No byId caching; rely on model bindings
         },
 
         _onRouteMatched: function (oEvent) {

@@ -3,6 +3,17 @@ sap.ui.define([
 ], function (DateFormat) {
     "use strict";
 
+    function getText(sKey, aArgs) {
+        try {
+            var oI18n = sap.ui.getCore().getModel("i18n");
+            var oBundle = oI18n && oI18n.getResourceBundle && oI18n.getResourceBundle();
+            if (oBundle) {
+                return aArgs ? oBundle.getText(sKey, aArgs) : oBundle.getText(sKey);
+            }
+        } catch (e) {}
+        return aArgs && aArgs.length ? (sKey + ": " + aArgs.join(", ")) : sKey;
+    }
+
     return {
         /**
          * Format status text for display
@@ -13,17 +24,7 @@ sap.ui.define([
             if (!sStatus) {
                 return "";
             }
-            
-            const statusMap = {
-                "PENDING_APPROVAL": "Pending Approval",
-                "APPROVED": "Approved",
-                "REJECTED": "Rejected",
-                "PARTIALLY_REJECTED": "Partially Rejected",
-                "CANCELLED": "Cancelled",
-                "DRAFT": "Draft"
-            };
-            
-            return statusMap[sStatus] || sStatus;
+            return getText("status." + sStatus, [sStatus]) || sStatus;
         },
 
         /**
@@ -103,13 +104,7 @@ sap.ui.define([
             if (!sRole) {
                 return "";
             }
-            
-            const roleMap = {
-                "USER": "User",
-                "MANAGER": "Manager"
-            };
-            
-            return roleMap[sRole] || sRole;
+            return getText("role." + sRole, [sRole]) || sRole;
         },
 
         /**
@@ -121,16 +116,7 @@ sap.ui.define([
             if (!sType) {
                 return "";
             }
-            
-            const typeMap = {
-                "ANNUAL_LEAVE": "Planned Leave",
-                "SICK_LEAVE": "Sick Leave",
-                "UNPAID_LEAVE": "Unpaid Leave",
-                "PARENTAL_LEAVE": "Parental Leave",
-                "OTHER": "Other"
-            };
-            
-            return typeMap[sType] || sType;
+            return getText("vacationType." + sType, [sType]) || sType;
         },
 
         /**
@@ -142,14 +128,7 @@ sap.ui.define([
             if (!sStatus) {
                 return "";
             }
-            
-            const statusMap = {
-                "APPROVED": "Approved",
-                "REJECTED": "Rejected",
-                "PENDING": "Pending"
-            };
-            
-            return statusMap[sStatus] || sStatus;
+            return getText("attachmentStatus." + sStatus, [sStatus]) || sStatus;
         },
 
         /**
@@ -253,11 +232,9 @@ sap.ui.define([
             const diffTime = Math.abs(endDate - startDate);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end days
             
-            if (diffDays === 1) {
-                return "1 day";
-            } else {
-                return diffDays + " days";
-            }
+            return diffDays === 1
+                ? getText("duration.singleDay")
+                : getText("duration.multipleDays", [diffDays]);
         },
 
         /**
@@ -329,6 +306,16 @@ sap.ui.define([
             };
             
             return iconMap[sType] || "sap-icon://document";
+        },
+
+        /**
+         * Format request type label via i18n
+         * @param {string} sType - Request type key
+         * @returns {string} Localized label
+         */
+        formatRequestType: function (sType) {
+            if (!sType) { return ""; }
+            return getText("requestType." + sType, [sType]) || sType;
         },
 
         /**

@@ -41,10 +41,7 @@
                             class="sapUiHideOnDesktop sapUiHideOnTablet"
                         />
                         <ToolbarSpacer />
-                        <Title
-                            text="Request Details"
-                            level="H2"
-                        />
+                        <Title text="{i18n>title.requestDetails}" level="H2"/>
                         <ToolbarSpacer />
                         <SegmentedButton
                             visible="{detailModel>/isManager}"
@@ -52,32 +49,18 @@
                             selectionChange="onViewModeChange"
                         >
                             <items>
-                                <SegmentedButtonItem
-                                    key="USER"
-                                    text="User Mode"
-                                    icon="sap-icon://employee"
-                                />
-                                <SegmentedButtonItem
-                                    key="MANAGER"
-                                    text="Manager Mode"
-                                    icon="sap-icon://manager"
-                                />
+                                <SegmentedButtonItem key="USER" text="{i18n>label.userMode}" icon="sap-icon://employee"/>
+                                <SegmentedButtonItem key="MANAGER" text="{i18n>label.managerMode}" icon="sap-icon://manager"/>
                             </items>
                         </SegmentedButton>
                         <ToolbarSpacer />
-                        <Avatar
-                            initials="Js"
-                            press="onUserInfoPress"
-                            displaySize="XS"
-                            backgroundColor="Accent6"
-                            tooltip="User Info"
-                        />
+                        <Avatar initials="Js" press="onUserInfoPress" displaySize="XS" backgroundColor="Accent6" tooltip="{i18n>text.userInfo}"/>
                     </OverflowToolbar>
                 </customHeader>
                 <content>
                     <VBox class="sapUiMediumMargin">
                         <!-- Request Detail Section -->
-                        <Panel headerText="Request Information" expanded="true">
+                        <Panel headerText="{i18n>title.requestInformation}" expanded="true">
                             <content>
                                 <VBox class="sapUiSmallMargin">
                                     <!-- Request ID -->
@@ -314,22 +297,14 @@
                             <content>
                                 <VBox class="sapUiSmallMargin">
                                     <HBox justifyContent="End" class="sapUiSmallMarginBottom">
-                                        <SearchField
-                                            id="descriptionSearch"
-                                            width="15rem"
-                                            placeholder="Search by description..."
-                                            value="{filterModel>/descriptionQuery}"
-                                            search="onSearchAttachmentsByDescription"
-                                            liveChange="onSearchAttachmentsByDescription"
-                                            class="sapUiTinyMarginEnd"
-                                        />
+                                        <SearchField id="descriptionSearch" width="15rem" placeholder="{i18n>placeholder.searchByDescription}" value="{filterModel>/descriptionQuery}" search="onSearchAttachmentsByDescription" liveChange="onSearchAttachmentsByDescription" class="sapUiTinyMarginEnd"/>
                                         <Select
                                             id="categoryFilter"
                                             width="12rem"
                                             selectedKey="{filterModel>/categoryFilter}"
                                             change="onFilterAttachmentsByCategory"
                                             class="sapUiTinyMarginEnd">
-                                            <core:Item key="" text="All Categories"/>
+                                            <core:Item key="" text="{i18n>filter.allCategories}"/>
                                             <core:Item key="Food Costs" text="Food Costs"/>
                                             <core:Item key="Travel Costs" text="Travel Costs"/>
                                             <core:Item key="Stay Costs" text="Stay Costs"/>
@@ -339,17 +314,13 @@
                                             width="12rem"
                                             selectedKey="{filterModel>/statusFilter}"
                                             change="onFilterAttachmentsByStatus">
-                                            <core:Item key="" text="All Statuses"/>
-                                            <core:Item key="PENDING" text="Pending"/>
-                                            <core:Item key="APPROVED" text="Approved"/>
-                                            <core:Item key="REJECTED" text="Rejected"/>
+                                            <core:Item key="" text="{i18n>filter.allStatus}"/>
+                                            <core:Item key="PENDING" text="{i18n>filter.status.pending}"/>
+                                            <core:Item key="APPROVED" text="{i18n>filter.status.approved}"/>
+                                            <core:Item key="REJECTED" text="{i18n>filter.status.rejected}"/>
                                         </Select>
                                     </HBox>
-                                    <Table 
-                                        id="attachmentsTable"
-                                        items="{detailModel>/attachments}" 
-                                        noDataText="No expense attachments"
-                                        class="sapUiSmallMarginTop">
+                                    <Table id="attachmentsTable" items="{detailModel>/attachmentsFiltered}" noDataText="{i18n>error.noAttachments}" class="sapUiSmallMarginTop">
                                         <columns>
                                             <Column>
                                                 <customData>
@@ -357,13 +328,13 @@
                                                 </customData>
                                             </Column>
                                             <Column>
-                                                <Text text="Description"/>
+                                                <Text text="{i18n>column.description}"/>
                                                 <customData>
                                                     <core:CustomData key="p13nData" value='\{"sortProperty": "description", "filterProperty": "description"}'/>
                                                 </customData>
                                             </Column>
                                             <Column>
-                                                <Text text="File Name"/>
+                                                <Text text="{i18n>column.fileName}"/>
                                                 <customData>
                                                     <core:CustomData key="p13nData" value='\{"sortProperty": "fileName", "filterProperty": "fileName"}'/>
                                                 </customData>
@@ -422,12 +393,12 @@
 
                         <!-- Resubmission Section for Rejected Attachments -->
                         <Panel 
-                            headerText="Resubmit Rejected Attachments" 
+                            headerText="{i18n>title.resubmitRejectedAttachments}" 
                             expanded="true"
                             visible="{= ${detailModel>/viewMode} === 'USER' &amp;&amp; ${detailModel>/isOwner} &amp;&amp; (${detailModel>/status} === 'REJECTED' || ${detailModel>/status} === 'PARTIALLY_REJECTED')}" class="sapUiMediumMarginTop">
                             <headerToolbar>
                                 <Toolbar>
-                                    <Title text="Rejected Attachments" level="H4"/>
+                                    <Title text="{i18n>title.rejectedAttachments}" level="H4"/>
                                     <ToolbarSpacer/>
                                     <Select
                                         id="rejectedCategoryFilter"
@@ -444,24 +415,14 @@
                             </headerToolbar>
                             <content>
                                 <VBox class="sapUiSmallMargin">
-                                    <Text text="Please upload new files to replace the rejected attachments below:" class="sapUiSmallMarginBottom"/>
-                                    <Table id="rejectedAttachmentsTable" items="{detailModel>/attachments}" noDataText="No rejected attachments" class="sapUiSmallMarginTop">
+                                    <Text text="{i18n>info.resubmitRequest}" class="sapUiSmallMarginBottom"/>
+                                    <Table id="rejectedAttachmentsTable" items="{detailModel>/attachmentsRejectedFiltered}" noDataText="{i18n>text.noRejectedAttachments}" class="sapUiSmallMarginTop">
                                         <columns>
-                                            <Column>
-                                                <Text text="Category"/>
-                                            </Column>
-                                            <Column>
-                                                <Text text="Description"/>
-                                            </Column>
-                                            <Column>
-                                                <Text text="Rejected File"/>
-                                            </Column>
-                                            <Column>
-                                                <Text text="Rejection Reason"/>
-                                            </Column>
-                                            <Column hAlign="Center">
-                                                <Text text="Replacement File"/>
-                                            </Column>
+                                            <Column><Text text="{i18n>column.category}"/></Column>
+                                            <Column><Text text="{i18n>column.description}"/></Column>
+                                            <Column><Text text="{i18n>column.fileName}"/></Column>
+                                            <Column><Text text="{i18n>column.rejectionReason}"/></Column>
+                                            <Column hAlign="Center"><Text text="{i18n>column.replacementFile}"/></Column>
                                         </columns>
                                         <items>
                                             <ColumnListItem visible="{= ${detailModel>status} === 'REJECTED'}">
@@ -470,10 +431,7 @@
                                                     <Text text="{detailModel>description}"/>
                                                     <Link text="{detailModel>fileName}" href="{detailModel>fileUrl}" target="_blank"/>
                                                     <VBox class="sapUiTinyMargin">
-                                                        <Label
-                                                            text="Reason"
-                                                            visible="{= ${detailModel>rejectionReason} ? true : false}"
-                                                        />
+                                                        <Label text="{i18n>label.rejectionReason}" visible="{= ${detailModel>rejectionReason} ? true : false}"/>
                                                         <Text
                                                             text="{detailModel>rejectionReason}"
                                                             wrapping="true"
@@ -483,7 +441,7 @@
                                                     </VBox>
                                                     <unified:FileUploader
                                                         sameFilenameAllowed="true"
-                                                        buttonText="Upload Replacement"
+                                                        buttonText="{i18n>column.replacementFile}"
                                                         fileType="pdf,doc,docx,jpg,jpeg,png"
                                                         uploadUrl="/api/upload"
                                                         uploadComplete="onFileReuploaded"
@@ -508,7 +466,7 @@
                         <HBox justifyContent="End" class="sapUiMediumMarginTop">
                             <!-- Manager Actions (only if user is manager and status is pending) -->
                             <Button
-                                text="Approve"
+                                text="{i18n>button.approve}"
                                 type="Accept"
                                 icon="sap-icon://accept"
                                 press="onApproveAll"
@@ -516,7 +474,7 @@
                                 class="sapUiTinyMarginEnd"
                             />
                             <Button
-                                text="Reject"
+                                text="{i18n>button.reject}"
                                 type="Reject"
                                 icon="sap-icon://decline"
                                 press="onRejectAll"
@@ -524,7 +482,7 @@
                                 class="sapUiTinyMarginEnd"
                             />
                             <Button
-                                text="Partial Approval"
+                                text="{i18n>button.partialApproval}"
                                 type="Emphasized"
                                 icon="sap-icon://approvals"
                                 press="onPartialApprove"
@@ -534,21 +492,21 @@
                             
                             <!-- User/Owner Actions -->
                             <Button
-                                text="Edit Request"
+                                text="{i18n>button.editRequest}"
                                 icon="sap-icon://edit"
                                 press="onEditRequest"
                                 visible="{= ${detailModel>/isOwner} &amp;&amp; (${detailModel>/status} === 'PENDING_APPROVAL' || ${detailModel>/status} === 'PARTIALLY_REJECTED') &amp;&amp; ${detailModel>/viewMode} === 'USER'}"
                                 class="sapUiTinyMarginEnd"
                             />
                             <Button
-                                text="Resubmit Request"
+                                text="{i18n>button.resubmitRequest}"
                                 icon="sap-icon://refresh"
                                 press="onResubmitRequestInline"
                                 class="sapUiTinyMarginEnd"
                                 visible="{= ${detailModel>/isOwner} &amp;&amp; (${detailModel>/status} === 'REJECTED' || ${detailModel>/status} === 'PARTIALLY_REJECTED') &amp;&amp; ${detailModel>/viewMode} === 'USER'}"
                             />
                             <Button
-                                text="Forward to Another Manager"
+                                text="{i18n>button.forwardToAnotherManager}"
                                 icon="sap-icon://forward"
                                 press="onForwardRequest"
                                 visible="{= (${detailModel>/viewMode} === 'USER' &amp;&amp; ${detailModel>/isOwner}) || (${detailModel>/viewMode} === 'MANAGER' &amp;&amp; ${detailModel>/isManager})}"

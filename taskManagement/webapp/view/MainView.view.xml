@@ -46,34 +46,15 @@
                             level="H2"
                         />
                         <ToolbarSpacer />
-                        <Avatar
-                            initials="Js"
-                            press="onUserInfoPress"
-                            displaySize="XS"
-                            backgroundColor="Accent6"
-                            tooltip="User Info"
-                        />
+                        <Avatar initials="Js" press="onUserInfoPress" displaySize="XS" backgroundColor="Accent6" tooltip="{i18n>text.userInfo}"/>
                     </OverflowToolbar>
                 </customHeader>
         <content>
             <VBox class ="sapUiMediumMarginTop">
                 <!-- Search and Filter Bar -->
                 <Toolbar>
-                    <SearchField
-                        id="titleSearchField"
-                        width="30%"
-                        placeholder="Search by title"
-                        value="{filterModel>/titleQuery}"
-                        search="onSearch"
-                        liveChange="onSearch"/>
-                    <SearchField
-                        id="employeeSearchField"
-                        width="30%"
-                        placeholder="Search by employee name"
-                        value="{filterModel>/employeeQuery}"
-                        search="onSearch"
-                        liveChange="onSearch"
-                        class="sapUiSmallMarginBegin"/>
+                    <SearchField id="titleSearchField" width="30%" placeholder="{i18n>placeholder.searchByTitle}" value="{filterModel>/titleQuery}" search="onSearch" liveChange="onSearch"/>
+                    <SearchField id="employeeSearchField" width="30%" placeholder="{i18n>placeholder.searchByEmployee}" value="{filterModel>/employeeQuery}" search="onSearch" liveChange="onSearch" class="sapUiSmallMarginBegin"/>
                     <ToolbarSpacer/>
                     <Select
                         id="typeFilter"
@@ -81,9 +62,9 @@
                         selectedKey="{filterModel>/typeFilter}"
                         change="onTypeFilter">
                         <items>
-                            <core:Item key="all" text="All Types"/>
-                            <core:Item key="Travel" text="Travel"/>
-                            <core:Item key="Equipment" text="Equipment"/>
+                            <core:Item key="all" text="{i18n>filter.allTypes}"/>
+                            <core:Item key="Travel" text="{i18n>filter.type.travel}"/>
+                            <core:Item key="Equipment" text="{i18n>filter.type.equipment}"/>
                         </items>
                     </Select>
                 </Toolbar>
@@ -91,32 +72,20 @@
                 <!-- Table -->
                 <Table
                     id="requestsTable"
-                    items="{/requests}"
+                    items="{/filteredRequests}"
                     mode="None">
                     <columns>
-                        <Column>
-                            <Text text="Title"/>
-                        </Column>
-                        <Column>
-                            <Text text="Type"/>
-                        </Column>
-                        <Column>
-                            <Text text="From"/>
-                        </Column>
-                        <Column width="3rem" hAlign="Center">
-                            <Text text="Files"/>
-                        </Column>
-                        <Column width="8rem" hAlign="Center">
-                            <Text text="Actions"/>
-                        </Column>
+                        <Column><Text text="{i18n>label.title}"/></Column>
+                        <Column><Text text="{i18n>column.type}"/></Column>
+                        <Column><Text text="{i18n>column.from}"/></Column>
+                        <Column width="3rem" hAlign="Center"><Text text="{i18n>label.files}"/></Column>
+                        <Column width="8rem" hAlign="Center"><Text text="{i18n>column.actions}"/></Column>
                     </columns>
                     <items>
                         <ColumnListItem type="Active" press="onItemPress">
                             <cells>
                                 <Text text="{title}"/>
-                                <ObjectStatus 
-                                    text="{type}"
-                                    state="{= ${type} === 'Travel' ? 'Success' : (${type} === 'Equipment' ? 'Information' : 'Warning')}"/>
+                                <ObjectStatus text="{path: 'type', formatter: '.formatter.formatRequestType'}" state="Information"/>
                                 <Text text="{from}"/>
                                 <core:Icon
                                     src="{= ${hasFiles} ? 'sap-icon://attachment' : 'sap-icon://document' }"
@@ -140,7 +109,7 @@
                 <!-- Request Detail Section (shown on click) -->
 <!-- Request Detail Section (shown on click) -->
                 <Panel 
-                    headerText="Request Details"
+                    headerText="{i18n>title.requestDetails}"
                     expanded="{viewModel>/showDetail}"
                     expandable="true"
                     visible="{viewModel>/showDetail}"
@@ -149,18 +118,18 @@
                         <!-- Request ID -->
                         <VBox class="sapUiSmallMargin">
                             <HBox class="sapUiSmallMarginBottom">
-                                <Label text="Request ID:" class="sapUiTinyMarginEnd"/>
+                                <Label text="{i18n>column.requestId}" class="sapUiTinyMarginEnd"/>
                                 <Text text="{viewModel>/selectedRequest/requestId}" class="sapUiTinyMarginBegin"/>
                             </HBox>
                             
                             <!-- Type and Status -->
                             <HBox class="sapUiSmallMarginBottom">
-                                <Label text="Type:" class="sapUiTinyMarginEnd"/>
+                                <Label text="{i18n>column.type}" class="sapUiTinyMarginEnd"/>
                                 <ObjectStatus 
                                     text="{viewModel>/selectedRequest/type}"
                                     state="{= ${viewModel>/selectedRequest/type} === 'Travel' ? 'Success' : 'Information'}"
                                     class="sapUiTinyMarginBegin"/>
-                                <Label text="Status:" class="sapUiMediumMarginBegin"/>
+                                <Label text="{i18n>column.status}" class="sapUiMediumMarginBegin"/>
                                 <ObjectStatus 
                                     text="{viewModel>/selectedRequest/status}"
                                     state="{= ${viewModel>/selectedRequest/status} === 'APPROVED' ? 'Success' : (${viewModel>/selectedRequest/status} === 'REJECTED' ? 'Error' : 'Warning')}"
@@ -169,22 +138,19 @@
                             
                             <!-- Submitted Date and From -->
                             <HBox class="sapUiSmallMarginBottom">
-                                <Label text="From:" class="sapUiTinyMarginEnd"/>
+                                <Label text="{i18n>column.from}" class="sapUiTinyMarginEnd"/>
                                 <Text text="{viewModel>/selectedRequest/from}" class="sapUiTinyMarginBegin"/>
                             </HBox>
                             
                             <!-- View Details Button -->
                             <HBox class="sapUiMediumMarginTop" justifyContent="Center">
                                 <Button
-                                    text="View Full Details"
+                                    text="{i18n>button.viewDetails}"
                                     type="Emphasized"
                                     icon="sap-icon://detail-view"
                                     press="onViewDetails"
                                     class="sapUiTinyMargin"/>
-                                <Button
-                                    text="Close"
-                                    press="onCloseDetail"
-                                    class="sapUiTinyMarginBegin"/>
+                                <Button text="{i18n>button.close}" press="onCloseDetail" class="sapUiTinyMarginBegin"/>
                             </HBox>
                         </VBox>
                     </content>

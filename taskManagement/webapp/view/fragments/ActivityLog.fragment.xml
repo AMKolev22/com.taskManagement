@@ -3,7 +3,7 @@
     xmlns:core="sap.ui.core"
 >
     <Panel
-        headerText="Activity Log"
+        headerText="{i18n>title.activityLog}"
         expandable="true"
         expanded="true"
     >
@@ -14,7 +14,7 @@
                     <SearchField
                         id="activitySearchField"
                         width="60%"
-                        placeholder="Search activities..."
+                        placeholder="{i18n>placeholder.searchActivities}"
                         value="{filterModel>/searchQuery}"
                         search=".onActivitySearch"
                         liveChange=".onActivitySearch"
@@ -27,26 +27,11 @@
                         change=".onActivityFilterChange"
                     >
                         <items>
-                            <core:Item
-                                key="all"
-                                text="All Actions"
-                            />
-                            <core:Item
-                                key="APPROVED"
-                                text="Approved"
-                            />
-                            <core:Item
-                                key="REJECTED"
-                                text="Rejected"
-                            />
-                            <core:Item
-                                key="PARTIALLY_REJECTED"
-                                text="Partially Rejected"
-                            />
-                            <core:Item
-                                key="SUBMITTED"
-                                text="Submitted"
-                            />
+                            <core:Item key="all" text="{i18n>filter.allActions}"/>
+                            <core:Item key="APPROVED" text="{i18n>filter.status.approved}"/>
+                            <core:Item key="REJECTED" text="{i18n>filter.status.rejected}"/>
+                            <core:Item key="PARTIALLY_REJECTED" text="{i18n>filter.status.partiallyRejected}"/>
+                            <core:Item key="SUBMITTED" text="{i18n>filter.status.submitted}"/>
                         </items>
                     </Select>
                 </Toolbar>
@@ -55,10 +40,10 @@
                 <List
                     class="activityLogList"
                     id="activityFeedList"
-                    items="{dashboardModel>/activities}"
+                    items="{dashboardModel>/activitiesFiltered}"
                     growing="true"
                     growingThreshold="20"
-                    noDataText="No activities found"
+                    noDataText="{i18n>text.noActivities}"
                 >
                     <FeedListItem
                         sender="{dashboardModel>actorName}"

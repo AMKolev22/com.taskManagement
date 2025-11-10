@@ -25,22 +25,11 @@ sap.ui.define([
             const oFilterModel = Models.createFilterModel();
             this.getView().setModel(oFilterModel, "filterModel");
             
-            // Subscribe to filter model changes
-            oFilterModel.attachPropertyChange(this._onFilterChange.bind(this), this);
+            // We will compute filtered array in model instead of binding filters
             
             this._loadRequests();
             
-            // Store table reference after view is loaded
-            this.attachViewLoaded();
-        },
-
-        attachViewLoaded: function () {
-            const oView = this.getView();
-            if (oView && oView.byId) {
-                this._oRequestsTable = oView.byId("requestsTable");
-            } else {
-                setTimeout(this.attachViewLoaded.bind(this), 100);
-            }
+            // No byId caching; use model-driven filtering
         },
 
         _onFilterChange: function () {
@@ -51,9 +40,8 @@ sap.ui.define([
             this.callAPI("/requests", "GET")
                 .then((data) => {
                     if (data.success && data.data) {
-                        const oModel = new JSONModel({
-                            requests: data.data
-                        });
+                        const oModel = this.getView().getModel() || new JSONModel();
+                        oModel.setData({ requests: data.data, filteredRequests: data.data });
                         this.getView().setModel(oModel);
                     }
                 })
@@ -83,31 +71,20 @@ sap.ui.define([
         },
 
         _applyFilters: function () {
-            if (!this._oRequestsTable) return;
-            
-            const oBinding = this._oRequestsTable.getBinding("items");
-            if (!oBinding) return;
-            
             const oFilterModel = this.getView().getModel("filterModel");
-            const sTitleQuery = oFilterModel.getProperty("/titleQuery") || "";
-            const sEmployeeQuery = oFilterModel.getProperty("/employeeQuery") || "";
+            const oModel = this.getView().getModel();
+            const aAll = (oModel && oModel.getProperty("/requests")) || [];
+            const sTitleQuery = (oFilterModel.getProperty("/titleQuery") || "").toLowerCase();
+            const sEmployeeQuery = (oFilterModel.getProperty("/employeeQuery") || "").toLowerCase();
             const sTypeFilter = oFilterModel.getProperty("/typeFilter") || "all";
-            
-            const aFilters = [];
 
-            if (sTitleQuery) {
-                aFilters.push(new Filter("title", FilterOperator.Contains, sTitleQuery));
-            }
-
-            if (sEmployeeQuery) {
-                aFilters.push(new Filter("from", FilterOperator.Contains, sEmployeeQuery));
-            }
-
-            if (sTypeFilter && sTypeFilter !== "all") {
-                aFilters.push(new Filter("type", FilterOperator.EQ, sTypeFilter));
-            }
-
-            oBinding.filter(aFilters);
+            const aFiltered = aAll.filter(function (r) {
+                var bTitle = !sTitleQuery || String(r.title || "").toLowerCase().indexOf(sTitleQuery) !== -1;
+                var bEmp = !sEmployeeQuery || String(r.from || "").toLowerCase().indexOf(sEmployeeQuery) !== -1;
+                var bType = sTypeFilter === "all" || r.type === sTypeFilter;
+                return bTitle && bEmp && bType;
+            });
+            oModel.setProperty("/filteredRequests", aFiltered);
         },
 
         onItemSelect: function (oEvent) {

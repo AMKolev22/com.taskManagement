@@ -98,6 +98,7 @@ sap.ui.define([
                 }
 
                 this.getModel("dashboardModel").setProperty("/tasks", aTasks);
+                this._applyFilters();
                 this.setBusy(false);
             })
             .catch((error) => {
@@ -114,7 +115,7 @@ sap.ui.define([
                             id: oRequest.id,
                             requestId: oRequest.requestId,
                             type: "Vacation",
-                            submittedBy: oRequest.user ? `${oRequest.user.firstName} ${oRequest.user.lastName}` : "Unknown",
+                            submittedBy: oRequest.user ? `${oRequest.user.firstName} ${oRequest.user.lastName}` : this.getText("label.unknown"),
                             subject: `${formatter.formatVacationType(oRequest.vacationType)} - ${formatter.calculateDuration(oRequest.startDate, oRequest.endDate)}`,
                             submittedDate: oRequest.submittedDate,
                             status: oRequest.status,
@@ -134,7 +135,7 @@ sap.ui.define([
                             id: oRequest.id,
                             requestId: oRequest.requestId,
                             type: "Travel",
-                            submittedBy: oRequest.submittedBy || "Unknown",
+                            submittedBy: oRequest.submittedBy || this.getText("label.unknown"),
                             subject: oRequest.destination,
                             submittedDate: oRequest.submittedDate,
                             status: oRequest.status,
@@ -154,8 +155,8 @@ sap.ui.define([
                             id: oRequest.id,
                             requestId: oRequest.requestId,
                             type: "Equipment",
-                            submittedBy: oRequest.manager?.managerName || "Unknown",
-                            subject: `${oRequest.totalItems} items`,
+                            submittedBy: oRequest.manager?.managerName || this.getText("label.unknown"),
+                            subject: this.getText("text.itemsCount", [oRequest.totalItems || 0]),
                             submittedDate: oRequest.submittedDate,
                             status: oRequest.status,
                             raw: oRequest
@@ -193,41 +194,23 @@ sap.ui.define([
         },
 
         _applyFilters: function () {
-            let _oPendingTasksTable = this.getView().byId("pendingTasksTable");
-            if (!_oPendingTasksTable) return;
-            
-            const oBinding = _oPendingTasksTable.getBinding("items");
-            if (!oBinding) 
-                {return};
-
             const oFilterModel = this.getModel("filterModel");
-            const sSearchQuery = oFilterModel.getProperty("/searchQuery") || "";
+            const oDash = this.getModel("dashboardModel");
+            const aAll = oDash.getProperty("/tasks") || [];
+            const sSearchQuery = (oFilterModel.getProperty("/searchQuery") || "").toLowerCase();
             const sTypeFilter = oFilterModel.getProperty("/typeFilter") || "all";
             const sStatusFilter = oFilterModel.getProperty("/statusFilter") || "all";
 
-            const aFilters = [];
+            const aFiltered = aAll.filter(function (t) {
+                var bMatchesSearch = !sSearchQuery || [t.requestId, t.submittedBy, t.subject]
+                    .filter(Boolean)
+                    .some(function (v) { return String(v).toLowerCase().indexOf(sSearchQuery) !== -1; });
+                var bMatchesType = sTypeFilter === "all" || t.type === sTypeFilter;
+                var bMatchesStatus = sStatusFilter === "all" || t.status === sStatusFilter;
+                return bMatchesSearch && bMatchesType && bMatchesStatus;
+            });
 
-            if (sSearchQuery) {
-                const oSearchFilter = new Filter({
-                    filters: [
-                        new Filter("requestId", FilterOperator.Contains, sSearchQuery),
-                        new Filter("submittedBy", FilterOperator.Contains, sSearchQuery),
-                        new Filter("subject", FilterOperator.Contains, sSearchQuery)
-                    ],
-                    and: false
-                });
-                aFilters.push(oSearchFilter);
-            }
-
-            if (sTypeFilter && sTypeFilter !== "all") {
-                aFilters.push(new Filter("type", FilterOperator.EQ, sTypeFilter));
-            }
-
-            if (sStatusFilter && sStatusFilter !== "all") {
-                aFilters.push(new Filter("status", FilterOperator.EQ, sStatusFilter));
-            }
-
-            oBinding.filter(aFilters);
+            oDash.setProperty("/filteredTasks", aFiltered);
         },
 
         onTaskPress: function (oEvent) {
@@ -261,9 +244,9 @@ sap.ui.define([
             
             if (oListItem) {
                 const oTask = oListItem.getBindingContext("dashboardModel").getObject();
-                this.showConfirmation(`Approve request ${oTask.requestId}?`, () => {
+                this.showConfirmation("confirm.approveRequestWithId", () => {
                     this._updateTaskStatus(oTask, "APPROVED");
-                });
+                }, [oTask.requestId]);
             }
         },
 
@@ -272,8 +255,8 @@ sap.ui.define([
             
             if (oListItem) {
                 const oTask = oListItem.getBindingContext("dashboardModel").getObject();
-                MessageBox.prompt("Please provide a reason for rejection:", {
-                    title: "Reject Request",
+                MessageBox.prompt(this.getText("label.rejectionReason"), {
+                    title: this.getText("dialog.titleReject"),
                     onClose: (oAction, sReason) => {
                         oAction === MessageBox.Action.OK && this._updateTaskStatus(oTask, "REJECTED", sReason);
                     }

@@ -34,7 +34,6 @@ sap.ui.define([
 
             const oFilterModel = Models.createTaskDetailsFilterModel();
             this.setModel(oFilterModel, "filterModel");
-            oFilterModel.attachPropertyChange(this._onFilterChange.bind(this), this);
 
             const bIsManager = oCurrentUser.role === "MANAGER";
             oDetailModel.setProperty("/isManager", bIsManager);
@@ -71,18 +70,7 @@ sap.ui.define([
                 }.bind(this), 100);
             }
             
-            // Store table reference after view is loaded
-            this.attachViewLoaded();
-        },
-
-        attachViewLoaded: function () {
-            const oView = this.getView();
-            if (oView && oView.byId) {
-                this._oAttachmentsTable = oView.byId("attachmentsTable");
-                this._oRejectedAttachmentsTable = oView.byId("rejectedAttachmentsTable");
-            } else {
-                setTimeout(this.attachViewLoaded.bind(this), 100);
-            }
+            // No need to store table references; filtering is model-driven
         },
 
         _onFilterChange: function () {
@@ -91,31 +79,21 @@ sap.ui.define([
         },
 
         _applyAttachmentFilters: function () {
-            if (!this._oAttachmentsTable) return;
-            
-            const oBinding = this._oAttachmentsTable.getBinding("items");
-            if (!oBinding) return;
-
             const oFilterModel = this.getModel("filterModel");
-            const sDescriptionQuery = oFilterModel.getProperty("/descriptionQuery") || "";
+            const oDetailModel = this.getModel("detailModel");
+            const aAll = oDetailModel.getProperty("/attachments") || [];
+            const sDescriptionQuery = (oFilterModel.getProperty("/descriptionQuery") || "").toLowerCase();
             const sCategoryFilter = oFilterModel.getProperty("/categoryFilter") || "";
             const sStatusFilter = oFilterModel.getProperty("/statusFilter") || "";
 
-            const aFilters = [];
+            const aFiltered = aAll.filter(function (a) {
+                var bDesc = !sDescriptionQuery || String(a.description || "").toLowerCase().indexOf(sDescriptionQuery) !== -1;
+                var bCat = !sCategoryFilter || a.category === sCategoryFilter;
+                var bStatus = !sStatusFilter || a.status === sStatusFilter;
+                return bDesc && bCat && bStatus;
+            });
 
-            if (sDescriptionQuery) {
-                aFilters.push(new Filter("description", FilterOperator.Contains, sDescriptionQuery));
-            }
-
-            if (sCategoryFilter) {
-                aFilters.push(new Filter("category", FilterOperator.EQ, sCategoryFilter));
-            }
-
-            if (sStatusFilter) {
-                aFilters.push(new Filter("status", FilterOperator.EQ, sStatusFilter));
-            }
-
-            oBinding.filter(aFilters);
+            oDetailModel.setProperty("/attachmentsFiltered", aFiltered);
         },
 
         // Rejected attachments: filter by category (like expense section)
@@ -127,21 +105,15 @@ sap.ui.define([
         },
 
         _applyRejectedAttachmentFilters: function () {
-            if (!this._oRejectedAttachmentsTable) return;
-            const oBinding = this._oRejectedAttachmentsTable.getBinding("items");
-            if (!oBinding) return;
-
             const oFilterModel = this.getModel("filterModel");
+            const oDetailModel = this.getModel("detailModel");
+            const aAll = (oDetailModel.getProperty("/attachments") || []).filter(function (a) { return a.status === "REJECTED"; });
             const sCategoryFilter = oFilterModel.getProperty("/rejectedCategoryFilter") || "";
 
-            const aFilters = [];
-            // Ensure we only display rejected
-            aFilters.push(new Filter("status", FilterOperator.EQ, "REJECTED"));
-            if (sCategoryFilter) {
-                aFilters.push(new Filter("category", FilterOperator.EQ, sCategoryFilter));
-            }
-
-            oBinding.filter(aFilters);
+            const aFiltered = aAll.filter(function (a) {
+                return !sCategoryFilter || a.category === sCategoryFilter;
+            });
+            oDetailModel.setProperty("/attachmentsRejectedFiltered", aFiltered);
         },
 
         _onRouteMatched: function (oEvent) {
@@ -238,8 +210,8 @@ sap.ui.define([
                 oModelData.items = oData.equipmentItems || [];
                 oModelData.totalCost = oData.totalCost;
             } else if (sType === "Travel") {
-                oModelData.manager = oData.manager?.managerName || "No Manager";
-                oModelData.from = oData.submittedBy || "Unknown";
+                oModelData.manager = oData.manager?.managerName || this.getText("label.noManager");
+                oModelData.from = oData.submittedBy || this.getText("label.unknown");
                 oModelData.userId = oData.userId;
                 oModelData.managerId = oData.managerId;
                 oModelData.destination = oData.destination;
@@ -296,6 +268,9 @@ sap.ui.define([
             }
 
             oDetailModel.setData(oModelData);
+            // After setting details, compute filtered attachment lists
+            this._applyAttachmentFilters();
+            this._applyRejectedAttachmentFilters();
         },
 
         onViewModeChange: function (oEvent) {
@@ -472,6 +447,7 @@ sap.ui.define([
             const oSearchField = oEvent.getSource();
             const sQuery = oEvent.getParameter("query") || oSearchField.getValue();
             oFilterModel.setProperty("/descriptionQuery", sQuery);
+            this._applyAttachmentFilters();
         },
 
         onToggleAttachmentStatus: function (oEvent) {
@@ -629,7 +605,7 @@ sap.ui.define([
             } else {
                 oDetailModel.setProperty(`${sPath}/status`, sStatus);
                 oDetailModel.setProperty(`${sPath}/rejectionReason`, sRejectionReason || "");
-                MessageToast.show(`Attachment ${sStatus.toLowerCase()} successfully`);
+                this.showSuccess("success.attachmentStatus", [sStatus.toLowerCase()]);
                 this._checkAndUpdateRequestStatus();
             }
         },
@@ -638,12 +614,14 @@ sap.ui.define([
             const oFilterModel = this.getModel("filterModel");
             const sSelectedCategory = oEvent.getSource().getSelectedKey();
             oFilterModel.setProperty("/categoryFilter", sSelectedCategory);
+            this._applyAttachmentFilters();
         },
 
         onFilterAttachmentsByStatus: function (oEvent) {
             const oFilterModel = this.getModel("filterModel");
             const sSelectedStatus = oEvent.getSource().getSelectedKey();
             oFilterModel.setProperty("/statusFilter", sSelectedStatus);
+            this._applyAttachmentFilters();
         },
 
         onRejectCategory: function (oEvent) {
@@ -656,19 +634,19 @@ sap.ui.define([
             const oTextArea = new sap.m.TextArea({
                 width: "100%",
                 rows: 3,
-                placeholder: "Enter rejection reason..."
+                placeholder: this.getText("placeholder.rejectionReason")
             });
 
             if (!this._rejectCategoryDialog) {
                 this._rejectCategoryDialog = new sap.m.Dialog({
-                    title: "Reject Category: " + sCategory,
+                    title: this.getText("dialog.titleRejectCategory", [sCategory]),
                     type: "Message",
                     content: [
-                        new sap.m.Label({ text: "Please provide a reason for rejecting all " + sCategory + " attachments:", labelFor: oTextArea }),
+                        new sap.m.Label({ text: this.getText("label.rejectionReasonForCategory", [sCategory]), labelFor: oTextArea }),
                         oTextArea
                     ],
                     beginButton: new sap.m.Button({
-                        text: "Reject All",
+                        text: this.getText("button.rejectAll"),
                         type: "Reject",
                         press: () => {
                             const sReason = oTextArea.getValue();

@@ -23,6 +23,8 @@ sap.ui.define([
                 items: [],
                 files: {},
                 attachments: [],
+                attachmentsFiltered: [],
+                attachmentsRejectedFiltered: [],
                 comments: [],
                 totalCost: "",
                 isManager: false,
@@ -39,20 +41,23 @@ sap.ui.define([
 
         createDashboardModel: function () {
             return new JSONModel({
-                tasks: []
+                tasks: [],
+                filteredTasks: []
             });
         },
 
         createUserDashboardModel: function () {
             return new JSONModel({
                 recentTasks: [],
-                activities: []
+                activities: [],
+                activitiesFiltered: []
             });
         },
 
         createTasksModel: function () {
             return new JSONModel({
-                tasks: []
+                tasks: [],
+                filteredTasks: []
             });
         },
 
