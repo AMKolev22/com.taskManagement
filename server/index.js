@@ -1222,6 +1222,36 @@ app.patch('/api/vacation-requests/:id/status', async (req, res) => {
             }
         });
 
+        // If approved, create an availability (absence) record for the requester
+        if (status === 'APPROVED') {
+            try {
+                // Avoid creating duplicates for the same exact period/type
+                const existing = await prisma.availability.findFirst({
+                    where: {
+                        userId: vacationRequest.userId,
+                        startDate: vacationRequest.startDate,
+                        endDate: vacationRequest.endDate,
+                        availabilityType: 'VACATION'
+                    }
+                });
+
+                if (!existing) {
+                    await prisma.availability.create({
+                        data: {
+                            userId: vacationRequest.userId,
+                            startDate: vacationRequest.startDate,
+                            endDate: vacationRequest.endDate,
+                            reason: vacationRequest.reason || 'Vacation',
+                            availabilityType: 'VACATION'
+                        }
+                    });
+                }
+            } catch (e) {
+                // Non-blocking: log and continue
+                console.error('Error creating availability for approved vacation:', e);
+            }
+        }
+
         res.json({
             success: true,
             message: `Vacation request ${status.toLowerCase()} successfully`,
@@ -1338,7 +1368,7 @@ app.post('/api/availability/check', async (req, res) => {
  */
 app.get('/api/availability', async (req, res) => {
     try {
-        const { userId } = req.query;
+        const { userId, type, availabilityType } = req.query;
 
         if (!userId) {
             return res.status(400).json({
@@ -1347,8 +1377,14 @@ app.get('/api/availability', async (req, res) => {
             });
         }
 
+        const where = { userId };
+        const requestedType = type || availabilityType;
+        if (requestedType) {
+            where.availabilityType = requestedType;
+        }
+
         const availabilities = await prisma.availability.findMany({
-            where: { userId },
+            where,
             orderBy: { startDate: 'asc' }
         });
 

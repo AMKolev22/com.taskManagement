@@ -221,6 +221,14 @@ sap.ui.define([
             oRequestModel.setProperty("/validation/managerState", "None");
             oRequestModel.setProperty("/validation/managerMessage", "");
             this._checkAvailability();
+            // If the calendar popover is open, refresh it for the selected manager
+            const sManagerId = oRequestModel.getProperty("/managerId");
+            if (this._oCalendarPopover && sManagerId) {
+                this._loadCalendarData(sManagerId, "Manager");
+            } else if (this._oCalendarPopover) {
+                const oCalendarModel = Models.createCalendarModel("Manager Availability", "", []);
+                this._oCalendarPopover.setModel(oCalendarModel, "calendarModel");
+            }
         },
 
         onSubstituteChange: function () {
@@ -228,6 +236,14 @@ sap.ui.define([
             oRequestModel.setProperty("/validation/substituteState", "None");
             oRequestModel.setProperty("/validation/substituteMessage", "");
             this._checkAvailability();
+            // If the calendar popover is open, refresh it for the selected substitute
+            const sSubstituteId = oRequestModel.getProperty("/substituteId");
+            if (this._oCalendarPopover && sSubstituteId) {
+                this._loadCalendarData(sSubstituteId, "Substitute");
+            } else if (this._oCalendarPopover) {
+                const oCalendarModel = Models.createCalendarModel("Substitute Availability", "", []);
+                this._oCalendarPopover.setModel(oCalendarModel, "calendarModel");
+            }
         },
 
         onPaidChange: function (oEvent) {
@@ -242,11 +258,9 @@ sap.ui.define([
             
             if (!sManagerId) {
                 this.setFieldError(this._oManagerSelect, true, "error.managerRequiredFirst");
-                return;
             }
-
-            // Load into side panel so the form stays interactive
-            this._showCalendar(sManagerId, "Manager", oEvent && oEvent.getSource());
+            // Open popover even without a selection (empty initially)
+            this._showCalendar(sManagerId || "", "Manager", oEvent && oEvent.getSource());
         },
 
         onViewSubstituteCalendar: function (oEvent) {
@@ -255,10 +269,9 @@ sap.ui.define([
             
             if (!sSubstituteId) {
                 this.setFieldError(this._oSubstituteSelect, true, "error.substituteRequiredFirst");
-                return;
             }
-
-            this._showCalendar(sSubstituteId, "Substitute", oEvent && oEvent.getSource());
+            // Open popover even without a selection (empty initially)
+            this._showCalendar(sSubstituteId || "", "Substitute", oEvent && oEvent.getSource());
         },
 
         _showCalendar: function (sUserId, sTitle, oOpenBy) {
@@ -269,13 +282,24 @@ sap.ui.define([
                 }).then((oPopover) => {
                     this._oCalendarPopover = oPopover;
                     this.getView().addDependent(oPopover);
-                    this._loadCalendarData(sUserId, sTitle);
+                    // Initialize empty or load user data if provided
+                    if (sUserId) {
+                        this._loadCalendarData(sUserId, sTitle);
+                    } else {
+                        const oCalendarModel = Models.createCalendarModel(`${sTitle} Availability`, "", []);
+                        this._oCalendarPopover.setModel(oCalendarModel, "calendarModel");
+                    }
                     if (oOpenBy && this._oCalendarPopover.openBy) {
                         this._oCalendarPopover.openBy(oOpenBy);
                     }
                 });
             } else {
-                this._loadCalendarData(sUserId, sTitle);
+                if (sUserId) {
+                    this._loadCalendarData(sUserId, sTitle);
+                } else if (this._oCalendarPopover) {
+                    const oCalendarModel = Models.createCalendarModel(`${sTitle} Availability`, "", []);
+                    this._oCalendarPopover.setModel(oCalendarModel, "calendarModel");
+                }
                 if (oOpenBy && this._oCalendarPopover.openBy) {
                     this._oCalendarPopover.openBy(oOpenBy);
                 }
@@ -283,10 +307,18 @@ sap.ui.define([
         },
 
         _loadCalendarData: function (sUserId, sTitle) {
-            this.callAPI(`/availability?userId=${sUserId}`, "GET")
+            this.callAPI(`/availability?userId=${sUserId}&type=VACATION`, "GET")
                 .then((oResponse) => {
                     if (oResponse.success && oResponse.data) {
-                        const oCalendarModel = Models.createCalendarModel(`${sTitle} Availability`, sUserId, oResponse.data);
+                        // Ensure start/end dates are Date objects for the Calendarc
+                        console.log("oResponse.data", oResponse.data);
+                        const aAvailabilities = (oResponse.data || []).map(function(item){
+                            return Object.assign({}, item, {
+                                startDate: item.startDate ? new Date(item.startDate) : null,
+                                endDate: item.endDate ? new Date(item.endDate) : null
+                            });
+                        });
+                        const oCalendarModel = Models.createCalendarModel(`${sTitle} Availability`, sUserId, aAvailabilities);
                         if (this._oCalendarPopover) {
                             this._oCalendarPopover.setModel(oCalendarModel, "calendarModel");
                         }
@@ -298,7 +330,7 @@ sap.ui.define([
         },
 
         _loadCalendarDataToView: function (sUserId, sTitle) {
-            this.callAPI(`/availability?userId=${sUserId}`, "GET")
+            this.callAPI(`/availability?userId=${sUserId}&type=VACATION`, "GET")
                 .then((oResponse) => {
                     if (oResponse.success && oResponse.data) {
                         const oCalendarModel = Models.createCalendarModel(sTitle || "", sUserId, oResponse.data);
