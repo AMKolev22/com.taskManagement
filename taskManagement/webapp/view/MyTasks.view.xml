@@ -95,7 +95,7 @@
                                                     text="{tasksModel>requestId}"
                                                     class="sapUiTinyMarginEnd"
                                                 />
-                                                <ObjectStatus text="{path: 'tasksModel>type', formatter: '.formatter.formatRequestType'}" state="Information"/>
+                                                <ObjectStatus text="{path: 'tasksModel>type', formatter: '.formatter.formatRequestType'}" state="Information" icon="{= ${tasksModel>type} === 'Vacation' ? 'sap-icon://general-leave-request' : '' }"/>
                                             </HBox>
                                             <Text
                                                 text="{tasksModel>subject}"

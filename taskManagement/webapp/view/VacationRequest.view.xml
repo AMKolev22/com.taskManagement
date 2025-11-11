@@ -41,6 +41,7 @@
                             press="onNavBack"
                         />
                         <ToolbarSpacer />
+                        <core:Icon src="sap-icon://create-leave-request" class="sapUiTinyMarginEnd"/>
                         <Title text="{i18n>title.newVacationRequest}" level="H2"/>
                         <ToolbarSpacer />
                     </OverflowToolbar>

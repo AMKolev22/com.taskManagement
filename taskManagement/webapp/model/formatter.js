@@ -302,7 +302,7 @@ sap.ui.define([
             const iconMap = {
                 "Travel": "sap-icon://travel-expense",
                 "Equipment": "sap-icon://product",
-                "Vacation": "sap-icon://vacation"
+                "Vacation": "sap-icon://general-leave-request"
             };
             
             return iconMap[sType] || "sap-icon://document";

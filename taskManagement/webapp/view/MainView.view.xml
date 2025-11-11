@@ -84,7 +84,7 @@
                         <ColumnListItem type="Active" press="onItemPress">
                             <cells>
                                 <Text text="{title}"/>
-                                <ObjectStatus text="{path: 'type', formatter: '.formatter.formatRequestType'}" state="Information"/>
+                                <ObjectStatus text="{path: 'type', formatter: '.formatter.formatRequestType'}" state="Information" icon="{= ${type} === 'Vacation' ? 'sap-icon://general-leave-request' : '' }"/>
                                 <Text text="{from}"/>
                                 <core:Icon
                                     src="{= ${hasFiles} ? 'sap-icon://attachment' : 'sap-icon://document' }"
@@ -127,6 +127,7 @@
                                 <ObjectStatus 
                                     text="{viewModel>/selectedRequest/type}"
                                     state="{= ${viewModel>/selectedRequest/type} === 'Travel' ? 'Success' : 'Information'}"
+                                    icon="{= ${viewModel>/selectedRequest/type} === 'Vacation' ? 'sap-icon://general-leave-request' : '' }"
                                     class="sapUiTinyMarginBegin"/>
                                 <Label text="{i18n>column.status}" class="sapUiMediumMarginBegin"/>
                                 <ObjectStatus 

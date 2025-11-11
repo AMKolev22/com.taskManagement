@@ -64,7 +64,7 @@
                     />
                     <Button
                         text="New Vacation Request"
-                        icon="sap-icon://vacation"
+                        icon="sap-icon://create-leave-request"
                         width="100%"
                         press="onPressRoute"
                         data:route="vacationRequest"

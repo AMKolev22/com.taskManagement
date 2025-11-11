@@ -161,7 +161,7 @@
                                             color="{path: 'dashboardModel>type', formatter: '.formatter.getRequestTypeColor'}"
                                         />
                                         <Text text="{dashboardModel>requestId}" />
-                                        <ObjectStatus text="{path: 'dashboardModel>type', formatter: '.formatter.formatRequestType'}" state="Information"/>
+                                        <ObjectStatus text="{path: 'dashboardModel>type', formatter: '.formatter.formatRequestType'}" state="Information" />
                                         <Text text="{dashboardModel>submittedBy}" />
                                         <Text text="{dashboardModel>subject}" />
                                         <Text text="{path: 'dashboardModel>submittedDate', formatter: '.formatter.formatDate'}" />

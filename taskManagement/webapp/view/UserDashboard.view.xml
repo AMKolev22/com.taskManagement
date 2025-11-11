@@ -64,7 +64,7 @@
                             justifyContent="Start"
                             class="sapUiMediumMarginBottom"
                         >
-                            <Button text="{i18n>button.newVacationRequest}" icon="sap-icon://vacation" type="Emphasized" press="onNewVacationRequest" class="sapUiTinyMarginEnd"/>
+                            <Button text="{i18n>button.newVacationRequest}" icon="sap-icon://create-leave-request" type="Emphasized" press="onNewVacationRequest" class="sapUiTinyMarginEnd"/>
                             <Button text="{i18n>button.viewAllMyTasks}" icon="sap-icon://task" press="onViewAllTasks" class="sapUiTinyMarginEnd"/>
                         </HBox>
 

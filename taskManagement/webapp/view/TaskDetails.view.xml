@@ -48,7 +48,7 @@
                                     <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="2" columnsM="2" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
                                         <f:content>
                                             <Label text="Type"/>
-                                            <ObjectStatus text="{detailModel>/type}" state="{= ${detailModel>/type} === 'Travel' ? 'Success' : 'Information'}"/>
+                                            <ObjectStatus text="{detailModel>/type}" state="{= ${detailModel>/type} === 'Travel' ? 'Success' : 'Information'}" icon="{= ${detailModel>/type} === 'Vacation' ? 'sap-icon://general-leave-request' : '' }"/>
 
                                             <Label text="Status"/>
                                             <ObjectStatus text="{detailModel>/status}" state="{= ${detailModel>/status} === 'APPROVED' ? 'Success' : (${detailModel>/status} === 'REJECTED' ? 'Error' : 'Warning')}"/>
@@ -88,7 +88,13 @@
                             </content>
                         </Panel>                        <!-- Vacation Request Details -->
                         <!-- Vacation Request Details -->
-                        <Panel headerText="Vacation Details" expanded="true" visible="{= ${detailModel>/type} === 'Vacation'}" class="sapUiMediumMarginTop">
+                        <Panel expanded="true" visible="{= ${detailModel>/type} === 'Vacation'}" class="sapUiMediumMarginTop">
+                            <headerToolbar>
+                                <Toolbar>
+                                    <core:Icon src="sap-icon://general-leave-request" class="sapUiTinyMarginEnd"/>
+                                    <Title text="Vacation Details" level="H4"/>
+                                </Toolbar>
+                            </headerToolbar>
                             <content>
                                 <VBox class="sapUiContentPadding">
                                     <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="1" columnsM="1" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
