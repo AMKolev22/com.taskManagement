@@ -1,28 +1,13 @@
-<mvc:View
-    controllerName="taskManagement.controller.MyTasks"
+<mvc:View controllerName="taskManagement.controller.MyTasks"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
-    xmlns="sap.m"
-    displayBlock="true"
-    height="100%"
->
-    <SplitApp
-        id="myTasksSplitApp"
-        initialMaster="masterPage"
-        initialDetail="detailPage"
-    >
+    xmlns="sap.m" displayBlock="true" height="100%">
+    <SplitApp id="myTasksSplitApp" initialMaster="masterPage" initialDetail="detailPage">
         <masterPages>
             <Page id="masterPage">
                 <content>
-                    <FlexBox
-                        alignItems="Center"
-                        direction="Column"
-                        height="100%"
-                    >
-                        <core:Fragment
-                            fragmentName="taskManagement.view.fragments.Sidebar"
-                            type="XML"
-                        />
+                    <FlexBox alignItems="Center" direction="Column" height="100%">
+                        <core:Fragment fragmentName="taskManagement.view.fragments.Sidebar" type="XML" />
                     </FlexBox>
                 </content>
             </Page>
@@ -31,11 +16,7 @@
             <Page id="detailPage">
                 <customHeader>
                     <OverflowToolbar>
-                        <Button
-                            icon="sap-icon://nav-back"
-                            type="Transparent"
-                            press="onNavBack"
-                        />
+                        <Button icon="sap-icon://nav-back" type="Transparent" press="onNavBack" />
                         <ToolbarSpacer />
                         <Title text="{i18n>title.myTasks}" level="H2"/>
                         <ToolbarSpacer />
@@ -68,52 +49,29 @@
 
                         <!-- Tasks List -->
                         <List id="myTasksList" items="{tasksModel>/filteredTasks}" growing="true" growingThreshold="20" noDataText="{i18n>text.noTasks}">
-                            <CustomListItem
-                                type="Active"
-                                press="onTaskPress"
-                            >
-                                <HBox
-                                    justifyContent="SpaceBetween"
-                                    alignItems="Center"
-                                    width="100%"
-                                >
-                                    <HBox
-                                        alignItems="Center"
-                                    >
+                            <CustomListItem type="Active" press="onTaskPress">
+                                <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%" class="sapUiSmallMarginTop">
+                                    <HBox alignItems="Center">
                                         <layoutData>
                                             <FlexItemData growFactor="1" />
                                         </layoutData>
-                                        <core:Icon
-                                            src="{path: 'tasksModel>type', formatter: '.formatter.getRequestTypeIcon'}"
-                                            color="{path: 'tasksModel>type', formatter: '.formatter.getRequestTypeColor'}"
-                                            size="2rem"
-                                            class="sapUiTinyMarginEnd"
-                                        />
+                                        <core:Icon src="{path: 'tasksModel>type', formatter: '.formatter.getRequestTypeIcon'}" color="{path: 'tasksModel>type', formatter: '.formatter.getRequestTypeColor'}" size="2rem" class="sapUiTinyMarginEnd" />
                                         <VBox>
                                             <HBox>
-                                                <Text
-                                                    text="{tasksModel>requestId}"
-                                                    class="sapUiTinyMarginEnd"
-                                                />
+                                                <Text text="{tasksModel>requestId}" class="sapUiTinyMarginEnd" />
                                                 <ObjectStatus text="{path: 'tasksModel>type', formatter: '.formatter.formatRequestType'}" state="Information" icon="{= ${tasksModel>type} === 'Vacation' ? 'sap-icon://general-leave-request' : '' }"/>
                                             </HBox>
-                                            <Text
-                                                text="{tasksModel>subject}"
-                                                class="sapUiTinyMarginTop"
-                                            />
+                                            <Text text="{tasksModel>subject}" class="sapUiTinyMarginTop" />
                                             <Text text="{= ${i18n>text.submittedPrefix}.replace('{0}', ${path: 'tasksModel>submittedDate', formatter: '.formatter.formatDate'}) }" class="sapUiTinyMarginTop"/>
-                                            
+
                                             <!-- Warning for Partially Rejected -->
                                             <MessageStrip text="{i18n>message.actionRequiredPartial}" type="Warning" showIcon="true" visible="{= ${tasksModel>status} === 'PARTIALLY_REJECTED' }" class="sapUiTinyMarginTop"/>
                                         </VBox>
                                     </HBox>
                                     <VBox alignItems="End">
-                                        <ObjectStatus
-                                            text="{path: 'tasksModel>status', formatter: '.formatter.formatStatus'}"
-                                            state="{path: 'tasksModel>status', formatter: '.formatter.formatStatusState'}"
-                                        />
+                                        <ObjectStatus text="{path: 'tasksModel>status', formatter: '.formatter.formatStatus'}" state="{path: 'tasksModel>status', formatter: '.formatter.formatStatusState'}" class="sapUiTinyMarginEnd" />
                                         <Button text="{i18n>button.viewDetails}" type="Transparent" press="onViewTaskDetails" class="sapUiTinyMarginTop"/>
-                                        
+
                                         <!-- Resubmit button for partially rejected tasks -->
                                         <Button text="{i18n>button.resubmit}" type="Emphasized" icon="sap-icon://upload" press="onResubmit" visible="{= ${tasksModel>status} === 'PARTIALLY_REJECTED' }" class="sapUiTinyMarginTop"/>
                                     </VBox>
