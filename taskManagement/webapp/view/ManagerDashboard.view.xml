@@ -62,22 +62,27 @@
                 <content>
                     <VBox class="sapUiMediumMarginTop">
                         <!-- Search and Filter Bar -->
-                        <Toolbar>
+                        <OverflowToolbar>
                             <SearchField
                                 id="searchField"
-                                width="40%"
                                 placeholder="{i18n>placeholder.searchTasks}"
                                 value="{filterModel>/searchQuery}"
                                 search="onSearch"
                                 liveChange="onSearch"
-                            />
+                            >
+                                <layoutData>
+                                    <OverflowToolbarLayoutData priority="NeverOverflow" shrinkable="true" />
+                                </layoutData>
+                            </SearchField>
                             <ToolbarSpacer />
                             <Select
                                 id="typeFilter"
-                                width="150px"
                                 selectedKey="{filterModel>/typeFilter}"
                                 change="onFilterChange"
                             >
+                                <layoutData>
+                                    <OverflowToolbarLayoutData priority="NeverOverflow" />
+                                </layoutData>
                                 <items>
                                     <core:Item key="all" text="{i18n>filter.allTypes}"/>
                                     <core:Item key="Vacation" text="{i18n>filter.type.vacation}"/>
@@ -87,11 +92,13 @@
                             </Select>
                             <Select
                                 id="statusFilter"
-                                width="150px"
                                 selectedKey="{filterModel>/statusFilter}"
                                 change="onFilterChange"
                                 class="sapUiSmallMarginBegin"
                             >
+                                <layoutData>
+                                    <OverflowToolbarLayoutData priority="NeverOverflow" />
+                                </layoutData>
                                 <items>
                                     <core:Item key="all" text="{i18n>filter.allStatus}"/>
                                     <core:Item key="PENDING_APPROVAL" text="{i18n>filter.status.pending}"/>
@@ -100,41 +107,44 @@
                                     <core:Item key="PARTIALLY_REJECTED" text="{i18n>filter.status.partiallyRejected}"/>
                                 </items>
                             </Select>
-                        </Toolbar>
+                        </OverflowToolbar>
 
                         <!-- Pending Tasks Table -->
                         <Table
-                            id="pendingTasksTable"
-                            items="{dashboardModel>/filteredTasks}"
-                            mode="None"
-                            growing="true"
-                            growingThreshold="20"
-                        >
+                             id="pendingTasksTable"
+                             items="{dashboardModel>/filteredTasks}"
+                             mode="None"
+                             growing="true"
+                             growingThreshold="20"
+                             autoPopinMode="true"
+                             popinLayout="GridSmall"
+                             noDataText="{i18n>text.noTasks}"
+                         >
                             <columns>
-                                <Column width="4rem">
+                                <Column width="4rem" importance="Low" popinDisplay="WithoutHeader">
                                     <Text text="" />
                                 </Column>
-                                <Column>
+                                <Column importance="High">
                                     <Text text="{i18n>column.requestId}" />
                                 </Column>
-                                <Column>
+                                <Column importance="Medium">
                                     <Text text="{i18n>column.type}" />
                                 </Column>
-                                <Column>
+                                <Column importance="Medium">
                                     <Text text="{i18n>column.from}" />
                                 </Column>
-                                <Column>
+                                <Column importance="Medium">
                                     <Text text="{i18n>column.subject}" />
                                 </Column>
-                                <Column>
+                                <Column importance="Medium">
                                     <Text text="{i18n>column.submitted}" />
                                 </Column>
-                                <Column>
+                                <Column importance="High">
                                     <Text text="{i18n>column.status}" />
                                 </Column>
                                 <Column
-                                    width="10rem"
                                     hAlign="Center"
+                                    importance="Medium"
                                     visible="{dashboardModel>/hasPending}"
                                 >
                                     <Text text="{i18n>column.actions}" />
@@ -159,7 +169,7 @@
                                             text="{path: 'dashboardModel>status', formatter: '.formatter.formatStatus'}"
                                             state="{path: 'dashboardModel>status', formatter: '.formatter.formatStatusState'}"
                                         />
-                                        <HBox justifyContent="Center" visible="{= ${dashboardModel>status} === 'PENDING_APPROVAL' }">
+                                        <HBox justifyContent="Center" alignItems="Center" width="100%" wrap="Wrap" visible="{= ${dashboardModel>status} === 'PENDING_APPROVAL' }">
                                             <Button icon="sap-icon://detail-view" type="Transparent" tooltip="{i18n>tooltip.viewDetails}" press="onViewDetails" class="sapUiTinyMarginEnd"/>
                                             <Button
                                                 icon="sap-icon://accept"
@@ -185,4 +195,3 @@
         </detailPages>
     </SplitApp>
 </mvc:View>
-

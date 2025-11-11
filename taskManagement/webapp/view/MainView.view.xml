@@ -58,7 +58,6 @@
                     <ToolbarSpacer/>
                     <Select
                         id="typeFilter"
-                        width="200px"
                         selectedKey="{filterModel>/typeFilter}"
                         change="onTypeFilter">
                         <items>

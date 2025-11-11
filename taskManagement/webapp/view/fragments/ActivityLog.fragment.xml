@@ -10,22 +10,27 @@
         <content>
             <VBox>
                 <!-- Filter Bar -->
-                <Toolbar>
+                <OverflowToolbar>
                     <SearchField
                         id="activitySearchField"
-                        width="60%"
                         placeholder="{i18n>placeholder.searchActivities}"
                         value="{filterModel>/searchQuery}"
                         search=".onActivitySearch"
                         liveChange=".onActivitySearch"
-                    />
+                    >
+                        <layoutData>
+                            <OverflowToolbarLayoutData priority="NeverOverflow" shrinkable="true" />
+                        </layoutData>
+                    </SearchField>
                     <ToolbarSpacer />
                     <Select
                         id="activityTypeFilter"
-                        width="150px"
                         selectedKey="{filterModel>/typeFilter}"
                         change=".onActivityFilterChange"
                     >
+                        <layoutData>
+                            <OverflowToolbarLayoutData priority="NeverOverflow" />
+                        </layoutData>
                         <items>
                             <core:Item key="all" text="{i18n>filter.allActions}"/>
                             <core:Item key="APPROVED" text="{i18n>filter.status.approved}"/>
@@ -34,11 +39,10 @@
                             <core:Item key="SUBMITTED" text="{i18n>filter.status.submitted}"/>
                         </items>
                     </Select>
-                </Toolbar>
+                </OverflowToolbar>
 
                 <!-- Activity Feed -->
                 <List
-                    class="activityLogList"
                     id="activityFeedList"
                     items="{dashboardModel>/activitiesFiltered}"
                     growing="true"

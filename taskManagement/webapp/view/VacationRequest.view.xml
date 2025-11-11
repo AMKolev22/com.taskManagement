@@ -125,7 +125,7 @@
                                 <core:Title text="{i18n>section.approverAndSubstitute}" />
 
                                 <Label text="{i18n>label.manager}" required="true"/>
-                                <HBox alignItems="Center" width="100%">
+                                <HBox alignItems="Center" width="100%" wrap="Wrap">
                                     <Select
                                         id="managerSelect"
                                         width="100%"
@@ -160,6 +160,7 @@
                                 <HBox 
                                     alignItems="Center"
                                     width="100%"
+                                    wrap="Wrap"
                                     visible="{
                                         parts: ['requestModel>/vacationType', 'requestModel>/startDate', 'requestModel>/endDate'],
                                         formatter: '.formatShowSubstitute'

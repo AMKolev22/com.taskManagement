@@ -80,8 +80,12 @@
                                             justifyContent="SpaceBetween"
                                             alignItems="Center"
                                             width="100%"
+                                            wrap="Wrap"
                                         >
                                             <HBox alignItems="Center">
+                                                <layoutData>
+                                                    <FlexItemData growFactor="1" />
+                                                </layoutData>
                                                 <core:Icon
                                                     src="{path: 'dashboardModel>type', formatter: '.formatter.getRequestTypeIcon'}"
                                                     color="{path: 'dashboardModel>type', formatter: '.formatter.getRequestTypeColor'}"
@@ -104,6 +108,9 @@
                                                 </VBox>
                                             </HBox>
                                             <VBox alignItems="End">
+                                                <layoutData>
+                                                    <FlexItemData shrinkFactor="0" />
+                                                </layoutData>
                                                 <ObjectStatus
                                                     text="{path: 'dashboardModel>status', formatter: '.formatter.formatStatus'}"
                                                     state="{path: 'dashboardModel>status', formatter: '.formatter.formatStatusState'}"

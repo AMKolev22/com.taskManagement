@@ -40,7 +40,6 @@ sap.ui.define([
 
 
             this.subscribeEvent("tasks", "taskSubmitted", this._onTaskSubmitted, this);
-            this._loadTasks();
             this.oRouter.getRoute("managerDashboard").attachPatternMatched(this._onRouteMatched, this);
             
         },

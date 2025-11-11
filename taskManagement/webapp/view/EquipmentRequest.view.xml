@@ -148,8 +148,7 @@
                                 <Label text="Approving Manager:" class="sapUiMediumMarginEnd" required="true"/>
                                 <Select
                                     selectedKey="{/selectedManager}"
-                                    items="{/managers}"
-                                    width="300px">
+                                    items="{/managers}">
                                     <core:Item key="{id}" text="{name}"/>
                                 </Select>
                             </HBox>
@@ -177,10 +176,9 @@
     <Dialog
         id="catalogDialog"
         title="Select Equipment from Catalog"
-        contentWidth="90%"
-        contentHeight="80%"
         resizable="true"
-        draggable="true">
+        draggable="true"
+        stretchOnPhone="true">
         <content>
             <VBox height="100%">
                 <!-- Custom Filter Bar -->
@@ -189,8 +187,7 @@
                     <Select
                         id="typeFilter"
                         selectedKey="{/filterType}"
-                        change="onFilterCatalog"
-                        width="150px">
+                        change="onFilterCatalog">
                         <core:Item key="" text="All"/>
                         <core:Item key="Headphones" text="Headphones"/>
                         <core:Item key="Laptops" text="Laptops"/>
@@ -199,7 +196,6 @@
                     <ToolbarSpacer/>
                     <SearchField
                         id="catalogSearch"
-                        width="300px"
                         placeholder="Search by name..."
                         search="onSearchCatalog"
                         value="{/searchQuery}"/>

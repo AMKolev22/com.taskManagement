@@ -39,37 +39,8 @@ sap.ui.define([
             oDetailModel.setProperty("/isManager", bIsManager);
             oDetailModel.setProperty("/viewMode", bIsManager ? "MANAGER" : "USER");
             
-            // Get the request ID from the route - this will be triggered on navigation AND on page reload
-            const oRoute = this.oRouter.getRoute("taskDetails");
-            if (oRoute) {
-                oRoute.attachPatternMatched(this._onRouteMatched, this);
-                
-                // Also check if we're already on this route (for page reload scenarios)
-                // Use setTimeout to ensure router is fully initialized
-                setTimeout(function() {
-                    const oHashChanger = sap.ui.core.routing.HashChanger.getInstance();
-                    const sHash = oHashChanger.getHash();
-                    
-                    // Check if hash matches pattern: taskDetails/{id}/{type}
-                    if (sHash && sHash.indexOf("taskDetails/") === 0) {
-                        const oMatch = sHash.match(/^taskDetails\/([^\/]+)\/([^\/]+)/);
-                        if (oMatch) {
-                            const sTaskId = oMatch[1];
-                            const sTaskType = oMatch[2];
-                            
-                            // Check if we already have data loaded (to avoid double loading)
-                            const oDetailModel = this.getModel("detailModel");
-                            const sCurrentTaskId = oDetailModel.getProperty("/taskId");
-                            
-                            if (sCurrentTaskId !== sTaskId) {
-                                // Load task details if not already loaded
-                                this._loadTaskDetails(sTaskId, sTaskType);
-                            }
-                        }
-                    }
-                }.bind(this), 100);
-            }
             
+            this.oRouter.getRoute("taskDetails").attachPatternMatched(this._onRouteMatched, this);
         },
 
         _onFilterChange: function () {

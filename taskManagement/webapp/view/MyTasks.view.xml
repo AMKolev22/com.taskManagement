@@ -45,10 +45,17 @@
                 <content>
                     <VBox class="sapUiMediumMargin">
                         <!-- Filter Bar -->
-                        <Toolbar>
-                            <SearchField id="searchField" width="40%" placeholder="{i18n>placeholder.searchMyTasks}" value="{filterModel>/searchQuery}" search="onSearch" liveChange="onSearch"/>
+                        <OverflowToolbar>
+                            <SearchField id="searchField" placeholder="{i18n>placeholder.searchMyTasks}" value="{filterModel>/searchQuery}" search="onSearch" liveChange="onSearch">
+                                <layoutData>
+                                    <OverflowToolbarLayoutData priority="NeverOverflow" shrinkable="true" />
+                                </layoutData>
+                            </SearchField>
                             <ToolbarSpacer />
-                            <Select id="statusFilter" width="200px" selectedKey="{filterModel>/statusFilter}" change="onFilterChange">
+                            <Select id="statusFilter" selectedKey="{filterModel>/statusFilter}" change="onFilterChange">
+                                <layoutData>
+                                    <OverflowToolbarLayoutData priority="NeverOverflow" />
+                                </layoutData>
                                 <items>
                                     <core:Item key="all" text="{i18n>filter.allStatus}"/>
                                     <core:Item key="PENDING_APPROVAL" text="{i18n>filter.status.pending}"/>
@@ -57,7 +64,7 @@
                                     <core:Item key="PARTIALLY_REJECTED" text="{i18n>filter.status.partiallyRejected}"/>
                                 </items>
                             </Select>
-                        </Toolbar>
+                        </OverflowToolbar>
 
                         <!-- Tasks List -->
                         <List id="myTasksList" items="{tasksModel>/filteredTasks}" growing="true" growingThreshold="20" noDataText="{i18n>text.noTasks}">
@@ -72,8 +79,10 @@
                                 >
                                     <HBox
                                         alignItems="Center"
-                                        width="70%"
                                     >
+                                        <layoutData>
+                                            <FlexItemData growFactor="1" />
+                                        </layoutData>
                                         <core:Icon
                                             src="{path: 'tasksModel>type', formatter: '.formatter.getRequestTypeIcon'}"
                                             color="{path: 'tasksModel>type', formatter: '.formatter.getRequestTypeColor'}"

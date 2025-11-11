@@ -31,7 +31,6 @@ sap.ui.define([
 
             this.subscribeEvent("tasks", "taskSubmitted", this._onTaskUpdated, this);
             this.subscribeEvent("tasks", "taskUpdated", this._onTaskUpdated, this);
-            this._loadMyTasks();
             this.oRouter.getRoute("myTasks").attachPatternMatched(this._onRouteMatched, this);
             
         },
