@@ -64,29 +64,71 @@ sap.ui.define([
 
             this.setBusy(true);
 
-            this.callAPI(`/vacation-requests?userId=${oCurrentUser.userId}&limit=4`, "GET")
-                .then((oResponse) => {
-                    if (oResponse.success && oResponse.data) {
-                        const aTasks = oResponse.data.map((oRequest) => ({
-                            id: oRequest.id,
-                            requestId: oRequest.requestId,
-                            type: "Vacation",
-                            subject: `${formatter.formatVacationType(oRequest.vacationType)} - ${formatter.calculateDuration(oRequest.startDate, oRequest.endDate)}`,
-                            submittedDate: oRequest.submittedDate,
-                            status: oRequest.status,
-                            raw: oRequest
-                        })).slice(0, 4);
+            Promise.all([
+                this.callAPI(`/vacation-requests?userId=${oCurrentUser.userId}&limit=50`, "GET"),
+                this.callAPI(`/travel-requests?userId=${oCurrentUser.userId}&limit=50`, "GET"),
+                this.callAPI(`/equipment-requests?userId=${oCurrentUser.userId}&limit=50`, "GET")
+            ])
+                .then(([oVac, oTrav, oEquip]) => {
+                    const aVac = (oVac && oVac.success && Array.isArray(oVac.data)) ? oVac.data : [];
+                    const aTrav = (oTrav && oTrav.success && Array.isArray(oTrav.data)) ? oTrav.data : [];
+                    const aEquip = (oEquip && oEquip.success && Array.isArray(oEquip.data)) ? oEquip.data : [];
 
-                        const aActivities = this._generateActivities(oResponse.data, oCurrentUser);
-                        const oDashboardModel = this.getModel("dashboardModel");
-                        oDashboardModel.setProperty("/recentTasks", aTasks);
-                        oDashboardModel.setProperty("/activities", aActivities);
-                        oDashboardModel.setProperty("/activitiesFiltered", aActivities);
+                    // Build Recent Tasks (top 4 across all types)
+                    const aVacationTasks = aVac.map((oRequest) => ({
+                        id: oRequest.id,
+                        requestId: oRequest.requestId,
+                        type: "Vacation",
+                        subject: `${formatter.formatVacationType(oRequest.vacationType)} - ${formatter.calculateDuration(oRequest.startDate, oRequest.endDate)}`,
+                        submittedDate: oRequest.submittedDate,
+                        status: oRequest.status,
+                        raw: oRequest
+                    }));
+
+                    const aTravelTasks = aTrav.map((oRequest) => ({
+                        id: oRequest.id,
+                        requestId: oRequest.requestId,
+                        type: "Travel",
+                        subject: oRequest.destination,
+                        submittedDate: oRequest.submittedDate,
+                        status: oRequest.status,
+                        raw: oRequest
+                    }));
+
+                    const aEquipmentTasks = aEquip.map((oRequest) => ({
+                        id: oRequest.id,
+                        requestId: oRequest.requestId,
+                        type: "Equipment",
+                        subject: `${oRequest.totalItems} items`,
+                        submittedDate: oRequest.submittedDate,
+                        status: oRequest.status,
+                        raw: oRequest
+                    }));
+
+                    let aTasks = [...aVacationTasks, ...aTravelTasks, ...aEquipmentTasks];
+                    if (aTasks.length > 0) {
+                        aTasks.sort((a, b) => new Date(b.submittedDate) - new Date(a.submittedDate));
                     }
+                    aTasks = aTasks.slice(0, 4);
+
+                    // Build Activity Log from all request types
+                    const aAllRaw = [
+                        ...aVac.map((r) => ({ ...r, __type: "Vacation" })),
+                        ...aTrav.map((r) => ({ ...r, __type: "Travel" })),
+                        ...aEquip.map((r) => ({ ...r, __type: "Equipment" }))
+                    ];
+                    const aActivities = this._generateActivities(aAllRaw, oCurrentUser);
+
+                    const oDashboardModel = this.getModel("dashboardModel");
+                    oDashboardModel.setProperty("/recentTasks", aTasks);
+                    oDashboardModel.setProperty("/activities", aActivities);
+                    // Initialize filtered with full set then apply filters
+                    oDashboardModel.setProperty("/activitiesFiltered", aActivities);
+                    this._applyActivityFilters();
 
                     this.setBusy(false);
                 })
-                .catch((error) => {
+                .catch(() => {
                     this.setBusy(false);
                 });
         },
@@ -95,58 +137,102 @@ sap.ui.define([
             const aActivities = [];
 
             aRequests.forEach((oRequest) => {
+                const sType = oRequest.__type || "Vacation";
+
+                // Submitted entry
+                let sSubmitDesc = "";
+                if (sType === "Vacation") {
+                    sSubmitDesc = `Submitted ${formatter.formatVacationType(oRequest.vacationType)} request (${oRequest.requestId})`;
+                } else if (sType === "Travel") {
+                    sSubmitDesc = `Submitted travel request to ${oRequest.destination} (${oRequest.requestId})`;
+                } else if (sType === "Equipment") {
+                    sSubmitDesc = `Submitted equipment request (${oRequest.requestId})`;
+                }
+
                 aActivities.push({
-                    id: `${oRequest.id}_submitted`,
+                    id: `${oRequest.id}_${sType}_submitted`,
                     requestId: oRequest.id,
-                    requestType: "Vacation",
+                    requestType: sType,
                     action: "SUBMITTED",
                     actorName: "You",
-                    description: `Submitted ${formatter.formatVacationType(oRequest.vacationType)} request (${oRequest.requestId})`,
+                    description: sSubmitDesc,
                     timestamp: oRequest.submittedDate
                 });
 
+                // Status-based entries
+                let sManagerName = "Manager";
+                if (oRequest.manager) {
+                    if (sType === "Vacation") {
+                        sManagerName = oRequest.manager.firstName || oRequest.manager.managerName || "Manager";
+                    } else {
+                        const sRaw = oRequest.manager.managerName || oRequest.manager.firstName || "Manager";
+                        sManagerName = String(sRaw).trim().split(/\s+/)[0] || "Manager";
+                    }
+                }
                 if (oRequest.status === "APPROVED" && oRequest.approvedDate) {
-                    const sManagerName = oRequest.manager ? `${oRequest.manager.firstName}` : "Manager";
+                    let sDesc = "";
+                    if (sType === "Vacation") {
+                        sDesc = `Approved your ${formatter.formatVacationType(oRequest.vacationType)} request (${oRequest.requestId})`;
+                    } else if (sType === "Travel") {
+                        sDesc = `Approved your travel request (${oRequest.requestId})`;
+                    } else if (sType === "Equipment") {
+                        sDesc = `Approved your equipment request (${oRequest.requestId})`;
+                    }
                     aActivities.push({
-                        id: `${oRequest.id}_approved`,
+                        id: `${oRequest.id}_${sType}_approved`,
                         requestId: oRequest.id,
-                        requestType: "Vacation",
+                        requestType: sType,
                         action: "APPROVED",
                         actorName: sManagerName,
-                        description: `Approved your ${formatter.formatVacationType(oRequest.vacationType)} request (${oRequest.requestId})`,
+                        description: sDesc,
                         timestamp: oRequest.approvedDate
                     });
                 } else if (oRequest.status === "REJECTED") {
-                    const sManagerName = oRequest.manager ? `${oRequest.manager.firstName}` : "Manager";
+                    let sDesc = "";
+                    if (sType === "Vacation") {
+                        sDesc = `Rejected your ${formatter.formatVacationType(oRequest.vacationType)} request (${oRequest.requestId})${oRequest.rejectionReason ? `: ${oRequest.rejectionReason}` : ""}`;
+                    } else if (sType === "Travel") {
+                        sDesc = `Rejected your travel request (${oRequest.requestId})${oRequest.rejectionReason ? `: ${oRequest.rejectionReason}` : ""}`;
+                    } else if (sType === "Equipment") {
+                        sDesc = `Rejected your equipment request (${oRequest.requestId})${oRequest.rejectionReason ? `: ${oRequest.rejectionReason}` : ""}`;
+                    }
                     aActivities.push({
-                        id: `${oRequest.id}_rejected`,
+                        id: `${oRequest.id}_${sType}_rejected`,
                         requestId: oRequest.id,
-                        requestType: "Vacation",
+                        requestType: sType,
                         action: "REJECTED",
                         actorName: sManagerName,
-                        description: `Rejected your ${formatter.formatVacationType(oRequest.vacationType)} request (${oRequest.requestId})${oRequest.rejectionReason ? `: ${oRequest.rejectionReason}` : ""}`,
+                        description: sDesc,
                         timestamp: oRequest.updatedAt
                     });
                 } else if (oRequest.status === "PARTIALLY_REJECTED") {
-                    const sManagerName = oRequest.manager ? `${oRequest.manager.firstName}` : "Manager";
+                    let sDesc = "";
+                    if (sType === "Vacation") {
+                        sDesc = `Partially approved your ${formatter.formatVacationType(oRequest.vacationType)} request (${oRequest.requestId}). Some attachments need resubmission.`;
+                    } else if (sType === "Travel") {
+                        sDesc = `Partially approved your travel request (${oRequest.requestId}). Some items need attention.`;
+                    } else if (sType === "Equipment") {
+                        sDesc = `Partially approved your equipment request (${oRequest.requestId}). Some items need resubmission.`;
+                    }
                     aActivities.push({
-                        id: `${oRequest.id}_partial`,
+                        id: `${oRequest.id}_${sType}_partial`,
                         requestId: oRequest.id,
-                        requestType: "Vacation",
+                        requestType: sType,
                         action: "PARTIALLY_REJECTED",
                         actorName: sManagerName,
-                        description: `Partially approved your ${formatter.formatVacationType(oRequest.vacationType)} request (${oRequest.requestId}). Some attachments need resubmission.`,
+                        description: sDesc,
                         timestamp: oRequest.updatedAt
                     });
                 }
 
-                if (oRequest.comments?.length > 0) {
+                // Comments (available for Vacation requests)
+                if (sType === "Vacation" && oRequest.comments?.length > 0) {
                     oRequest.comments.forEach((oComment) => {
                         const sCommentorName = oComment.user ? `${oComment.user.firstName}` : "Manager";
                         aActivities.push({
                             id: oComment.id,
                             requestId: oRequest.id,
-                            requestType: "Vacation",
+                            requestType: sType,
                             action: "COMMENT",
                             actorName: sCommentorName,
                             description: `Added a comment: ${oComment.content}`,
@@ -212,12 +298,14 @@ sap.ui.define([
             const oSearchField = oEvent.getSource();
             const sValue = oEvent.getParameter("query") || oSearchField.getValue();
             oFilterModel.setProperty("/searchQuery", sValue);
+            this._applyActivityFilters();
         },
 
         onActivityFilterChange: function (oEvent) {
             const oFilterModel = this.getModel("filterModel");
             const sSelectedKey = oEvent.getParameter("selectedItem").getKey();
             oFilterModel.setProperty("/typeFilter", sSelectedKey);
+            this._applyActivityFilters();
         },
 
         _applyActivityFilters: function () {

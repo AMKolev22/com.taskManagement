@@ -51,7 +51,7 @@
                 >
                     <FeedListItem
                         sender="{dashboardModel>actorName}"
-                        icon="{path: 'dashboardModel>action', formatter: '.formatter.getRequestTypeIcon'}"
+                        icon="{path: 'dashboardModel>requestType', formatter: '.formatter.getRequestTypeIcon'}"
                         iconActive="false"
                         info="{dashboardModel>requestType}"
                         timestamp="{path: 'dashboardModel>timestamp', formatter: '.formatter.formatDateTime'}"
