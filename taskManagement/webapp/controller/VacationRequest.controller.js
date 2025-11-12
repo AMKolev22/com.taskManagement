@@ -169,11 +169,6 @@ sap.ui.define([
                     const bAvailable = oResponse.data.available;
                     const sProperty = sUserType === "manager" ? "/managerNotAvailable" : "/substituteNotAvailable";
                     oRequestModel.setProperty(sProperty, !bAvailable);
-
-                    if (!bAvailable) {
-                        const sMessageKey = sUserType === "manager" ? "error.managerNotAvailableMessage" : "error.substituteNotAvailableMessage";
-                        this.showSuccess(sMessageKey);
-                    }
                 }
             })
             .catch(() => {

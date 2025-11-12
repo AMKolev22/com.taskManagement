@@ -970,15 +970,11 @@ sap.ui.define([
                         oDetailModel.setProperty(sPath + "/fileUrl", sNewUrl);
                         oDetailModel.setProperty(sPath + "/fileSize", oResponse.data.fileSize);
                         oDetailModel.setProperty(sPath + "/fileType", oResponse.data.fileType);
-                        // Clear rejection state locally (optional UX)
+                        // Mark as pending so manager can approve or reject again
                         oDetailModel.setProperty(sPath + "/status", "PENDING");
                         oDetailModel.setProperty(sPath + "/rejectionReason", "");
                     }
-                    // Also reload from backend to stay in sync if needed
-                    const oDetailModel2 = this.getModel("detailModel");
-                    const sTaskId = oDetailModel2.getProperty("/taskId");
-                    const sType = oDetailModel2.getProperty("/type");
-                    this._loadTaskDetails(sTaskId, sType);
+                    // Do not reload immediately; keep PENDING state visible to manager
                 } else {
                     this.showError("error.uploadFileFailed", [oResponse.message || this.getText("error.unknownError")]);
                 }
