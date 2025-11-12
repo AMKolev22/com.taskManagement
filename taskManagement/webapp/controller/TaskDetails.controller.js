@@ -57,9 +57,9 @@ sap.ui.define([
             const sStatusFilter = oFilterModel.getProperty("/statusFilter") || "";
 
             const aFiltered = aAll.filter(function (a) {
-                var bDesc = !sDescriptionQuery || String(a.description || "").toLowerCase().indexOf(sDescriptionQuery) !== -1;
-                var bCat = !sCategoryFilter || a.category === sCategoryFilter;
-                var bStatus = !sStatusFilter || a.status === sStatusFilter;
+                let bDesc = !sDescriptionQuery || String(a.description || "").toLowerCase().indexOf(sDescriptionQuery) !== -1;
+                let bCat = !sCategoryFilter || a.category === sCategoryFilter;
+                let bStatus = !sStatusFilter || a.status === sStatusFilter;
                 return bDesc && bCat && bStatus;
             });
 
@@ -179,6 +179,7 @@ sap.ui.define([
                 const sMgrDisplay = sMgrFirst || (sMgrNameRaw ? String(sMgrNameRaw).trim().split(/\s+/)[0] : "");
                 oModelData.manager = sMgrDisplay || this.getText("label.noManager");
                 oModelData.from = sMgrDisplay || oModelData.from;
+                oModelData.managerId = oData.managerId;
                 oModelData.items = oData.equipmentItems || [];
                 oModelData.totalCost = oData.totalCost;
             } else if (sType === "Travel") {
@@ -186,8 +187,8 @@ sap.ui.define([
                 const sMgrNameRaw = oData.manager?.managerName || "";
                 const sMgrDisplay = sMgrFirst || (sMgrNameRaw ? String(sMgrNameRaw).trim().split(/\s+/)[0] : "");
                 oModelData.manager = sMgrDisplay || this.getText("label.noManager");
-                var sSubmittedBy = oData.submittedBy || "";
-                var sFirstOnly = String(sSubmittedBy).trim().split(/\s+/)[0];
+                let sSubmittedBy = oData.submittedBy || "";
+                let sFirstOnly = String(sSubmittedBy).trim().split(/\s+/)[0];
                 oModelData.from = sFirstOnly || this.getText("label.unknown");
                 oModelData.userId = oData.userId;
                 oModelData.managerId = oData.managerId;
@@ -251,12 +252,12 @@ sap.ui.define([
         },
 
         onViewModeChange: function (oEvent) {
-            var oItem = oEvent.getParameter("item") || oEvent.getParameter("button");
+            let oItem = oEvent.getParameter("item") || oEvent.getParameter("button");
             if (!oItem) {
                 return;
             }
-            var sSelectedKey = oItem.getKey();
-            var oDetailModel = this.getModel("detailModel");
+            let sSelectedKey = oItem.getKey();
+            let oDetailModel = this.getModel("detailModel");
             if (sSelectedKey === "MANAGER" && !oDetailModel.getProperty("/isManager")) {
                 return;
             }
@@ -264,22 +265,22 @@ sap.ui.define([
         },
 
         onResubmitRequestInline: function () {
-            var oDetailModel = this.getModel("detailModel");
-            var sTaskId = oDetailModel.getProperty("/taskId");
-            var sType = oDetailModel.getProperty("/type");
+            let oDetailModel = this.getModel("detailModel");
+            let sTaskId = oDetailModel.getProperty("/taskId");
+            let sType = oDetailModel.getProperty("/type");
 
-            var mEndpoints = {
+            let mEndpoints = {
                 "Vacation": "/vacation-requests/" + sTaskId + "/status",
                 "Travel": "/travel-requests/" + sTaskId + "/status",
                 "Equipment": "/equipment-requests/" + sTaskId + "/status"
             };
-            var sEndpoint = mEndpoints[sType];
+            let sEndpoint = mEndpoints[sType];
             if (!sEndpoint) {
                 this.showError("error.unknownRequestType");
                 return;
             }
 
-            var fnResubmit = function () {
+            let fnResubmit = function () {
                 this.setBusy(true);
                 this.callAPI(sEndpoint, "PATCH", { status: "PENDING_APPROVAL" })
                     .then(function (oResponse) {
@@ -766,13 +767,6 @@ sap.ui.define([
          */
         onForwardRequest: function () {
             const oDetailModel = this.getModel("detailModel");
-            const sType = oDetailModel.getProperty("/type");
-
-            if (sType !== "Vacation") {
-                MessageBox.information(this.getText("info.forwardOnlyVacation"));
-                return;
-            }
-
             const sTaskId = oDetailModel.getProperty("/taskId");
             const sCurrentManagerId = oDetailModel.getProperty("/managerId");
 
@@ -787,7 +781,7 @@ sap.ui.define([
                         this._showForwardDialog(sTaskId, aManagers);
                     }
                 }.bind(this))
-                .catch(function (error) {
+                .catch(function () {
                     this.showError("error.loadManagersFailed");
                 }.bind(this));
         },
@@ -832,14 +826,20 @@ sap.ui.define([
         _performForward: function (sTaskId, sNewManagerId) {
             this.setBusy(true);
 
-            this.callAPI(`/vacation-requests/${sTaskId}`, "PATCH", {
-                managerId: sNewManagerId
-            })
+            const sType = this.getModel("detailModel").getProperty("/type");
+            const mEndpoints = {
+                "Vacation": `/vacation-requests/${sTaskId}`,
+                "Travel": `/travel-requests/${sTaskId}`,
+                "Equipment": `/equipment-requests/${sTaskId}`
+            };
+            const sEndpoint = mEndpoints[sType] || mEndpoints["Vacation"];
+
+            this.callAPI(sEndpoint, "PATCH", { managerId: sNewManagerId })
                 .then((oResponse) => {
                     this.setBusy(false);
                     if (oResponse.success) {
                         this.showSuccess("success.requestForwarded");
-                        this._loadTaskDetails(sTaskId, "Vacation");
+                        this._loadTaskDetails(sTaskId, sType);
                     } else {
                         this.showError("error.forwardFailed");
                     }
@@ -945,6 +945,10 @@ sap.ui.define([
             if (oFile) {
                 // File selected, ready to upload
                 this.showSuccess("success.fileSelected", [oFile.name]);
+                // Trigger upload immediately so uploadComplete fires
+                if (oFileUploader && typeof oFileUploader.upload === "function") {
+                    try { oFileUploader.upload(); } catch (e) { /* no-op */ }
+                }
             }
         },
 
@@ -954,10 +958,26 @@ sap.ui.define([
                 const oResponse = JSON.parse(sResponse);
                 if (oResponse.success) {
                     this.showSuccess("success.fileUploaded");
-                    // Reload task details to show updated attachments
-                    const oDetailModel = this.getModel("detailModel");
-                    const sTaskId = oDetailModel.getProperty("/taskId");
-                    const sType = oDetailModel.getProperty("/type");
+                    // Update the bound attachment immediately to reflect the new file
+                    const oUploader = oEvent.getSource();
+                    const oCtx = oUploader.getBindingContext("detailModel");
+                    if (oCtx && oResponse.data) {
+                        const sPath = oCtx.getPath();
+                        const oDetailModel = this.getModel("detailModel");
+                        oDetailModel.setProperty(sPath + "/fileName", oResponse.data.fileName);
+                        // Add cache buster to ensure browser fetches fresh file
+                        const sNewUrl = oResponse.data.fileUrl + (oResponse.data.fileUrl.indexOf("?") === -1 ? "?t=" : "&t=") + Date.now();
+                        oDetailModel.setProperty(sPath + "/fileUrl", sNewUrl);
+                        oDetailModel.setProperty(sPath + "/fileSize", oResponse.data.fileSize);
+                        oDetailModel.setProperty(sPath + "/fileType", oResponse.data.fileType);
+                        // Clear rejection state locally (optional UX)
+                        oDetailModel.setProperty(sPath + "/status", "PENDING");
+                        oDetailModel.setProperty(sPath + "/rejectionReason", "");
+                    }
+                    // Also reload from backend to stay in sync if needed
+                    const oDetailModel2 = this.getModel("detailModel");
+                    const sTaskId = oDetailModel2.getProperty("/taskId");
+                    const sType = oDetailModel2.getProperty("/type");
                     this._loadTaskDetails(sTaskId, sType);
                 } else {
                     this.showError("error.uploadFileFailed", [oResponse.message || this.getText("error.unknownError")]);

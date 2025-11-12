@@ -44,14 +44,14 @@ sap.ui.define([
             
             this._applyFiltersAndSort();
             
-            var oTable = this.byId && this.byId("catalogTable");
+            let oTable = this.byId && this.byId("catalogTable");
             if (oTable) { oTable.removeSelections(true); }
-            var oDialog = this.byId && this.byId("catalogDialog");
+            let oDialog = this.byId && this.byId("catalogDialog");
             if (oDialog) { oDialog.open(); }
         },
 
         onCloseCatalogDialog: function () {
-            var oDialog = this.byId && this.byId("catalogDialog");
+            let oDialog = this.byId && this.byId("catalogDialog");
             if (oDialog) { oDialog.close(); }
         },
 
@@ -68,7 +68,7 @@ sap.ui.define([
         },
 
         _saveSelection: function () {
-            var oTable = this.byId && this.byId("catalogTable");
+            let oTable = this.byId && this.byId("catalogTable");
             if (!oTable) return;
             const aSelectedItems = oTable.getSelectedItems();
             const oModel = this.getView().getModel();
@@ -78,7 +78,7 @@ sap.ui.define([
         },
 
         _restoreSelection: function () {
-            var oTable = this.byId && this.byId("catalogTable");
+            let oTable = this.byId && this.byId("catalogTable");
             if (!oTable) return;
             const oModel = this.getView().getModel();
             const aSelectedIds = oModel.getProperty("/selectedCatalogIds");
@@ -149,7 +149,7 @@ sap.ui.define([
         },
 
         onAddSelectedItems: function () {
-            var oTable = this.byId && this.byId("catalogTable");
+            let oTable = this.byId && this.byId("catalogTable");
             if (!oTable) return;
             const aSelectedItems = oTable.getSelectedItems();
 

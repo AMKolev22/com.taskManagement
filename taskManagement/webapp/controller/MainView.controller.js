@@ -76,9 +76,9 @@ sap.ui.define([
             const sTypeFilter = oFilterModel.getProperty("/typeFilter") || "all";
 
             const aFiltered = aAll.filter(function (r) {
-                var bTitle = !sTitleQuery || String(r.title || "").toLowerCase().indexOf(sTitleQuery) !== -1;
-                var bEmp = !sEmployeeQuery || String(r.from || "").toLowerCase().indexOf(sEmployeeQuery) !== -1;
-                var bType = sTypeFilter === "all" || r.type === sTypeFilter;
+                let bTitle = !sTitleQuery || String(r.title || "").toLowerCase().indexOf(sTitleQuery) !== -1;
+                let bEmp = !sEmployeeQuery || String(r.from || "").toLowerCase().indexOf(sEmployeeQuery) !== -1;
+                let bType = sTypeFilter === "all" || r.type === sTypeFilter;
                 return bTitle && bEmp && bType;
             });
             oModel.setProperty("/filteredRequests", aFiltered);

@@ -316,10 +316,10 @@ sap.ui.define([
             const sTypeFilter = oFilterModel.getProperty("/typeFilter") || "all";
 
             const aFiltered = aAll.filter(function (a) {
-                var bSearch = !sSearchQuery || [a.description, a.actorName]
+                let bSearch = !sSearchQuery || [a.description, a.actorName]
                     .filter(Boolean)
                     .some(function (v) { return String(v).toLowerCase().indexOf(sSearchQuery) !== -1; });
-                var bType = sTypeFilter === "all" || a.action === sTypeFilter;
+                let bType = sTypeFilter === "all" || a.action === sTypeFilter;
                 return bSearch && bType;
             });
 

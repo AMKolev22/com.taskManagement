@@ -208,6 +208,15 @@ sap.ui.define([
             const oModel = this.getView().getModel();
             const aFiles = oModel.getProperty(`/${this._currentCategory}`);
             
+            // If this is a resubmission, replace one rejected placeholder instead of appending
+            const bIsResubmission = !!oModel.getProperty("/isResubmission");
+            if (bIsResubmission) {
+                const iReplace = aFiles.findIndex(f => Object.prototype.hasOwnProperty.call(f, "originalId"));
+                if (iReplace > -1) {
+                    aFiles.splice(iReplace, 1);
+                }
+            }
+
             aFiles.push({
                 fileId: `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 file: oFile,

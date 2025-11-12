@@ -22,20 +22,25 @@
                         <ToolbarSpacer />
                         <Title text="{i18n>title.requestDetails}" level="H2"/>
                         <ToolbarSpacer />
-                        <SegmentedButton visible="{detailModel>/isManager}" selectedKey="{detailModel>/viewMode}" selectionChange="onViewModeChange">
-                            <items>
-                                <SegmentedButtonItem key="USER" text="{i18n>label.userMode}" icon="sap-icon://employee"/>
-                                <SegmentedButtonItem key="MANAGER" text="{i18n>label.managerMode}" icon="sap-icon://manager"/>
-                            </items>
-                        </SegmentedButton>
-                        <ToolbarSpacer />
                         <Avatar initials="Js" press="onUserInfoPress" displaySize="XS" backgroundColor="Accent6" tooltip="{i18n>text.userInfo}"/>
                     </OverflowToolbar>
                 </customHeader>
                 <content>
                     <VBox class="sapUiMediumMargin">                        <!-- Request Detail Section -->
                         <!-- Request Detail Section -->
-                        <Panel headerText="{i18n>title.requestInformation}" expanded="true">
+                        <Panel expanded="true">
+                            <headerToolbar>
+                                <OverflowToolbar>
+                                    <Title text="{i18n>title.requestInformation}" level="H3"/>
+                                    <ToolbarSpacer />
+                                    <SegmentedButton visible="{detailModel>/isManager}" selectedKey="{detailModel>/viewMode}" selectionChange="onViewModeChange">
+                                        <items>
+                                            <SegmentedButtonItem key="USER" text="{i18n>label.userMode}" icon="sap-icon://employee"/>
+                                            <SegmentedButtonItem key="MANAGER" text="{i18n>label.managerMode}" icon="sap-icon://manager"/>
+                                        </items>
+                                    </SegmentedButton>
+                                </OverflowToolbar>
+                            </headerToolbar>
                             <content>
                                 <VBox class="sapUiContentPadding">
                                     <!-- Request ID - Full Width -->
@@ -48,10 +53,13 @@
                                     <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="2" columnsM="2" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
                                         <f:content>
                                             <Label text="Type"/>
-                                            <ObjectStatus text="{detailModel>/type}" state="{= ${detailModel>/type} === 'Travel' ? 'Success' : 'Information'}" icon="{= ${detailModel>/type} === 'Vacation' ? 'sap-icon://general-leave-request' : '' }"/>
+                                            <ObjectStatus text="{path: 'detailModel>/type', formatter: '.formatter.formatRequestType'}"
+                                                          state="None"
+                                                          icon="{path: 'detailModel>/type', formatter: '.formatter.getRequestTypeIcon'}"/>
 
                                             <Label text="Status"/>
-                                            <ObjectStatus text="{detailModel>/status}" state="{= ${detailModel>/status} === 'APPROVED' ? 'Success' : (${detailModel>/status} === 'REJECTED' ? 'Error' : 'Warning')}"/>
+                                            <ObjectStatus text="{path: 'detailModel>/status', formatter: '.formatter.formatStatus'}"
+                                                          state="{path: 'detailModel>/status', formatter: '.formatter.formatStatusState'}"/>
                                         </f:content>
                                     </f:SimpleForm>
 
@@ -308,7 +316,8 @@
                                                     <Text text="{detailModel>description}"/>
                                                     <Link text="{detailModel>fileName}" href="{detailModel>fileUrl}" target="_blank"/>
                                                     <Text text="{detailModel>fileSize}"/>
-                                                    <ObjectStatus text="{path: 'detailModel>status', formatter: '.formatter.formatAttachmentStatus'}" state="{= ${detailModel>status} === 'APPROVED' ? 'Success' : (${detailModel>status} === 'REJECTED' ? 'Error' : 'Warning')}" />
+                                                <ObjectStatus text="{path: 'detailModel>status', formatter: '.formatter.formatAttachmentStatus'}"
+                                                              state="{path: 'detailModel>status', formatter: '.formatter.formatAttachmentStatusState'}" />
                                                     <HBox justifyContent="Center" alignItems="Center" wrap="Wrap" width="100%" visible="{= ${detailModel>/canApprove} &amp;&amp; ${detailModel>/viewMode} === 'MANAGER'}">
                                                         <Button icon="sap-icon://accept" type="Accept" tooltip="Approve this attachment" press="onApproveAttachment" visible="{= ${detailModel>status} !== 'APPROVED'}" class="sapUiTinyMarginEnd" />
                                                         <Button icon="sap-icon://decline" type="Reject" tooltip="Reject this attachment" press="onRejectAttachment" visible="{= ${detailModel>status} !== 'REJECTED'}" />
@@ -361,7 +370,6 @@
                                                     <Text text="{detailModel>description}"/>
                                                     <Link text="{detailModel>fileName}" href="{detailModel>fileUrl}" target="_blank"/>
                                                     <VBox class="sapUiTinyMargin">
-                                                        <Label text="{i18n>label.rejectionReason}" visible="{= ${detailModel>rejectionReason} ? true : false}"/>
                                                         <Text text="{detailModel>rejectionReason}" wrapping="true" class="sapUiTinyMarginTop" visible="{= ${detailModel>rejectionReason} ? true : false}" />
                                                     </VBox>
                                                     <unified:FileUploader sameFilenameAllowed="true" buttonText="{i18n>column.replacementFile}" fileType="pdf,doc,docx,jpg,jpeg,png" uploadUrl="/api/upload" uploadComplete="onFileReuploaded" change="onFileReuploadChange" class="sapUiSmallMarginTop">

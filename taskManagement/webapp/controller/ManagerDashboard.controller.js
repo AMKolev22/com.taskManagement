@@ -202,11 +202,11 @@ sap.ui.define([
             const sStatusFilter = oFilterModel.getProperty("/statusFilter") || "all";
 
             const aFiltered = aAll.filter(function (t) {
-                var bMatchesSearch = !sSearchQuery || [t.requestId, t.submittedBy, t.subject]
+                let bMatchesSearch = !sSearchQuery || [t.requestId, t.submittedBy, t.subject]
                     .filter(Boolean)
                     .some(function (v) { return String(v).toLowerCase().indexOf(sSearchQuery) !== -1; });
-                var bMatchesType = sTypeFilter === "all" || t.type === sTypeFilter;
-                var bMatchesStatus = sStatusFilter === "all" || t.status === sStatusFilter;
+                let bMatchesType = sTypeFilter === "all" || t.type === sTypeFilter;
+                let bMatchesStatus = sStatusFilter === "all" || t.status === sStatusFilter;
                 return bMatchesSearch && bMatchesType && bMatchesStatus;
             });
 

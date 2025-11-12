@@ -132,6 +132,25 @@ sap.ui.define([
         },
 
         /**
+         * Get state for ObjectStatus based on attachment status
+         * @param {string} sStatus - The attachment status value
+         * @returns {string} State value (Success, Error, Warning, None)
+         */
+        formatAttachmentStatusState: function (sStatus) {
+            if (!sStatus) {
+                return "None";
+            }
+
+            const stateMap = {
+                "APPROVED": "Success",
+                "REJECTED": "Error",
+                "PENDING": "Warning"
+            };
+
+            return stateMap[sStatus] || "None";
+        },
+
+        /**
          * Get state for attachment status
          * @param {string} sStatus - The attachment status value
          * @returns {string} State value
