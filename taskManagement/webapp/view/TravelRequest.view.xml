@@ -36,8 +36,6 @@
                             icon="sap-icon://nav-back"
                             type="Transparent"
                             press="onNavBack"
-                            visible="{pageModel>/navBackVisible}"
-                            class="sapUiHideOnDesktop sapUiHideOnTablet"
                         />
                         <ToolbarSpacer />
                         <Title

@@ -20,7 +20,13 @@
                         <ToolbarSpacer />
                         <Title text="{i18n>title.myTasks}" level="H2"/>
                         <ToolbarSpacer />
-                        <Button icon="sap-icon://refresh" tooltip="{i18n>tooltip.refresh}" press="onRefresh" type="Transparent"/>
+                        <Avatar
+                            initials="{= ${userModel>/currentUser/firstName}.charAt(0) }"
+                            press="onUserInfoPress"
+                            displaySize="XS"
+                            backgroundColor="Accent6"
+                            tooltip="{userModel>/currentUser/firstName}"
+                        />
                     </OverflowToolbar>
                 </customHeader>
                 <content>

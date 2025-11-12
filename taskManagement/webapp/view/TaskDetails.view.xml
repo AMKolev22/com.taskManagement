@@ -1,8 +1,9 @@
-<mvc:View controllerName="taskManagement.controller.TaskDetails"
+﻿<mvc:View controllerName="taskManagement.controller.TaskDetails"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns="sap.m"
     xmlns:f="sap.ui.layout.form"
+    xmlns:layout="sap.ui.layout"
     xmlns:unified="sap.ui.unified" displayBlock="true" height="100%" busyIndicatorDelay="0">
     <SplitApp id="managerSplitApp" initialMaster="masterPage" initialDetail="detailPage">
         <masterPages>
@@ -18,7 +19,7 @@
             <Page id="detailPage">
                 <customHeader>
                     <OverflowToolbar>
-                        <Button icon="sap-icon://nav-back" type="Transparent" press="onNavBack" class="sapUiHideOnDesktop sapUiHideOnTablet" />
+                        <Button icon="sap-icon://nav-back" type="Transparent" press="onNavBack" />
                         <ToolbarSpacer />
                         <Title text="{i18n>title.requestDetails}" level="H2"/>
                         <ToolbarSpacer />
@@ -26,75 +27,114 @@
                     </OverflowToolbar>
                 </customHeader>
                 <content>
-                    <VBox class="sapUiMediumMargin">                        <!-- Request Detail Section -->
-                        <!-- Request Detail Section -->
-                        <Panel expanded="true">
-                            <headerToolbar>
-                                <OverflowToolbar>
-                                    <Title text="{i18n>title.requestInformation}" level="H3"/>
-                                    <ToolbarSpacer />
-                                    <SegmentedButton visible="{detailModel>/isManager}" selectedKey="{detailModel>/viewMode}" selectionChange="onViewModeChange">
-                                        <items>
-                                            <SegmentedButtonItem key="USER" text="{i18n>label.userMode}" icon="sap-icon://employee"/>
-                                            <SegmentedButtonItem key="MANAGER" text="{i18n>label.managerMode}" icon="sap-icon://manager"/>
-                                        </items>
-                                    </SegmentedButton>
-                                </OverflowToolbar>
-                            </headerToolbar>
-                            <content>
-                                <VBox class="sapUiContentPadding">
-                                    <!-- Request ID - Full Width -->
-                                    <VBox class="sapUiSmallMarginBegin sapUiSmallMarginTop">
-                                        <Label text="Request ID:" design="Bold"/>
-                                        <Text text="{detailModel>/requestId}" wrapping="true" class="sapUiTinyMarginTop"/>
-                                    </VBox>
+                    <VBox class="sapUiMediumMargin">
+                        <layout:Grid width="100%" defaultSpan="L6 M12 S12" hSpacing="1" vSpacing="1" class="sapUiMediumMarginTop">
+                            <layout:content>
+                                <!-- Request Detail Section -->
+                                <Panel expanded="true" height="100%">
+                                    <layoutData>
+                                        <layout:GridData span="L6 M12 S12" />
+                                    </layoutData>
+                                    <headerToolbar>
+                                        <OverflowToolbar>
+                                            <Title text="{i18n>title.requestInformation}" level="H3"/>
+                                            <ToolbarSpacer />
+                                            <SegmentedButton visible="{detailModel>/isManager}" selectedKey="{detailModel>/viewMode}" selectionChange="onViewModeChange">
+                                                <items>
+                                                    <SegmentedButtonItem key="USER" text="{i18n>label.userMode}" icon="sap-icon://employee"/>
+                                                    <SegmentedButtonItem key="MANAGER" text="{i18n>label.managerMode}" icon="sap-icon://manager"/>
+                                                </items>
+                                            </SegmentedButton>
+                                        </OverflowToolbar>
+                                    </headerToolbar>
+                                    <content>
+                                        <VBox class="sapUiContentPadding">
+                                            <!-- Request ID - Full Width -->
+                                            <VBox class="sapUiSmallMarginBegin sapUiSmallMarginTop">
+                                                <Label text="Request ID:" design="Bold"/>
+                                                <Text text="{detailModel>/requestId}" wrapping="true" class="sapUiTinyMarginTop"/>
+                                            </VBox>
 
-                                    <!-- Type and Status -->
-                                    <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="2" columnsM="2" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
-                                        <f:content>
-                                            <Label text="Type"/>
-                                            <ObjectStatus text="{path: 'detailModel>/type', formatter: '.formatter.formatRequestType'}"
-                                                          state="None"
-                                                          icon="{path: 'detailModel>/type', formatter: '.formatter.getRequestTypeIcon'}"/>
+                                            <!-- Type and Status -->
+                                            <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="2" columnsM="2" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
+                                                <f:content>
+                                                    <Label text="Type"/>
+                                                    <ObjectStatus text="{path: 'detailModel>/type', formatter: '.formatter.formatRequestType'}" state="None" icon="{path: 'detailModel>/type', formatter: '.formatter.getRequestTypeIcon'}"/>
 
-                                            <Label text="Status"/>
-                                            <ObjectStatus text="{path: 'detailModel>/status', formatter: '.formatter.formatStatus'}"
-                                                          state="{path: 'detailModel>/status', formatter: '.formatter.formatStatusState'}"/>
-                                        </f:content>
-                                    </f:SimpleForm>
+                                                    <Label text="Status"/>
+                                                    <ObjectStatus text="{path: 'detailModel>/status', formatter: '.formatter.formatStatus'}" state="{path: 'detailModel>/status', formatter: '.formatter.formatStatusState'}"/>
+                                                </f:content>
+                                            </f:SimpleForm>
 
-                                    <!-- Submitted Date and From -->
-                                    <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="2" columnsM="2" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
-                                        <f:content>
-                                            <Label text="Submitted Date"/>
-                                            <Text text="{path: 'detailModel>/submittedDate', formatter: '.formatter.formatDateTime'}" wrapping="true"/>
+                                            <!-- Submitted Date and From -->
+                                            <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="2" columnsM="2" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
+                                                <f:content>
+                                                    <Label text="Submitted Date"/>
+                                                    <Text text="{path: 'detailModel>/submittedDate', formatter: '.formatter.formatDateTime'}" wrapping="true"/>
 
-                                            <Label text="From"/>
-                                            <Text text="{detailModel>/from}" wrapping="true"/>
-                                        </f:content>
-                                    </f:SimpleForm>
+                                                    <Label text="From"/>
+                                                    <Text text="{detailModel>/from}" wrapping="true"/>
+                                                </f:content>
+                                            </f:SimpleForm>
 
-                                    <!-- Manager and Substitute (for Vacation) -->
-                                    <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="2" columnsM="2" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12" visible="{= ${detailModel>/type} === 'Vacation'}">
-                                        <f:content>
-                                            <Label text="Manager"/>
-                                            <Text text="{detailModel>/manager}" wrapping="true"/>
+                                            <!-- Manager and Substitute (for Vacation) -->
+                                            <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="2" columnsM="2" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12" visible="{= ${detailModel>/type} === 'Vacation'}">
+                                                <f:content>
+                                                    <Label text="Manager"/>
+                                                    <Text text="{detailModel>/manager}" wrapping="true"/>
 
-                                            <Label text="Substitute"/>
-                                            <Text text="{detailModel>/substitute}" wrapping="true"/>
-                                        </f:content>
-                                    </f:SimpleForm>
+                                                    <Label text="Substitute"/>
+                                                    <Text text="{detailModel>/substitute}" wrapping="true"/>
+                                                </f:content>
+                                            </f:SimpleForm>
 
-                                    <!-- Approving Manager (for Travel and Equipment) -->
-                                    <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="1" columnsM="1" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12" visible="{= ${detailModel>/type} === 'Travel' || ${detailModel>/type} === 'Equipment'}">
-                                        <f:content>
-                                            <Label text="Approving Manager"/>
-                                            <Text text="{detailModel>/manager}" wrapping="true"/>
-                                        </f:content>
-                                    </f:SimpleForm>
-                                </VBox>
-                            </content>
-                        </Panel>                        <!-- Vacation Request Details -->
+                                            <!-- Approving Manager (for Travel and Equipment) -->
+                                            <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="1" columnsM="1" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12" visible="{= ${detailModel>/type} === 'Travel' || ${detailModel>/type} === 'Equipment'}">
+                                                <f:content>
+                                                    <Label text="Approving Manager"/>
+                                                    <Text text="{detailModel>/manager}" wrapping="true"/>
+                                                </f:content>
+                                            </f:SimpleForm>
+                                        </VBox>
+                                    </content>
+                                </Panel>
+                                <Panel headerText="Travel Request Details" expanded="true" visible="{= ${detailModel>/type} === 'Travel'}" height="100%">
+                                    <layoutData>
+                                        <layout:GridData span="L6 M12 S12" />
+                                    </layoutData>
+                                    <content>
+                                        <VBox class="sapUiContentPadding">
+                                            <!-- Travel Information -->
+                                            <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="1" columnsM="1" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
+                                                <f:content class="sapUiMediumMarginTop">
+                                                    <Label text="Destination"/>
+                                                    <Text text="{detailModel>/destination}" wrapping="true"/>
+                                                </f:content>
+                                            </f:SimpleForm>
+
+                                            <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="2" columnsM="2" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
+                                                <f:content>
+                                                    <Label text="Start Date"/>
+                                                    <Text text="{path: 'detailModel>/startDate', formatter: '.formatter.formatDate'}" wrapping="true"/>
+
+                                                    <Label text="End Date"/>
+                                                    <Text text="{path: 'detailModel>/endDate', formatter: '.formatter.formatDate'}" wrapping="true"/>
+                                                </f:content>
+                                            </f:SimpleForm>
+
+                                            <f:SimpleForm class="sapUiLargeMarginBottom" editable="false" layout="ResponsiveGridLayout" columnsL="1" columnsM="1" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
+                                                <f:content>
+                                                    <Label text="Reason"/>
+                                                    <Text text="{detailModel>/travelReason}" wrapping="true"/>
+                                                </f:content>
+                                            </f:SimpleForm>
+                                            <Text text="" class="sapUiLargeMarginTop sapUiHideOnPhone sapUiHideOnTablet" />
+                                            <Text text="" class="sapUiHideOnPhone sapUiHideOnTablet" />
+                                        </VBox>
+                                    </content>
+                                </Panel>
+                            </layout:content>
+                        </layout:Grid>                        <!-- Vacation Request Details -->
                         <!-- Vacation Request Details -->
                         <Panel expanded="true" visible="{= ${detailModel>/type} === 'Vacation'}" class="sapUiMediumMarginTop">
                             <headerToolbar>
@@ -203,37 +243,6 @@
                                     </HBox>
                                 </VBox>
                             </content>
-                        </Panel>                        <!-- Files (for Travel requests) -->
-                        <!-- Files (for Travel requests) -->
-                        <Panel headerText="Travel Request Details" expanded="true" visible="{= ${detailModel>/type} === 'Travel'}" class="sapUiMediumMarginTop">
-                            <content>
-                                <VBox class="sapUiContentPadding">
-                                    <!-- Travel Information -->
-                                    <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="1" columnsM="1" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
-                                        <f:content>
-                                            <Label text="Destination"/>
-                                            <Text text="{detailModel>/destination}" wrapping="true"/>
-                                        </f:content>
-                                    </f:SimpleForm>
-
-                                    <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="2" columnsM="2" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
-                                        <f:content>
-                                            <Label text="Start Date"/>
-                                            <Text text="{path: 'detailModel>/startDate', formatter: '.formatter.formatDate'}" wrapping="true"/>
-
-                                            <Label text="End Date"/>
-                                            <Text text="{path: 'detailModel>/endDate', formatter: '.formatter.formatDate'}" wrapping="true"/>
-                                        </f:content>
-                                    </f:SimpleForm>
-
-                                    <f:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="1" columnsM="1" columnsS="1" labelSpanL="12" labelSpanM="12" labelSpanS="12">
-                                        <f:content>
-                                            <Label text="Reason"/>
-                                            <Text text="{detailModel>/travelReason}" wrapping="true"/>
-                                        </f:content>
-                                    </f:SimpleForm>
-                                </VBox>
-                            </content>
                         </Panel>                        <!-- All Expense Attachments (combined) -->
                         <Panel headerText="Expense Attachments" expanded="true" visible="{= ${detailModel>/type} === 'Travel'}" class="sapUiMediumMarginTop">
                             <headerToolbar>
@@ -316,8 +325,7 @@
                                                     <Text text="{detailModel>description}"/>
                                                     <Link text="{detailModel>fileName}" href="{detailModel>fileUrl}" target="_blank"/>
                                                     <Text text="{detailModel>fileSize}"/>
-                                                <ObjectStatus text="{path: 'detailModel>status', formatter: '.formatter.formatAttachmentStatus'}"
-                                                              state="{path: 'detailModel>status', formatter: '.formatter.formatAttachmentStatusState'}" />
+                                                    <ObjectStatus text="{path: 'detailModel>status', formatter: '.formatter.formatAttachmentStatus'}" state="{path: 'detailModel>status', formatter: '.formatter.formatAttachmentStatusState'}" />
                                                     <HBox justifyContent="Center" alignItems="Center" wrap="Wrap" width="100%" visible="{= ${detailModel>/canApprove} &amp;&amp; ${detailModel>/viewMode} === 'MANAGER'}">
                                                         <Button icon="sap-icon://accept" type="Accept" tooltip="Approve this attachment" press="onApproveAttachment" visible="{= ${detailModel>status} !== 'APPROVED'}" class="sapUiTinyMarginEnd" />
                                                         <Button icon="sap-icon://decline" type="Reject" tooltip="Reject this attachment" press="onRejectAttachment" visible="{= ${detailModel>status} !== 'REJECTED'}" />
@@ -402,3 +410,4 @@
         </detailPages>
     </SplitApp>
 </mvc:View>
+

@@ -56,6 +56,19 @@ sap.ui.define([
             }
         },
 
+        onUserInfoPress: function () {
+            const oUser = this.getCurrentUser();
+            if (!oUser) {
+                return;
+            }
+            MessageBox.information(this.getText("info.loggedInAs", [oUser.firstName]), {
+                actions: [this.getText("button.logout"), MessageBox.Action.CLOSE],
+                onClose: (oAction) => {
+                    oAction === this.getText("button.logout") && this.logout();
+                }
+            });
+        },
+
         getCurrentUser: function () {
             const oUserModel = this.getOwnerComponent().getModel("userModel");
             return oUserModel ? oUserModel.getProperty("/currentUser") : null;

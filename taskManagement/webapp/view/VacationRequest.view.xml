@@ -44,6 +44,13 @@
                         <core:Icon src="sap-icon://create-leave-request" class="sapUiTinyMarginEnd"/>
                         <Title text="{i18n>title.newVacationRequest}" level="H2"/>
                         <ToolbarSpacer />
+                        <Avatar
+                            initials="{= ${userModel>/currentUser/firstName}.charAt(0) }"
+                            press="onUserInfoPress"
+                            displaySize="XS"
+                            backgroundColor="Accent6"
+                            tooltip="{userModel>/currentUser/firstName}"
+                        />
                     </OverflowToolbar>
                 </customHeader>
                 <content>
