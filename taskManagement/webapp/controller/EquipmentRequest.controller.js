@@ -12,11 +12,26 @@ sap.ui.define([
 
         onInit: function () {
             Base.prototype.onInit.call(this);
-            
+
             const oModel = Models.createEquipmentRequestModel();
             oModel.setProperty("/filteredCatalogItems", oModel.getProperty("/catalogItems"));
             this.getView().setModel(oModel);
+            // Cache manager select for validation feedback if present
+            this._oManagerSelect = this.byId && this.byId("managerSelect");
+            // Load managers for approver selection (with placeholder)
+            this._loadManagers();
             
+        },
+
+        _loadManagers: function () {
+            this.fetchManagersList({ includePlaceholder: true })
+                .then((aManagers) => {
+                    this.getView().getModel().setProperty("/managers", aManagers);
+                })
+                .catch(() => {
+                    this.showError("error.loadManagersFailed");
+                    this.getView().getModel().setProperty("/managers", []);
+                });
         },
 
         onOpenCatalogDialog: function () {
@@ -221,8 +236,9 @@ sap.ui.define([
 
             this.clearFieldErrors([this._oManagerSelect].filter(Boolean));
 
+            const bManagerChosen = !!sManager && sManager !== 99999 && sManager !== '99999';
             const aValidations = [
-                { field: this._oManagerSelect, isValid: !!sManager, errorKey: "error.managerRequired" }
+                { field: this._oManagerSelect, isValid: bManagerChosen, errorKey: "error.managerRequired" }
             ].filter((oValidation) => oValidation.field);
             
             if (aSelectedItems.length === 0) {
@@ -234,7 +250,7 @@ sap.ui.define([
                 return;
             }
 
-            const oManager = oModel.getProperty("/managers").find((m) => m.id === sManager);
+            const oManager = oModel.getProperty("/managers").find((m) => String(m.key) === String(sManager));
             this._submitEquipmentRequest(aSelectedItems, oModel.getProperty("/totalCost"), oManager);
         },
 
@@ -246,7 +262,7 @@ sap.ui.define([
                 submittedDate: new Date().toISOString(),
                 status: "PENDING_APPROVAL",
                 approvingManager: {
-                    managerId: oManager.id,
+                    managerId: oManager.key,
                     managerName: oManager.name
                 },
                 equipmentItems: aItems,

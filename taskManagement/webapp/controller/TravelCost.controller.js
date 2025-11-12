@@ -96,26 +96,15 @@ sap.ui.define([
         },
 
         _loadManagers: function () {
-            this.callAPI("/users", "GET")
-                .then((oResponse) => {
-                    if (oResponse.success && oResponse.data) {
-                        const aManagers = oResponse.data
-                            .filter((oUser) => oUser.role === "MANAGER")
-                            .map((oUser) => ({
-                                key: oUser.userId,
-                                name: `${oUser.firstName}`
-                            }));
-
-                        this.getView().getModel().setProperty("/managers", aManagers);
-                    }
+            this.fetchManagersList({ includePlaceholder: true })
+                .then((aManagers) => {
+                    this.getView().getModel().setProperty("/managers", aManagers);
                 })
                 .catch(() => {
                     this.showError("error.loadManagersFailed");
+                    // Keep a minimal placeholder if fetch fails
                     this.getView().getModel().setProperty("/managers", [
-                        { key: "MGR001", name: "John Smith - Finance Manager" },
-                        { key: "MGR002", name: "Sarah Johnson - Operations Manager" },
-                        { key: "MGR003", name: "Michael Chen - Department Head" },
-                        { key: "MGR004", name: "Emma Williams - Regional Manager" }
+                        { key: 99999, name: "Select a Manager" }
                     ]);
                 });
         },

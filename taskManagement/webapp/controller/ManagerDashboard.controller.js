@@ -150,11 +150,12 @@ sap.ui.define([
             return this.callAPI(`/equipment-requests?managerId=${sManagerId}`, "GET")
                 .then((oResponse) => {
                     if (oResponse.success && oResponse.data) {
+                        console.log(oResponse.data);
                         return oResponse.data.map((oRequest) => ({
                             id: oRequest.id,
                             requestId: oRequest.requestId,
                             type: "Equipment",
-                            submittedBy: oRequest.manager ? oRequest.manager.managerName : this.getText("label.unknown"),
+                            submittedBy: oRequest.manager ? String(oRequest.manager.managerName).trim().split(/\s+/)[0] : this.getText("label.unknown"),
                             subject: this.getText("text.itemsCount", [oRequest.totalItems || 0]),
                             submittedDate: oRequest.submittedDate,
                             status: oRequest.status,

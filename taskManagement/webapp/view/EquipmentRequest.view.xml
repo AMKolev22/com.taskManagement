@@ -147,9 +147,10 @@
                             <HBox alignItems="Center" class="sapUiMediumMarginTop">
                                 <Label text="Approving Manager:" class="sapUiMediumMarginEnd" required="true"/>
                                 <Select
+                                    id="managerSelect"
                                     selectedKey="{/selectedManager}"
                                     items="{/managers}">
-                                    <core:Item key="{id}" text="{name}"/>
+                                    <core:Item key="{key}" text="{name}"/>
                                 </Select>
                             </HBox>
                         </VBox>
@@ -160,7 +161,7 @@
                                 text="Submit Request"
                                 type="Emphasized"
                                 press="onSubmitRequest"
-                                enabled="{= ${/selectedItems}.length > 0 &amp;&amp; ${/selectedManager} !== '' }"/>
+                                enabled="{= ${/selectedItems}.length > 0 &amp;&amp; ${/selectedManager} !== '' &amp;&amp; ${/selectedManager} !== '99999' }"/>
                             <Button
                                 text="Cancel"
                                 press="onCancelRequest"

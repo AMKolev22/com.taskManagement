@@ -137,8 +137,8 @@
                                         change="onManagerChange"
                                     >
                                         <core:Item
-                                            key="{requestModel>userId}"
-                                            text="{requestModel>firstName}"
+                                            key="{requestModel>key}"
+                                            text="{requestModel>name}"
                                         />
                                         <layoutData>
                                             <FlexItemData growFactor="1"/>

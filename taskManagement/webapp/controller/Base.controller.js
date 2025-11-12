@@ -236,15 +236,34 @@ sap.ui.define([
             return this.getView().setModel(oModel, sName);
         },
 
-        checkUserAvailability: function (sUserId, oStartDate, oEndDate) {
-            return this.callAPI("/availability/check", "POST", {
-                userId: sUserId,
-                startDate: oStartDate.toISOString(),
-                endDate: oEndDate.toISOString()
-            }).then((oResponse) => oResponse)
-            .catch((error) => {
-                throw error;
+
+        // Managers helpers
+        fetchUsers: function () {
+            return this.callAPI("/users", "GET").then((oResponse) => {
+                if (oResponse && oResponse.success && Array.isArray(oResponse.data)) {
+                    return oResponse.data;
+                }
+                return [];
             });
+        },
+
+        mapManagers: function (aUsers, oOptions) {
+            const opts = oOptions || {};
+            const aManagers = (aUsers || [])
+                .filter((oUser) => oUser && oUser.role === "MANAGER")
+                .map((oUser) => ({
+                    key: oUser.userId,
+                    name: `${oUser.firstName}`,
+                    email: oUser.email
+                }));
+            if (opts.includePlaceholder) {
+                return [{ key: 99999, name: "Select a Manager" }, ...aManagers];
+            }
+            return aManagers;
+        },
+
+        fetchManagersList: function (oOptions) {
+            return this.fetchUsers().then((aUsers) => this.mapManagers(aUsers, oOptions));
         }
     });
 });

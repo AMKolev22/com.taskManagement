@@ -51,20 +51,13 @@ sap.ui.define([
         },
 
         _loadUsers: function () {
-            const oCurrentUser = this.getCurrentUser();
-
-            this.callAPI("/users", "GET")
-                .then((oResponse) => {
-                    if (oResponse.success && oResponse.data) {
-                        const oRequestModel = this.getModel("requestModel");
-                        const aManagers = oResponse.data.filter((oUser) => 
-                            oUser.role === "MANAGER"
-                        );
-
-                        oRequestModel.setProperty("/managers", aManagers);
-                        oRequestModel.setProperty("/substitutes", oResponse.data);
-                    }
-                })
+            this.fetchUsers()
+                .then((aUsers) => {
+                    const oRequestModel = this.getModel("requestModel");
+                    const aManagers = this.mapManagers(aUsers, {includePlaceholder: true});
+                    oRequestModel.setProperty("/managers", aManagers);
+                    oRequestModel.setProperty("/substitutes", aUsers);
+                });
         },
 
 
