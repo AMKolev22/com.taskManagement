@@ -372,7 +372,7 @@
                                                     <VBox class="sapUiTinyMargin">
                                                         <Text text="{detailModel>rejectionReason}" wrapping="true" class="sapUiTinyMarginTop" visible="{= ${detailModel>rejectionReason} ? true : false}" />
                                                     </VBox>
-                                                    <unified:FileUploader sameFilenameAllowed="true" buttonText="{i18n>column.replacementFile}" fileType="pdf,doc,docx,jpg,jpeg,png" uploadUrl="/api/upload" uploadComplete="onFileReuploaded" change="onFileReuploadChange" class="sapUiSmallMarginTop">
+                                                    <unified:FileUploader sameFilenameAllowed="true" buttonText="{i18n>column.replacementFile}" fileType="pdf,doc,docx,jpg,jpeg,png" sendXHR="true" name="file" uploadUrl="http://localhost:3000/api/upload" uploadComplete="onFileReuploaded" change="onFileReuploadChange" class="sapUiSmallMarginTop">
                                                         <unified:parameters>
                                                             <unified:FileUploaderParameter name="category" value="{detailModel>category}"/>
                                                             <unified:FileUploaderParameter name="requestId" value="{detailModel>/requestId}"/>

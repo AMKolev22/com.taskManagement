@@ -300,7 +300,6 @@ sap.ui.define([
         },
 
         fetchManagersList: function (oOptions) {
-            // Prefer /managers to ensure IDs match request foreign key
             return this.fetchManagers()
                 .then((aManagers) => {
                     console.log("test:", aManagers);

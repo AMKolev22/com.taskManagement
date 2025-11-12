@@ -977,9 +977,19 @@ sap.ui.define([
         },
 
         onFileReuploaded: function (oEvent) {
-            const sResponse = oEvent.getParameter("response");
+            // Prefer raw XHR response when sendXHR=true; fallback to response
+            let sResponse = oEvent.getParameter("responseRaw") || oEvent.getParameter("response") || "";
             try {
-                const oResponse = JSON.parse(sResponse);
+                // Strip potential <pre> wrappers or HTML noise (iFrame fallback)
+                let sClean = String(sResponse).trim();
+                sClean = sClean.replace(/^<pre[^>]*>/i, "").replace(/<\/pre>$/i, "").trim();
+                // If still not pure JSON, try to extract JSON object substring
+                if (sClean && sClean[0] !== "{" && sClean.indexOf("{") !== -1) {
+                    const m = sClean.match(/\{[\s\S]*\}/);
+                    if (m && m[0]) { sClean = m[0]; }
+                }
+
+                const oResponse = JSON.parse(sClean);
                 if (oResponse.success) {
                     this.showSuccess("success.fileUploaded");
                     // Update the bound attachment immediately to reflect the new file
@@ -998,12 +1008,36 @@ sap.ui.define([
                         oDetailModel.setProperty(sPath + "/status", "PENDING");
                         oDetailModel.setProperty(sPath + "/rejectionReason", "");
                     }
-                    // Do not reload immediately; keep PENDING state visible to manager
+
+                    // Also reset the overall request status to PENDING_APPROVAL so both actions show again
+                    const oDetailModel = this.getModel("detailModel");
+                    const sCurrStatus = oDetailModel.getProperty("/status");
+                    if (sCurrStatus !== "PENDING_APPROVAL") {
+                        oDetailModel.setProperty("/status", "PENDING_APPROVAL");
+                        oDetailModel.setProperty("/canApprove", this.isManager());
+
+                        // Attempt to persist status change in backend (non-blocking)
+                        try {
+                            const sTaskId = oDetailModel.getProperty("/taskId");
+                            const sType = oDetailModel.getProperty("/type");
+                            const mEndpoints = {
+                                "Vacation": `/vacation-requests/${sTaskId}/status`,
+                                "Travel": `/travel-requests/${sTaskId}/status`,
+                                "Equipment": `/equipment-requests/${sTaskId}/status`
+                            };
+                            const sEndpoint = mEndpoints[sType];
+                            if (sEndpoint) {
+                                this.callAPI(sEndpoint, "PATCH", { status: "PENDING_APPROVAL" })
+                                    .catch(() => {/* silent */});
+                            }
+                        } catch (e) { /* silent */ }
+                    }
+                    // Keep view without full reload to show updated states
                 } else {
                     this.showError("error.uploadFileFailed", [oResponse.message || this.getText("error.unknownError")]);
                 }
             } catch (error) {
-                console.error("Error parsing upload response:", error);
+                console.error("Error parsing upload response:", error, sResponse);
                 this.showError("error.uploadFileFailedGeneric");
             }
         }
