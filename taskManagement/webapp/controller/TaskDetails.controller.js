@@ -762,59 +762,83 @@ sap.ui.define([
             return oParent;
         },
 
-        /**
-         * Forward request to another manager
-         */
         onForwardRequest: function () {
             const oDetailModel = this.getModel("detailModel");
             const sTaskId = oDetailModel.getProperty("/taskId");
             const sCurrentManagerId = oDetailModel.getProperty("/managerId");
-
-            // Load all managers
-            this.callAPI("/users", "GET")
-                .then(function (oResponse) {
-                    if (oResponse.success && oResponse.data) {
-                        const aManagers = oResponse.data.filter(oUser => {
-                            return oUser.role === "MANAGER" && oUser.userId !== sCurrentManagerId;
-                        });
-
-                        this._showForwardDialog(sTaskId, aManagers);
+        
+            console.log("Current manager ID:", sCurrentManagerId); // Debug log
+        
+            this.setBusy(true); // Show loading indicator
+        
+            this.fetchUsers()
+                .then((aManagers) => {
+                    this.setBusy(false);
+                    
+                    console.log("All managers from API:", aManagers); // Debug log
+                    
+                    // Filter out current manager - be more lenient with type comparison
+                    const aFiltered = (aManagers || []).filter(m => {
+                        return m && m.userId && String(m.userId) !== String(sCurrentManagerId);
+                    });
+                    
+                    console.log("Filtered managers:", aFiltered); // Debug log
+                    
+                    if (aFiltered.length === 0) {
+                        this.showError("error.noOtherManagers");
+                        return;
                     }
-                }.bind(this))
-                .catch(function () {
+                    
+                    this._showForwardDialog(sTaskId, aFiltered);
+                })
+                .catch((error) => {
+                    this.setBusy(false);
+                    console.error("Error loading managers:", error); // Debug log
                     this.showError("error.loadManagersFailed");
-                }.bind(this));
+                });
         },
 
         _showForwardDialog: function (sTaskId, aManagers) {
             if (!this._forwardDialog) {
                 Fragment.load({
+                    id: this.getView().getId(),
                     name: "taskManagement.view.fragments.ForwardDialog",
                     controller: this
                 }).then((oDialog) => {
                     this._forwardDialog = oDialog;
                     this.getView().addDependent(oDialog);
-                    const oForwardModel = new JSONModel({ managers: aManagers, taskId: sTaskId });
+                    const oForwardModel = new JSONModel({ 
+                        managers: aManagers, 
+                        taskId: sTaskId 
+                    });
                     this._forwardDialog.setModel(oForwardModel, "forwardModel");
+                    
+                    // Open after model is set
                     this._forwardDialog.open();
                 });
             } else {
                 const oForwardModel = this._forwardDialog.getModel("forwardModel");
                 oForwardModel.setProperty("/managers", aManagers);
                 oForwardModel.setProperty("/taskId", sTaskId);
+                
+                // Refresh bindings to ensure UI updates
+                oForwardModel.refresh(true);
+                
                 this._forwardDialog.open();
             }
         },
 
         onForwardConfirm: function () {
             const oForwardModel = this._forwardDialog.getModel("forwardModel");
-            const sNewManagerId = this._forwardDialog.byId("managerSelect")?.getSelectedKey();
+            const oSelect = this.byId("managerSelect");
+            const sNewManagerId = oSelect && oSelect.getSelectedKey();
             const sTaskId = oForwardModel.getProperty("/taskId");
 
             if (sNewManagerId) {
                 this._performForward(sTaskId, sNewManagerId);
             } else {
-                this.setFieldError("managerSelect", true, "error.managerSelectFailed");
+                this.setFieldError(oSelect, true, "error.managerSelectFailed");
+                return;
             }
             this._forwardDialog.close();
         },

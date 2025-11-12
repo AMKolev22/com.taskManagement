@@ -14,7 +14,7 @@
                     items="{forwardModel>/managers}">
                     <core:Item
                         key="{forwardModel>userId}"
-                        text="{forwardModel>firstName}"/>
+                        text="{forwardModel>firstName} {forwardModel>lastName}"/>
                 </Select>
             </VBox>
         </content>
@@ -26,4 +26,3 @@
         </endButton>
     </Dialog>
 </core:FragmentDefinition>
-

@@ -96,16 +96,27 @@ sap.ui.define([
             }
 
             return fetch(sUrl, oOptions)
-                .then((response) => {
-                    return response.json().then((data) => {
-                        if (!response.ok) {
-                            const error = new Error(data.message || data.error || this.getText("error.unknownError"));
-                            error.response = data;
-                            error.status = response.status;
-                            throw error;
+                .then(async (response) => {
+                    // Read body once as text to avoid JSON.parse errors on non-JSON responses
+                    const rawText = await response.text();
+                    let data = {};
+                    if (rawText) {
+                        try {
+                            data = JSON.parse(rawText);
+                        } catch (e) {
+                            // Not JSON; keep raw for error context
+                            data = { raw: rawText };
                         }
-                        return data;
-                    });
+                    }
+
+                    if (!response.ok) {
+                        const message = (data && (data.message || data.error)) || rawText || this.getText("error.unknownError");
+                        const error = new Error(message);
+                        error.response = data;
+                        error.status = response.status;
+                        throw error;
+                    }
+                    return data;
                 })
                 .catch((error) => {
                     console.error("API Error:", error);
@@ -126,7 +137,7 @@ sap.ui.define([
         },
 
         showSuccess: function (sMessageKey, aArgs) {
-            const bIsI18nKey = typeof sMessageKey === "string" && 
+            const bIsI18nKey = typeof sMessageKey === "string" &&
                 (sMessageKey.startsWith("success.") || sMessageKey.startsWith("info."));
             const sMessage = bIsI18nKey ? this.getText(sMessageKey, aArgs) : sMessageKey;
             MessageToast.show(sMessage);
@@ -186,7 +197,7 @@ sap.ui.define([
         showMessageStrip: function (sMessageKey, sType, aArgs) {
             const oView = this.getView();
             const sMessage = this.getText(sMessageKey, aArgs);
-            
+
             // Update model binding - MessageStrip must be defined in XML
             // Try default model first
             let oModel = oView.getModel();
@@ -207,7 +218,7 @@ sap.ui.define([
 
         hideMessageStrip: function () {
             const oView = this.getView();
-            
+
             // Update model binding - MessageStrip must be defined in XML
             let oModel = oView.getModel();
             if (oModel && oModel.getProperty("/showValidationMessage") !== undefined) {
@@ -247,15 +258,41 @@ sap.ui.define([
             });
         },
 
-        mapManagers: function (aUsers, oOptions) {
+        // Fetch managers from /api/managers (canonical source for managerId used by requests)
+        fetchManagers: function () {
+            return this.callAPI("/managers", "GET").then((oResponse) => {
+                if (oResponse && oResponse.success && Array.isArray(oResponse.data)) {
+                    return oResponse.data;
+                }
+                return [];
+            });
+        },
+
+        mapManagers: function (aData, oOptions) {
             const opts = oOptions || {};
-            const aManagers = (aUsers || [])
-                .filter((oUser) => oUser && oUser.role === "MANAGER")
-                .map((oUser) => ({
-                    key: oUser.userId,
-                    name: `${oUser.firstName}`,
-                    email: oUser.email
-                }));
+            const aManagers = (aData || [])
+                .filter((oItem) => {
+                    if (oItem.role) {
+                        return oItem.role === "MANAGER";
+                    }
+                    return true;
+                })
+                .map((oItem) => {
+                    let sName = "";
+                    if (oItem.managerId && oItem.managerName) {
+                        // Extract username (first word before space)
+                        sName = oItem.managerName.split(' ')[0];
+                    } else {
+                        sName = `${oItem.firstName}`;
+                    }
+                    
+                    return {
+                        key: oItem.managerId || oItem.userId,
+                        name: sName,
+                        email: oItem.email || ""
+                    };
+                });
+            
             if (opts.includePlaceholder) {
                 return [{ key: 99999, name: "Select a Manager" }, ...aManagers];
             }
@@ -263,7 +300,17 @@ sap.ui.define([
         },
 
         fetchManagersList: function (oOptions) {
-            return this.fetchUsers().then((aUsers) => this.mapManagers(aUsers, oOptions));
+            // Prefer /managers to ensure IDs match request foreign key
+            return this.fetchManagers()
+                .then((aManagers) => {
+                    console.log("test:", aManagers);
+                    const aMapped = this.mapManagers(aManagers, oOptions) || [];
+                    if (aMapped.length > 0) {
+                        return aMapped;
+                    }
+                    // Fallback to /users?role=MANAGER if managers table is empty
+                    return this.fetchUsers().then((aUsers) => this.mapManagers(aUsers, oOptions));
+                });
         }
     });
 });

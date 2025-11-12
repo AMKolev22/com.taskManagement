@@ -18,6 +18,46 @@ app.use(cors({
 // Initialize file upload service
 const fileUploadService = new FileUploadService();
 
+// Helper to resolve/normalize a managerId passed from the client.
+// Accepts either an existing Manager.managerId or a User.userId and returns a valid Manager.managerId.
+async function resolveManagerId(prisma, inputId) {
+    if (!inputId) return inputId;
+    try {
+        // If input matches an existing managerId, use it as-is
+        const existing = await prisma.manager.findUnique({ where: { managerId: inputId } });
+        if (existing) {
+            return existing.managerId;
+        }
+
+        // Try to resolve via user record
+        const user = await prisma.user.findUnique({ where: { userId: inputId } });
+        if (user) {
+            // Try to find a manager by email
+            if (user.email) {
+                const managerByEmail = await prisma.manager.findFirst({ where: { email: user.email } });
+                if (managerByEmail) {
+                    return managerByEmail.managerId;
+                }
+            }
+            // Create a minimal manager record linked by userId as managerId
+            const created = await prisma.manager.create({
+                data: {
+                    managerId: user.userId,
+                    managerName: user.firstName || user.username || user.email || user.userId,
+                    email: user.email || null,
+                    department: user.department || null
+                }
+            });
+            return created.managerId;
+        }
+
+        // Fallback: return as-is; FK layer will enforce correctness
+        return inputId;
+    } catch (e) {
+        return inputId;
+    }
+}
+
 /**
  * POST /api/upload
  * Upload a single file - NOW ACTUALLY SAVES THE FILE
@@ -586,6 +626,46 @@ app.patch('/api/travel-requests/:id/status', async (req, res) => {
             });
         }
 
+        res.status(500).json({
+            error: 'Internal server error',
+            message: error.message
+        });
+    }
+});
+
+/**
+ * PATCH /api/travel-requests/:id
+ * Update travel request (e.g., forward to another manager)
+ */
+app.patch('/api/travel-requests/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body || {};
+        if (updateData.managerId) {
+            updateData.managerId = await resolveManagerId(prisma, updateData.managerId);
+        }
+
+        const travelRequest = await prisma.travelRequest.update({
+            where: { id },
+            data: {
+                ...updateData,
+                updatedAt: new Date()
+            },
+            include: {
+                manager: true,
+                foodCosts: true,
+                travelCosts: true,
+                stayCosts: true
+            }
+        });
+
+        res.json({
+            success: true,
+            message: 'Travel request updated successfully',
+            data: travelRequest
+        });
+    } catch (error) {
+        console.error('Error updating travel request:', error);
         res.status(500).json({
             error: 'Internal server error',
             message: error.message
@@ -1274,7 +1354,10 @@ app.patch('/api/vacation-requests/:id/status', async (req, res) => {
 app.patch('/api/vacation-requests/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const updateData = req.body;
+        const updateData = req.body || {};
+        if (updateData.managerId) {
+            updateData.managerId = await resolveManagerId(prisma, updateData.managerId);
+        }
 
         const vacationRequest = await prisma.vacationRequest.update({
             where: { id },
@@ -1650,6 +1733,44 @@ app.patch('/api/equipment-requests/:id/status', async (req, res) => {
             });
         }
 
+        res.status(500).json({
+            error: 'Internal server error',
+            message: error.message
+        });
+    }
+});
+
+/**
+ * PATCH /api/equipment-requests/:id
+ * Update equipment request (e.g., forward to another manager)
+ */
+app.patch('/api/equipment-requests/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body || {};
+        if (updateData.managerId) {
+            updateData.managerId = await resolveManagerId(prisma, updateData.managerId);
+        }
+
+        const equipmentRequest = await prisma.equipmentRequest.update({
+            where: { id },
+            data: {
+                ...updateData,
+                updatedAt: new Date()
+            },
+            include: {
+                manager: true,
+                equipmentItems: true
+            }
+        });
+
+        res.json({
+            success: true,
+            message: 'Equipment request updated successfully',
+            data: equipmentRequest
+        });
+    } catch (error) {
+        console.error('Error updating equipment request:', error);
         res.status(500).json({
             error: 'Internal server error',
             message: error.message
