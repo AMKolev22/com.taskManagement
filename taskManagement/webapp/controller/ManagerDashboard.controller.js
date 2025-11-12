@@ -114,7 +114,7 @@ sap.ui.define([
                             id: oRequest.id,
                             requestId: oRequest.requestId,
                             type: "Vacation",
-                            submittedBy: oRequest.user ? `${oRequest.user.firstName} ${oRequest.user.lastName}` : this.getText("label.unknown"),
+                            submittedBy: oRequest.user ? `${oRequest.user.firstName}` : this.getText("label.unknown"),
                             subject: `${formatter.formatVacationType(oRequest.vacationType)} - ${formatter.calculateDuration(oRequest.startDate, oRequest.endDate)}`,
                             submittedDate: oRequest.submittedDate,
                             status: oRequest.status,
@@ -134,7 +134,7 @@ sap.ui.define([
                             id: oRequest.id,
                             requestId: oRequest.requestId,
                             type: "Travel",
-                            submittedBy: oRequest.submittedBy || this.getText("label.unknown"),
+                            submittedBy: (oRequest.submittedBy && String(oRequest.submittedBy).trim().split(/\s+/)[0]) || this.getText("label.unknown"),
                             subject: oRequest.destination,
                             submittedDate: oRequest.submittedDate,
                             status: oRequest.status,
@@ -154,7 +154,7 @@ sap.ui.define([
                             id: oRequest.id,
                             requestId: oRequest.requestId,
                             type: "Equipment",
-                            submittedBy: oRequest.manager?.managerName || this.getText("label.unknown"),
+                            submittedBy: oRequest.manager ? oRequest.manager.managerName : this.getText("label.unknown"),
                             subject: this.getText("text.itemsCount", [oRequest.totalItems || 0]),
                             submittedDate: oRequest.submittedDate,
                             status: oRequest.status,
@@ -329,7 +329,7 @@ sap.ui.define([
 
         onUserInfoPress: function () {
             const oUser = this.getCurrentUser();
-            MessageBox.information(this.getText("info.loggedInAs", [oUser.firstName, oUser.lastName]), {
+            MessageBox.information(this.getText("info.loggedInAs", [oUser.firstName]), {
                 actions: [this.getText("button.logout"), MessageBox.Action.CLOSE],
                 onClose: (oAction) => {
                     oAction === this.getText("button.logout") && this.logout();

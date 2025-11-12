@@ -14,7 +14,7 @@
                     items="{forwardModel>/managers}">
                     <core:Item
                         key="{forwardModel>userId}"
-                        text="{forwardModel>firstName} {forwardModel>lastName} ({forwardModel>department})"/>
+                        text="{forwardModel>firstName}"/>
                 </Select>
             </VBox>
         </content>

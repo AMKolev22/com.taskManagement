@@ -106,7 +106,7 @@ sap.ui.define([
                 });
 
                 if (oRequest.status === "APPROVED" && oRequest.approvedDate) {
-                    const sManagerName = oRequest.manager ? `${oRequest.manager.firstName} ${oRequest.manager.lastName}` : "Manager";
+                    const sManagerName = oRequest.manager ? `${oRequest.manager.firstName}` : "Manager";
                     aActivities.push({
                         id: `${oRequest.id}_approved`,
                         requestId: oRequest.id,
@@ -117,7 +117,7 @@ sap.ui.define([
                         timestamp: oRequest.approvedDate
                     });
                 } else if (oRequest.status === "REJECTED") {
-                    const sManagerName = oRequest.manager ? `${oRequest.manager.firstName} ${oRequest.manager.lastName}` : "Manager";
+                    const sManagerName = oRequest.manager ? `${oRequest.manager.firstName}` : "Manager";
                     aActivities.push({
                         id: `${oRequest.id}_rejected`,
                         requestId: oRequest.id,
@@ -128,7 +128,7 @@ sap.ui.define([
                         timestamp: oRequest.updatedAt
                     });
                 } else if (oRequest.status === "PARTIALLY_REJECTED") {
-                    const sManagerName = oRequest.manager ? `${oRequest.manager.firstName} ${oRequest.manager.lastName}` : "Manager";
+                    const sManagerName = oRequest.manager ? `${oRequest.manager.firstName}` : "Manager";
                     aActivities.push({
                         id: `${oRequest.id}_partial`,
                         requestId: oRequest.id,
@@ -142,7 +142,7 @@ sap.ui.define([
 
                 if (oRequest.comments?.length > 0) {
                     oRequest.comments.forEach((oComment) => {
-                        const sCommentorName = oComment.user ? `${oComment.user.firstName} ${oComment.user.lastName}` : "Manager";
+                        const sCommentorName = oComment.user ? `${oComment.user.firstName}` : "Manager";
                         aActivities.push({
                             id: oComment.id,
                             requestId: oRequest.id,
@@ -254,7 +254,7 @@ sap.ui.define([
         onUserInfoPress: function () {
             const oUser = this.getCurrentUser();
             MessageBox.information(
-                this.getText("info.loggedInAsDetails", [oUser.firstName, oUser.lastName, formatter.formatRole(oUser.role), oUser.department || "N/A"]),
+                this.getText("info.loggedInAsDetails", [oUser.firstName, formatter.formatRole(oUser.role), oUser.department || "N/A"]),
                 {
                     actions: [this.getText("button.logout"), MessageBox.Action.CLOSE],
                     onClose: (oAction) => {

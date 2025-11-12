@@ -49,7 +49,7 @@
                     </OverflowToolbar>
                 </customHeader>
                 <content>
-                    <VBox width="100%">
+                    <VBox width="100%" class="sapUiMediumMarginTop">
                         
                         <!-- Validation Message Strip -->
                         <MessageStrip
@@ -120,10 +120,10 @@
                         </Panel>
 
                         <!-- Food Costs Section -->
-                        <Panel headerText="{i18n>title.foodCosts}">
+                        <Panel headerText="{i18n>title.foodCosts}" class="sapUiMediumMarginTop">
                             <VBox class="sapUiSmallMargin">
                                 <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiTinyMarginBottom">
-                                    <Label text="{i18n>text.uploadFoodHint}"/>
+                                    <Label text="{i18n>text.uploadFoodHint}" class="sapUiHideOnPhone sapUiHideOnTablet" />
                                     <Button 
                                         text="{i18n>button.addFoodCost}" 
                                         icon="sap-icon://add"
@@ -160,10 +160,10 @@
                         </Panel>
 
                         <!-- Travel Costs Section -->
-                        <Panel headerText="{i18n>title.travelCosts}" >
+                        <Panel headerText="{i18n>title.travelCosts}" class="sapUiMediumMarginTop">
                             <VBox class="sapUiSmallMargin">
                                 <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiTinyMarginBottom">
-                                    <Label text="{i18n>text.uploadTravelHint}"/>
+                                    <Label text="{i18n>text.uploadTravelHint}" class="sapUiHideOnPhone sapUiHideOnTablet"/>
                                     <Button 
                                         text="{i18n>button.addTravelCost}" 
                                         icon="sap-icon://add"
@@ -200,10 +200,10 @@
                         </Panel>
 
                         <!-- Stay Costs Section -->
-                        <Panel headerText="{i18n>title.stayCosts}" >
+                        <Panel headerText="{i18n>title.stayCosts}" class="sapUiMediumMarginTop">
                             <VBox class="sapUiSmallMargin">
                                 <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiTinyMarginBottom">
-                                    <Label text="{i18n>text.uploadStayHint}"/>
+                                    <Label text="{i18n>text.uploadStayHint}" class="sapUiHideOnPhone sapUiHideOnTablet"/>
                                     <Button 
                                         text="{i18n>button.addStayCost}" 
                                         icon="sap-icon://add"
@@ -247,7 +247,8 @@
                                 type="Success"
                                 icon="sap-icon://accept"
                                 press=".onSubmit"
-                                tooltip="{i18n>tooltip.submit}"/>
+                                tooltip="{i18n>tooltip.submit}"
+                                class="sapUiSmallMarginTop sapUiSmallMarginEnd" />
                         </HBox>
                         
                     </VBox>

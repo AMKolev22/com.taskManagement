@@ -138,7 +138,7 @@
                                     >
                                         <core:Item
                                             key="{requestModel>userId}"
-                                            text="{requestModel>firstName} {requestModel>lastName} ({requestModel>department})"
+                                            text="{requestModel>firstName}"
                                         />
                                         <layoutData>
                                             <FlexItemData growFactor="1"/>
@@ -177,7 +177,7 @@
                                     >
                                         <core:Item
                                             key="{requestModel>userId}"
-                                            text="{requestModel>firstName} {requestModel>lastName} ({requestModel>department})"
+                                            text="{requestModel>firstName}"
                                         />
                                         <layoutData>
                                             <FlexItemData growFactor="1"/>

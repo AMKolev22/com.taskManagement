@@ -25,7 +25,7 @@ sap.ui.define([
                 this.oRouter.navTo("login");
                 return;
             }
-            
+
             const oDetailModel = Models.createDetailModel();
             this.setModel(oDetailModel, "detailModel");
 
@@ -38,8 +38,8 @@ sap.ui.define([
             const bIsManager = oCurrentUser.role === "MANAGER";
             oDetailModel.setProperty("/isManager", bIsManager);
             oDetailModel.setProperty("/viewMode", bIsManager ? "MANAGER" : "USER");
-            
-            
+
+
             this.oRouter.getRoute("taskDetails").attachPatternMatched(this._onRouteMatched, this);
         },
 
@@ -90,7 +90,7 @@ sap.ui.define([
             const oArgs = oEvent.getParameter("arguments");
             const sTaskId = oArgs.id;
             const sTaskType = oArgs.type;
-            
+
             if (sTaskId && sTaskType) {
                 this._loadTaskDetails(sTaskId, sTaskType);
             } else {
@@ -105,14 +105,14 @@ sap.ui.define([
                 "Equipment": "/equipment-requests/" + sTaskId
             };
             const sEndpoint = mEndpoints[sTaskType];
-            
+
             if (!sEndpoint) {
                 this.showError("error.unknownRequestType");
                 return;
             }
-            
+
             this.setBusy(true);
-            
+
             this.callAPI(sEndpoint, "GET")
                 .then((oResponse) => {
                     this.setBusy(false);
@@ -131,7 +131,7 @@ sap.ui.define([
         _displayTaskDetails: function (oData, sType) {
             const oDetailModel = this.getModel("detailModel");
             const oCurrentUser = this.getCurrentUser();
-            
+
             const bCanApprove = this.isManager() && oData.status === "PENDING_APPROVAL";
             const bIsOwner = oData.userId === oCurrentUser.userId;
 
@@ -151,9 +151,9 @@ sap.ui.define([
             };
 
             if (sType === "Vacation") {
-                oModelData.from = oData.user ? `${oData.user.firstName} ${oData.user.lastName}` : "";
-                oModelData.manager = oData.manager ? `${oData.manager.firstName} ${oData.manager.lastName}` : "";
-                oModelData.substitute = oData.substitute ? `${oData.substitute.firstName} ${oData.substitute.lastName}` : "";
+                oModelData.from = oData.user ? `${oData.user.firstName}` : "";
+                oModelData.manager = oData.manager ? `${oData.manager.firstName}` : "";
+                oModelData.substitute = oData.substitute ? `${oData.substitute.firstName}` : "";
                 oModelData.vacationType = oData.vacationType;
                 oModelData.startDate = oData.startDate;
                 oModelData.endDate = oData.endDate;
@@ -174,24 +174,31 @@ sap.ui.define([
                     };
                 });
             } else if (sType === "Equipment") {
-                const sManagerName = oData.manager?.managerName || "";
-                oModelData.manager = sManagerName;
-                oModelData.from = sManagerName;
+                const sMgrFirst = oData.manager?.firstName;
+                const sMgrNameRaw = oData.manager?.managerName || "";
+                const sMgrDisplay = sMgrFirst || (sMgrNameRaw ? String(sMgrNameRaw).trim().split(/\s+/)[0] : "");
+                oModelData.manager = sMgrDisplay || this.getText("label.noManager");
+                oModelData.from = sMgrDisplay || oModelData.from;
                 oModelData.items = oData.equipmentItems || [];
                 oModelData.totalCost = oData.totalCost;
             } else if (sType === "Travel") {
-                oModelData.manager = oData.manager?.managerName || this.getText("label.noManager");
-                oModelData.from = oData.submittedBy || this.getText("label.unknown");
+                const sMgrFirst = oData.manager?.firstName;
+                const sMgrNameRaw = oData.manager?.managerName || "";
+                const sMgrDisplay = sMgrFirst || (sMgrNameRaw ? String(sMgrNameRaw).trim().split(/\s+/)[0] : "");
+                oModelData.manager = sMgrDisplay || this.getText("label.noManager");
+                var sSubmittedBy = oData.submittedBy || "";
+                var sFirstOnly = String(sSubmittedBy).trim().split(/\s+/)[0];
+                oModelData.from = sFirstOnly || this.getText("label.unknown");
                 oModelData.userId = oData.userId;
                 oModelData.managerId = oData.managerId;
                 oModelData.destination = oData.destination;
                 oModelData.startDate = oData.startDate;
                 oModelData.endDate = oData.endDate;
                 oModelData.travelReason = oData.reason;
-                
+
                 // Combine all files into attachments with category
                 const aAllAttachments = [];
-                
+
                 (oData.foodCosts || []).forEach(function (oFile) {
                     aAllAttachments.push({
                         id: oFile.id,
@@ -205,7 +212,7 @@ sap.ui.define([
                         fileUrl: oFile.fileUrl
                     });
                 });
-                
+
                 (oData.travelCosts || []).forEach(function (oFile) {
                     aAllAttachments.push({
                         id: oFile.id,
@@ -219,7 +226,7 @@ sap.ui.define([
                         fileUrl: oFile.fileUrl
                     });
                 });
-                
+
                 (oData.stayCosts || []).forEach(function (oFile) {
                     aAllAttachments.push({
                         id: oFile.id,
@@ -233,7 +240,7 @@ sap.ui.define([
                         fileUrl: oFile.fileUrl
                     });
                 });
-                
+
                 oModelData.attachments = aAllAttachments;
             }
 
@@ -256,7 +263,7 @@ sap.ui.define([
             oDetailModel.setProperty("/viewMode", sSelectedKey);
         },
 
-                onResubmitRequestInline: function () {
+        onResubmitRequestInline: function () {
             var oDetailModel = this.getModel("detailModel");
             var sTaskId = oDetailModel.getProperty("/taskId");
             var sType = oDetailModel.getProperty("/type");
@@ -298,7 +305,7 @@ sap.ui.define([
                     }
                 }
             });
-        },onApproveAll: function () {
+        }, onApproveAll: function () {
             const oDetailModel = this.getModel("detailModel");
             const sTaskId = oDetailModel.getProperty("/taskId");
             const sType = oDetailModel.getProperty("/type");
@@ -312,7 +319,7 @@ sap.ui.define([
             const oDetailModel = this.getModel("detailModel");
             const sTaskId = oDetailModel.getProperty("/taskId");
             const sType = oDetailModel.getProperty("/type");
-            
+
             const oTextArea = new sap.m.TextArea({
                 width: "100%",
                 rows: 4,
@@ -347,7 +354,7 @@ sap.ui.define([
                 });
                 this.getView().addDependent(this._rejectDialog);
             }
-            
+
             this._rejectDialog.open();
         },
 
@@ -398,7 +405,7 @@ sap.ui.define([
             oEvent.preventDefault();
             const oButton = oEvent.getSource();
             const oListItem = this._getListItem(oButton);
-            
+
             if (oListItem) {
                 const oContext = oListItem.getBindingContext("detailModel");
                 const oAttachment = oContext.getObject();
@@ -425,7 +432,7 @@ sap.ui.define([
             oEvent.preventDefault();
             const oButton = oEvent.getSource();
             const oListItem = this._getListItem(oButton);
-            
+
             if (oListItem) {
                 const oContext = oListItem.getBindingContext("detailModel");
                 const oAttachment = oContext.getObject();
@@ -456,7 +463,7 @@ sap.ui.define([
                     rows: 3,
                     placeholder: this.getText("placeholder.rejectionReason")
                 });
-        
+
                 this._rejectAttachmentDialog = new sap.m.Dialog({
                     title: this.getText("error.rejectAttachmentTitle", [oAttachment.fileName]),
                     type: "Message",
@@ -490,20 +497,20 @@ sap.ui.define([
                 });
                 this.getView().addDependent(this._rejectAttachmentDialog);
             }
-            
+
             // Store current context in dialog's custom data
             this._rejectAttachmentDialog.data("path", sPath);
             this._rejectAttachmentDialog.data("attachment", oAttachment);
             this._rejectAttachmentDialog.data("taskId", sTaskId);
             this._rejectAttachmentDialog.data("type", sType);
-            
+
             // Update title and clear previous value
             this._rejectAttachmentDialog.setTitle(this.getText("error.rejectAttachmentTitle", [oAttachment.fileName]));
             const oTextArea = sap.ui.getCore().byId(this.createId("rejectAttachmentReason"));
             if (oTextArea) {
                 oTextArea.setValue("");
             }
-            
+
             this._rejectAttachmentDialog.open();
         },
 
@@ -540,38 +547,38 @@ sap.ui.define([
                 });
                 this.getView().addDependent(this._approveRejectDialog);
             }
-            
+
             this._approveRejectDialog.setTitle(this.getText("error.approveRejectAttachmentTitle", [oAttachment.fileName]));
             this._approveRejectDialog.open();
         },
 
         _updateExpenseStatus: function (sTaskId, sType, oAttachment, sStatus, sRejectionReason, sPath) {
             const oDetailModel = this.getModel("detailModel");
-            
+
             if (sType === "Travel") {
                 const sRequestId = oDetailModel.getProperty("/requestId");
                 const sEndpoint = `/travel-requests/${sRequestId}/expense/${oAttachment.id}/status`;
-                
+
                 this.setBusy(true);
-                
+
                 this.callAPI(sEndpoint, "PATCH", {
                     status: sStatus,
                     rejectionReason: sRejectionReason,
                     category: oAttachment.category
                 })
-                .then((oResponse) => {
-                    this.setBusy(false);
-                    if (oResponse.success) {
-                        oDetailModel.setProperty(`${sPath}/status`, sStatus);
-                        oDetailModel.setProperty(`${sPath}/rejectionReason`, sRejectionReason || "");
-                        this.showSuccess("success.attachmentStatus", [sStatus.toLowerCase()]);
-                        this._checkAndUpdateRequestStatus();
-                    }
-                })
-                .catch((error) => {
-                    this.setBusy(false);
-                    this.showError("error.updateAttachmentStatusFailed");
-                });
+                    .then((oResponse) => {
+                        this.setBusy(false);
+                        if (oResponse.success) {
+                            oDetailModel.setProperty(`${sPath}/status`, sStatus);
+                            oDetailModel.setProperty(`${sPath}/rejectionReason`, sRejectionReason || "");
+                            this.showSuccess("success.attachmentStatus", [sStatus.toLowerCase()]);
+                            this._checkAndUpdateRequestStatus();
+                        }
+                    })
+                    .catch((error) => {
+                        this.setBusy(false);
+                        this.showError("error.updateAttachmentStatusFailed");
+                    });
             } else {
                 oDetailModel.setProperty(`${sPath}/status`, sStatus);
                 oDetailModel.setProperty(`${sPath}/rejectionReason`, sRejectionReason || "");
@@ -600,7 +607,7 @@ sap.ui.define([
             const oDetailModel = this.getModel("detailModel");
             const sType = oDetailModel.getProperty("/type");
             const sTaskId = oDetailModel.getProperty("/taskId");
-            
+
             const oTextArea = new sap.m.TextArea({
                 width: "100%",
                 rows: 3,
@@ -623,38 +630,38 @@ sap.ui.define([
                             if (sReason && sReason.trim()) {
                                 const aAttachments = oDetailModel.getProperty("/attachments");
                                 const aCategoryAttachments = aAttachments.filter((oAttachment) => oAttachment.category === sCategory);
-                                
+
                                 if (aCategoryAttachments.length === 0) {
                                     this.showError("error.noAttachments");
                                     return;
                                 }
-                                
+
                                 if (sType === "Travel") {
                                     this.setBusy(true);
                                     const sRequestId = oDetailModel.getProperty("/requestId");
-                                    Promise.all(aCategoryAttachments.map((oAttachment) => 
+                                    Promise.all(aCategoryAttachments.map((oAttachment) =>
                                         this.callAPI(`/travel-requests/${sRequestId}/expense/${oAttachment.id}/status`, "PATCH", {
                                             status: "REJECTED",
                                             rejectionReason: sReason,
                                             category: sCategory
                                         })
                                     ))
-                                    .then(() => {
-                                        this.setBusy(false);
-                                        aAttachments.forEach((oAttachment, iIndex) => {
-                                            if (oAttachment.category === sCategory) {
-                                                oDetailModel.setProperty(`/attachments/${iIndex}/status`, "REJECTED");
-                                                oDetailModel.setProperty(`/attachments/${iIndex}/rejectionReason`, sReason);
-                                            }
+                                        .then(() => {
+                                            this.setBusy(false);
+                                            aAttachments.forEach((oAttachment, iIndex) => {
+                                                if (oAttachment.category === sCategory) {
+                                                    oDetailModel.setProperty(`/attachments/${iIndex}/status`, "REJECTED");
+                                                    oDetailModel.setProperty(`/attachments/${iIndex}/rejectionReason`, sReason);
+                                                }
+                                            });
+                                            this.showSuccess("success.attachmentRejected", [aCategoryAttachments.length, sCategory]);
+                                            this._rejectCategoryDialog.close();
+                                            this._loadTaskDetails(sTaskId, sType);
+                                        })
+                                        .catch(() => {
+                                            this.setBusy(false);
+                                            this.showError("error.rejectAttachmentsFailed");
                                         });
-                                        this.showSuccess("success.attachmentRejected", [aCategoryAttachments.length, sCategory]);
-                                        this._rejectCategoryDialog.close();
-                                        this._loadTaskDetails(sTaskId, sType);
-                                    })
-                                    .catch(() => {
-                                        this.setBusy(false);
-                                        this.showError("error.rejectAttachmentsFailed");
-                                    });
                                 } else {
                                     let rejectedCount = 0;
                                     aAttachments.forEach((oAttachment, iIndex) => {
@@ -680,7 +687,7 @@ sap.ui.define([
                 });
                 this.getView().addDependent(this._rejectCategoryDialog);
             }
-            
+
             this._rejectCategoryDialog.setTitle("Reject Category: " + sCategory);
             this._rejectCategoryDialog.open();
         },
@@ -693,14 +700,14 @@ sap.ui.define([
                         const oDetailModel = this.getModel("detailModel");
                         const aComments = oDetailModel.getProperty("/comments") || [];
                         const oCurrentUser = this.getCurrentUser();
-                        
+
                         aComments.push({
                             content: sComment,
-                            user: `${oCurrentUser.firstName} ${oCurrentUser.lastName}`,
+                            user: `${oCurrentUser.firstName}`,
                             createdAt: new Date().toISOString(),
                             commentType: "GENERAL"
                         });
-                        
+
                         oDetailModel.setProperty("/comments", aComments);
                         MessageToast.show("Comment added");
                     }
@@ -729,13 +736,13 @@ sap.ui.define([
                 .then((oResponse) => {
                     this.setBusy(false);
                     this.showSuccess("success.requestApproved", [sStatus.toLowerCase()]);
-                    
+
                     this.publishEvent("tasks", "taskUpdated", {
                         taskId: sTaskId,
                         type: sType,
                         status: sStatus
                     });
-                    
+
                     bReloadInstead ? this._loadTaskDetails(sTaskId, sType) : this.onNavBack();
                 })
                 .catch((error) => {
@@ -746,9 +753,9 @@ sap.ui.define([
 
         _getListItem: function (oControl) {
             let oParent = oControl.getParent();
-            while (oParent && oParent.getMetadata().getName() !== "sap.m.CustomListItem" && 
-                   oParent.getMetadata().getName() !== "sap.m.StandardListItem" &&
-                   oParent.getMetadata().getName() !== "sap.m.ColumnListItem") {
+            while (oParent && oParent.getMetadata().getName() !== "sap.m.CustomListItem" &&
+                oParent.getMetadata().getName() !== "sap.m.StandardListItem" &&
+                oParent.getMetadata().getName() !== "sap.m.ColumnListItem") {
                 oParent = oParent.getParent();
             }
             return oParent;
@@ -760,15 +767,15 @@ sap.ui.define([
         onForwardRequest: function () {
             const oDetailModel = this.getModel("detailModel");
             const sType = oDetailModel.getProperty("/type");
-            
+
             if (sType !== "Vacation") {
                 MessageBox.information(this.getText("info.forwardOnlyVacation"));
                 return;
             }
-            
+
             const sTaskId = oDetailModel.getProperty("/taskId");
             const sCurrentManagerId = oDetailModel.getProperty("/managerId");
-            
+
             // Load all managers
             this.callAPI("/users", "GET")
                 .then(function (oResponse) {
@@ -776,7 +783,7 @@ sap.ui.define([
                         const aManagers = oResponse.data.filter(oUser => {
                             return oUser.role === "MANAGER" && oUser.userId !== sCurrentManagerId;
                         });
-                        
+
                         this._showForwardDialog(sTaskId, aManagers);
                     }
                 }.bind(this))
@@ -809,7 +816,7 @@ sap.ui.define([
             const oForwardModel = this._forwardDialog.getModel("forwardModel");
             const sNewManagerId = this._forwardDialog.byId("managerSelect")?.getSelectedKey();
             const sTaskId = oForwardModel.getProperty("/taskId");
-            
+
             if (sNewManagerId) {
                 this._performForward(sTaskId, sNewManagerId);
             } else {
@@ -824,7 +831,7 @@ sap.ui.define([
 
         _performForward: function (sTaskId, sNewManagerId) {
             this.setBusy(true);
-            
+
             this.callAPI(`/vacation-requests/${sTaskId}`, "PATCH", {
                 managerId: sNewManagerId
             })
@@ -848,7 +855,7 @@ sap.ui.define([
             const sType = oDetailModel.getProperty("/type");
             const sTaskId = oDetailModel.getProperty("/taskId");
             const sStatus = oDetailModel.getProperty("/status");
-            
+
             if (sType === "Vacation") {
                 this.oRouter.navTo("vacationRequest");
             } else if (sType === "Travel") {
@@ -874,35 +881,35 @@ sap.ui.define([
             const sTaskId = oDetailModel.getProperty("/taskId");
             const sType = oDetailModel.getProperty("/type");
             const aAttachments = oDetailModel.getProperty("/attachments") || [];
-            
+
             // Only check if status is still PENDING_APPROVAL
             if (sStatus !== "PENDING_APPROVAL") {
                 return;
             }
-            
+
             // If no attachments, don't change status
             if (aAttachments.length === 0) {
                 return;
             }
-            
+
             const aApproved = aAttachments.filter(function (oAttachment) {
                 return oAttachment.status === "APPROVED";
             });
-            
+
             const aRejected = aAttachments.filter(function (oAttachment) {
                 return oAttachment.status === "REJECTED";
             });
-            
+
             const aPending = aAttachments.filter(function (oAttachment) {
                 return oAttachment.status === "PENDING";
             });
-            
+
             // If all attachments are approved and none are pending → auto-approve
             if (aApproved.length === aAttachments.length && aPending.length === 0) {
                 this._updateTaskStatus(sTaskId, sType, "APPROVED", null, aAttachments, true);
                 return;
             }
-            
+
             // If all attachments are rejected → auto-reject
             if (aRejected.length === aAttachments.length && aPending.length === 0) {
                 // Combine rejection reasons or use a default message
@@ -913,21 +920,21 @@ sap.ui.define([
                     .filter(function (sReason) {
                         return sReason && sReason.trim();
                     });
-                
-                const sCombinedReason = aRejectionReasons.length > 0 
+
+                const sCombinedReason = aRejectionReasons.length > 0
                     ? "All attachments rejected. Reasons: " + aRejectionReasons.join("; ")
                     : "All attachments were rejected";
-                
+
                 this._updateTaskStatus(sTaskId, sType, "REJECTED", sCombinedReason, aAttachments, true);
                 return;
             }
-            
+
             // If we have both approved and rejected attachments → PARTIALLY_REJECTED
             if (aApproved.length > 0 && aRejected.length > 0 && aPending.length === 0) {
                 this._updateTaskStatus(sTaskId, sType, "PARTIALLY_REJECTED", "Some attachments were rejected", aAttachments, true);
                 return;
             }
-            
+
             // If there are still pending attachments, keep status as PENDING_APPROVAL
         },
 
@@ -937,7 +944,7 @@ sap.ui.define([
             const oFile = oEvent.getParameter("files") && oEvent.getParameter("files")[0];
             if (oFile) {
                 // File selected, ready to upload
-                        this.showSuccess("success.fileSelected", [oFile.name]);
+                this.showSuccess("success.fileSelected", [oFile.name]);
             }
         },
 
@@ -962,6 +969,3 @@ sap.ui.define([
         }
     });
 });
-
-
-

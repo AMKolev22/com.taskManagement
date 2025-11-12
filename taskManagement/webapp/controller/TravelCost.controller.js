@@ -103,17 +103,8 @@ sap.ui.define([
                             .filter((oUser) => oUser.role === "MANAGER")
                             .map((oUser) => ({
                                 key: oUser.userId,
-                                name: `${oUser.firstName} ${oUser.lastName} - ${oUser.department}`
+                                name: `${oUser.firstName}`
                             }));
-
-                        if (aManagers.length === 0) {
-                            aManagers.push(
-                                { key: "MGR001", name: "John Smith - Finance Manager" },
-                                { key: "MGR002", name: "Sarah Johnson - Operations Manager" },
-                                { key: "MGR003", name: "Michael Chen - Department Head" },
-                                { key: "MGR004", name: "Emma Williams - Regional Manager" }
-                            );
-                        }
 
                         this.getView().getModel().setProperty("/managers", aManagers);
                     }
@@ -383,7 +374,7 @@ sap.ui.define([
                 status: "PENDING_APPROVAL",
                 submitter: {
                     userId: oCurrentUser.userId,
-                    submittedBy: `${oCurrentUser.firstName} ${oCurrentUser.lastName}`,
+                    submittedBy: `${oCurrentUser.firstName}`,
                     submittedByEmail: oCurrentUser.email
                 },
                 travelInformation: {

@@ -51,11 +51,11 @@
                             type="Transparent"
                         />
                         <Avatar
-                            initials="{= ${userModel>/currentUser/firstName}.charAt(0) + ${userModel>/currentUser/lastName}.charAt(0) }"
+                            initials="{= ${userModel>/currentUser/firstName}.charAt(0) }"
                             press="onUserInfoPress"
                             displaySize="XS"
                             backgroundColor="Accent6"
-                            tooltip="{= ${userModel>/currentUser/firstName} + ' ' + ${userModel>/currentUser/lastName} }"
+                            tooltip="{userModel>/currentUser/firstName}"
                         />
                     </OverflowToolbar>
                 </customHeader>
